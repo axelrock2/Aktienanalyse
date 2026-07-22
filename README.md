@@ -1,0 +1,2 @@
+# Aktienanalyse
+Tool der Einzelaktienanalyse
