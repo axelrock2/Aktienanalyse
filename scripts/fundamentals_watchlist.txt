@@ -1,0 +1,23 @@
+# Titel, fuer die taeglich Bilanzdaten geholt werden (SEC EDGAR + optional Alpha Vantage).
+# Eine Zeile je Ticker. Bewusst getrennt vom Depot: diese Liste ist oeffentlich,
+# ein Depot darf es nie sein. Grosse auslaendische Werte werden ueber ihr
+# SEC-Form-20-F erfasst (ADR-Ticker verwenden, z. B. Toyota = TM).
+#
+# --- US-Werte ---
+NVDA
+JNJ
+AAPL
+MSFT
+GOOGL
+AMZN
+META
+JPM
+V
+# --- Europa/Asien (ueber 20-F bei der SEC) ---
+SAP
+ASML
+TM
+AZN
+NVO
+TSM
+SONY
