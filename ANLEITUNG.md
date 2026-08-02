@@ -221,6 +221,42 @@ gibt es den Aktualisieren-Knopf.
 Unabhängig davon gilt: Kurse aus kostenlosen Quellen sind in der Regel
 15 Minuten verzögert, und an Wochenenden sowie Feiertagen ändern sie sich nicht.
 
+## Bewertungsmodell als Tabelle (.xlsx)
+
+In der Einzeltitel-Ansicht gibt es unter dem Dossier-Knopf den Knopf
+**„Bewertungsmodell als Tabelle (.xlsx)"**. Ein Klick erzeugt eine Arbeitsmappe und
+lädt sie herunter. Doppelklick öffnet sie in **Numbers** – Excel wird nicht
+gebraucht, und die Formeln rechnen dort normal weiter.
+
+Die Mappe hat sechs Blätter, aufgebaut wie ein Analystenmodell (Eingaben strikt
+getrennt vom Rechenweg):
+
+| Blatt | Inhalt |
+|---|---|
+| Übersicht | Fairer Wert aus beiden Methoden, Auf-/Abschlag zum Kurs, Einordnung |
+| Annahmen | Alle Stellschrauben: Cashflow-Basis, Wachstum, Anteile, Nettoverschuldung |
+| WACC | Kapitalkosten aus Beta, risikofreiem Zins, Marktprämie, Kapitalstruktur |
+| DCF | Zehnjahresprojektion, Terminal Value, Eigenkapitalwert je Anteil |
+| Multiplikatoren | Faire Werte über KGV, Umsatz, Cashflow und Buchwert |
+| Sensitivität | Matrix Diskontsatz × ewiges Wachstum, jede Zelle rechnet vollständig |
+
+**Farbcode:** Blau sind Eingaben, die du ändern darfst. Schwarz sind Formeln. Grün
+verweist auf ein anderes Blatt. **Gelb markierte Felder solltest du prüfen** – dort
+stehen entweder Annahmen oder Werte, die nicht abrufbar waren und leer geblieben sind.
+
+> [!ACHTUNG] Zwei Fallstricke, die das Blatt selbst benennt
+> Die **Multiplikatoren** sind mit den aktuellen Werten des Titels vorbelegt. Lässt
+> du sie so stehen, bekommst du zwangsläufig ungefähr den heutigen Kurs zurück – der
+> Ansatz sagt dann nichts aus. Setze Werte echter Wettbewerber ein.
+> Die **Nettoverschuldung** kommt aus den SEC-Daten ohne Abzug der Barmittel. Bei
+> Unternehmen mit hoher Liquidität solltest du die Barmittel selbst abziehen, sonst
+> fällt der faire Wert zu niedrig aus.
+
+Das Modell ist ein Rechenwerkzeug zur eigenen Meinungsbildung, keine
+Anlageempfehlung. Ein DCF ist immer nur so gut wie seine Annahmen – deshalb gibt es
+das Sensitivitätsblatt: Wenn dein Ergebnis nur in einer Ecke der Matrix günstig
+aussieht, trägt die Bewertung nicht.
+
 ## Bilanzdaten fürs Dossier einrichten
 
 Das Analyse-Dossier kann Piotroski-F-Score, Altman-Z-Score und eine DCF-Näherung

@@ -28,6 +28,8 @@ gehostet kostenlos über GitHub Pages, ohne Server und ohne Konto.
 
 - **Bilanz-Scores im Dossier** (Piotroski, Altman-Z, DCF-Näherung) aus SEC EDGAR, optional Alpha Vantage – via täglicher GitHub Action, schlüsselfrei
 
+- **Bewertungsmodell als .xlsx** je Titel (DCF, WACC, Multiplikatoren, Sensitivität) mit echten Formeln, öffnet in Numbers
+
 ## Aufbau
 
 `index.html` (Grundgerüst) · `styles.css` (Aussehen) · `app.js` (Analyse, Suche, Dossier, Nachrichten) · `depot.js` (Depot)

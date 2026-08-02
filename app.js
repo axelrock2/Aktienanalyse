@@ -1042,6 +1042,10 @@ function renderDetail(item, chart, fund, a) {
       <small>16-Phasen-Bericht: Risikometriken, Faktoren, Konsens &amp; Katalysatoren – mit klarer Kennzeichnung, was berechnet, abgerufen und selbst zu beurteilen ist</small>
     </button>
 
+    <button class="p-xlsx">Bewertungsmodell als Tabelle (.xlsx)
+      <small>DCF, WACC, Multiplikatoren und Sensitivitätsmatrix mit echten Formeln – Annahmen änderbar, öffnet in Numbers und Excel</small>
+    </button>
+
     <div class="blk">
       <h3>Einstiegs- &amp; Ausstiegszonen</h3>
       <span class="zb-status ${a.trendUp ? "up" : "wait"}">${a.trendUp
@@ -1124,6 +1128,8 @@ function renderDetail(item, chart, fund, a) {
     if (Favs.has(item.s)) { Favs.remove(item.s); favBtn.classList.remove("on"); favBtn.textContent = "+ Favorit"; }
     else { Favs.add(item); favBtn.classList.add("on"); favBtn.textContent = "✓ Favorit"; }
   };
+  const xlsxBtn = panel.querySelector(".p-xlsx");
+  if (xlsxBtn) xlsxBtn.onclick = () => vxExport(item, chart, fund, a, xlsxBtn);
   const dossierBtn = panel.querySelector(".p-dossier");
   if(dossierBtn) dossierBtn.onclick = () => openDossier(item);
   let curDays = 252, curMode = "candle";
