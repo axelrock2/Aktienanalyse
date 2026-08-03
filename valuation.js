@@ -11,6 +11,8 @@
 function buildValuationWorkbook(ExcelJS, d) {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Aktien-Cockpit";
+  wb.title = `Bewertungsmodell ${d.name || d.sym} (${d.sym})`;
+  wb.subject = `Bewertung ${d.sym} – Stand ${d.asOf}`;
   wb.created = new Date();
 
   /* ---------- Stilhelfer ---------- */
@@ -117,14 +119,174 @@ function buildValuationWorkbook(ExcelJS, d) {
   label(ov, "A20", "Die Annahmen bestimmen das Ergebnis maßgeblich – ein DCF ist so gut wie seine Eingaben.");
   label(ov, "A21", `Datenquelle: Kurse und Kennzahlen aus dem Aktien-Cockpit; Bilanzposten aus SEC EDGAR, soweit vorhanden.`);
   label(ov, "A22", "Gelb hinterlegte leere Felder lagen nicht vor und müssen von dir gefüllt werden.");
+  label(ov, "A24", "Leere Felder? Das Blatt „Suche“ sagt dir für jeden Wert, wo du ihn findest.", { font: BOLD });
+  formula(ov, "A25",
+    '"Noch offen: "&(COUNTIF(Suche!F29:F42,"→ fehlt")+COUNTIF(Suche!F29:F42,"→ prüfen*"))&" von 14 Werten. Details im Blatt „Suche“."', { font: BOLD });
 
   /* =================================================================
-     Blatt 2 – Annahmen
+     Blatt 2 – Suche: wo finde ich welchen Wert, und wie trage ich ihn ein
+     ================================================================= */
+  const su = wb.addWorksheet("Suche");
+  su.columns = [{ width: 20 }, { width: 32 }, { width: 50 }, { width: 34 }, { width: 30 }, { width: 24 }];
+
+  label(su, "A1", `Wo finde ich die Werte? – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
+  label(su, "A2", `Alle Beträge in ${cur} und in Millionen eintragen. Werte je Anteil als echte Beträge.`);
+
+  section(su, "A4", "Schritt 1 – Den Titel bei TradingView öffnen");
+  label(su, "A5", "Suchfeld");
+  label(su, "B5", `tradingview.com öffnen, oben ins Suchfeld „${d.sym}“ oder „${d.name || ""}“ eingeben.`);
+  label(su, "A6", "Direktes Adressmuster");
+  label(su, "B6", "tradingview.com/symbols/BÖRSE-TICKER/financials-statistics-and-ratios/");
+  label(su, "A7", "Beispiel");
+  label(su, "B7", "tradingview.com/symbols/NASDAQ-NVDA/financials-statistics-and-ratios/");
+  label(su, "C7", "Das Börsenkürzel unterscheidet sich je Titel (NASDAQ, NYSE, XETR, LSE, EURONEXT, TSE …).");
+  label(su, "A8", "Einfacher");
+  label(su, "B8", "Über das Suchfeld gehen – TradingView wählt die Börse selbst.");
+
+  section(su, "A10", "Schritt 2 – Reiter „Financials“ öffnen");
+  label(su, "A11", "Vier Bereiche:", { font: BOLD });
+  label(su, "A12", "Overview");
+  label(su, "B12", "Grafische Trends zu Gewinn, Cashflow und Marge.");
+  label(su, "C12", "Zum Einordnen nützlich, liefert aber keine Zahl für die Tabelle.");
+  label(su, "A13", "Statements");
+  label(su, "B13", "Income statement · Balance sheet · Cash flow");
+  label(su, "C13", "Hier stehen Umsatz, Gewinn, Schulden, Eigenkapital und der freie Cashflow.");
+  label(su, "A14", "Statistics");
+  label(su, "B14", "Key stats · Valuation ratios");
+  label(su, "C14", "Hier stehen Anzahl Anteile, Buchwert je Anteil und die Verhältniszahlen (KGV, KUV, KBV).");
+  label(su, "A15", "Dividends / Earnings");
+  label(su, "B15", "Für dieses Modell nicht gebraucht.");
+  label(su, "A16", "Tipp");
+  label(su, "B16", "Zeilen haben Aufklapp-Pfeile – dahinter stecken die Unterposten.");
+  label(su, "C16", "Im Bereich Statements gibt es außerdem ein Suchfeld für Zeilennamen.");
+
+  section(su, "A18", "Schritt 3 – Zeitraum und Währung einstellen (der häufigste Fehler)");
+  label(su, "A19", "Umschalter");
+  label(su, "B19", "FY = Geschäftsjahr · FQ = Quartal · TTM = letzte zwölf Monate");
+  label(su, "C19", "TTM ist am aktuellsten, FY am stabilsten.");
+  label(su, "A20", "Regel", { font: BOLD });
+  label(su, "B20", "Entscheide dich für EINE Einstellung und hole ALLE Werte daraus.");
+  label(su, "C20", "Mischst du TTM und Geschäftsjahr, rechnet das Modell Äpfel gegen Birnen.");
+  label(su, "A21", "Währung");
+  label(su, "B21", `Über der Tabelle steht „Currency: …“. Sie muss ${cur} sein.`);
+  label(su, "C21", "Stimmt sie nicht, wird der faire Wert um den Wechselkurs verfälscht.");
+  label(su, "A22", "Einheit");
+  label(su, "B22", "TradingView zeigt Beträge meist schon in Millionen – dann direkt übernehmen.");
+  label(su, "C22", "Steht dort „B“ für Milliarden, mit 1000 multiplizieren.");
+
+  section(su, "A24", "Schritt 4 – Werte eintragen. Diese vier zuerst:");
+  label(su, "A25", "1. Freier Cashflow   2. Anzahl Anteile   3. Nettoverschuldung   4. Beta", { font: BOLD });
+  label(su, "A26", "Ohne sie bleibt der DCF leer. Alles Weitere ist bereits sinnvoll vorbelegt.");
+
+  section(su, "A28", "Zelle");
+  section(su, "B28", "Wert");
+  section(su, "C28", "Wo genau bei TradingView");
+  section(su, "D28", "So eintragen");
+  section(su, "E28", "Hinweis");
+  section(su, "F28", "Status");
+
+  const guide = [
+    ["Annahmen!B5", "Freier Cashflow Basisjahr",
+      "Financials → Statements → Cash flow → „Free cash flow“",
+      "Zahl in Mio, z. B. 60000",
+      "Herzstück des DCF. TradingView rechnet ihn als operativer Cashflow minus Investitionen.", "Annahmen!B5"],
+    ["Annahmen!B13", "Anzahl Anteile",
+      "Financials → Statistics → Key stats → „Total common shares outstanding“",
+      "Zahl in Mio, z. B. 24600",
+      "Wenn vorhanden die verwässerte Anzahl („Diluted shares outstanding“).", "Annahmen!B13"],
+    ["Annahmen!B15", "Nettoverschuldung",
+      "Financials → Statements → Balance sheet: „Total debt“ minus „Cash & equivalents“",
+      "Differenz in Mio; negativ, wenn mehr Barmittel als Schulden",
+      "Barmittel abzuziehen wird am häufigsten vergessen.", "Annahmen!B15"],
+    ["WACC!B6", "Beta",
+      "NICHT im Financials-Reiter. Watchlist → Symbol rechts oben aufklappen (Kreisdiagramm) → Overview → Financials oder Risk. Alternativ Stock Screener, Spalte „Beta“.",
+      "Zahl, z. B. 1,15",
+      "Ohne Wert ist 1,0 angesetzt (Marktdurchschnitt).", "WACC!B6",
+      d.betaIsDefault ? "→ prüfen (Standardwert 1,0)" : null],
+    ["WACC!B15", "Marktwert Eigenkapital",
+      "Symbolseite oben → „Market capitalization“ (oder Watchlist → Price → Market Cap)",
+      "Zahl in Mio",
+      "Alternativ Kurs mal Anzahl Anteile.", "WACC!B15"],
+    ["WACC!B16", "Marktwert Fremdkapital",
+      "Financials → Statements → Balance sheet → „Total debt“",
+      "Zahl in Mio",
+      "Der Buchwert als Näherung ist üblich und ausreichend.", "WACC!B16"],
+    ["Multiplikatoren!B4", "Gewinn je Anteil (EPS)",
+      "Financials → Statements → Income statement → „Basic EPS“ / „Diluted EPS“",
+      `Betrag je Anteil in ${cur}`,
+      "Verwässerten Wert bevorzugen, er ist vorsichtiger.", "Multiplikatoren!B4"],
+    ["Multiplikatoren!B5", "Umsatz je Anteil",
+      "Income statement → „Total revenue“ geteilt durch Anzahl Anteile",
+      `Betrag je Anteil in ${cur}`,
+      "Oder: Kurs geteilt durch das Kurs-Umsatz-Verhältnis aus Statistics.", "Multiplikatoren!B5"],
+    ["Multiplikatoren!B6", "Freier Cashflow je Anteil",
+      "Financials → Statements → Cash flow → „Free cash flow per share“",
+      `Betrag je Anteil in ${cur}`,
+      "TradingView weist diesen Wert direkt aus.", "Multiplikatoren!B6"],
+    ["Multiplikatoren!B7", "Buchwert je Anteil",
+      "Financials → Statistics → „Book value per share“",
+      `Betrag je Anteil in ${cur}`,
+      "Bei Banken und Substanzwerten besonders aussagekräftig.", "Multiplikatoren!B7"],
+    ["Multiplikatoren!C4", "Multiplikator KGV",
+      "Stock Screener öffnen → Branche filtern → Spalte „P/E“ mehrerer Wettbewerber ansehen, Mittel bilden",
+      "Vielfaches, z. B. 22",
+      "NICHT das eigene aktuelle KGV stehen lassen – sonst rechnest du im Kreis.", "Multiplikatoren!C4"],
+    ["Multiplikatoren!C5", "Multiplikator Kurs/Umsatz",
+      "Stock Screener → Spalte „P/S“ der Wettbewerber",
+      "Vielfaches, z. B. 4",
+      "In Statistics steht auch der eigene Wert zur Einordnung.", "Multiplikatoren!C5"],
+    ["Multiplikatoren!C6", "Multiplikator Kurs/Cashflow",
+      "Statistics → „Price to cash flow ratio“ der Wettbewerber",
+      "Vielfaches, z. B. 18", "", "Multiplikatoren!C6"],
+    ["Multiplikatoren!C7", "Multiplikator Kurs/Buchwert",
+      "Stock Screener → Spalte „P/B“ der Wettbewerber",
+      "Vielfaches, z. B. 3", "", "Multiplikatoren!C7"],
+  ];
+  guide.forEach((g, i) => {
+    const r = 29 + i;
+    label(su, "A" + r, g[0], { font: { ...BASE, bold: true, color: { argb: "FF0000FF" } } });
+    label(su, "B" + r, g[1]);
+    label(su, "C" + r, g[2]);
+    label(su, "D" + r, g[3]);
+    label(su, "E" + r, g[4]);
+    const okText = g[6] || "ok";
+    formula(su, "F" + r, `IF(${g[5]}="","→ fehlt","${okText}")`, { font: BOLD });
+  });
+
+  const endRow = 29 + guide.length + 1;
+  section(su, "A" + endRow, "Annahmen, die du bewusst setzen darfst (bereits vorbelegt)");
+  const assum = [
+    ["Annahmen!B8", "Wachstum Jahre 1–5", "Aus dem historischen Umsatz- oder Cashflow-Wachstum ableiten (Financials → Overview zeigt die Trends), konservativ deckeln."],
+    ["Annahmen!B9", "Wachstum Jahre 6–10", "Deutlich unter Phase 1 – kein Unternehmen wächst dauerhaft zweistellig."],
+    ["Annahmen!B10", "Ewiges Wachstum", "2 bis 2,5 % sind üblich. Darf das langfristige Wirtschaftswachstum nicht übersteigen."],
+    ["WACC!B4", "Risikofreier Zins", "Rendite zehnjähriger Bundesanleihen (TradingView-Symbol DE10Y) oder US-Treasuries (US10Y)."],
+    ["WACC!B5", "Marktrisikoprämie", "4,5 bis 6 % für entwickelte Märkte – Erfahrungswert, nicht abrufbar."],
+    ["WACC!B10", "Fremdkapitalzins", "Income statement → „Interest expense“ geteilt durch „Total debt“."],
+    ["WACC!B11", "Steuersatz", "Etwa 25 % in Deutschland, rund 21 % in den USA. Oder: Steueraufwand geteilt durch Vorsteuergewinn."],
+  ];
+  assum.forEach((g, i) => {
+    const r = endRow + 1 + i;
+    label(su, "A" + r, g[0], { font: { ...BASE, bold: true, color: { argb: "FF0000FF" } } });
+    label(su, "B" + r, g[1]);
+    label(su, "C" + r, g[2]);
+  });
+
+  const noteRow = endRow + assum.length + 2;
+  label(su, "A" + noteRow, "Die drei Fehler, die dein Ergebnis am stärksten verzerren", { font: BOLD });
+  label(su, "A" + (noteRow + 1), "1. Zeiträume mischen. Alle Werte aus derselben Spalte holen – entweder TTM oder dasselbe Geschäftsjahr.");
+  label(su, "A" + (noteRow + 2), "2. Einheiten mischen. Beträge durchgehend in Millionen; Milliarden vorher mal 1000 nehmen.");
+  label(su, "A" + (noteRow + 3), "3. Die eigenen Multiplikatoren stehen lassen. Dann bekommst du zwangsläufig den heutigen Kurs zurück.");
+  label(su, "A" + (noteRow + 5), "Die Spalte „Status“ oben zeigt jederzeit, welche Felder noch fehlen.");
+  label(su, "A" + (noteRow + 6), "Warum TradingView-Zahlen leicht von anderen Quellen abweichen können: unterschiedliche Bereinigungen");
+  label(su, "A" + (noteRow + 7), "und Stichtage. Für ein Bewertungsmodell ist das unerheblich, solange du bei einer Quelle bleibst.");
+
+  /* =================================================================
+     Blatt 3 – Annahmen
      ================================================================= */
   const an = wb.addWorksheet("Annahmen");
   an.columns = [{ width: 38 }, { width: 16 }, { width: 56 }];
 
-  label(an, "A1", "Annahmen", { font: TITLE });
+  label(an, "A1", `Annahmen – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
   label(an, "A2", "Blaue Werte sind Eingaben. Änderst du sie, rechnen alle Blätter automatisch neu.");
 
   section(an, "A4", "Cashflow-Basis");
@@ -171,7 +333,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   const wa = wb.addWorksheet("WACC");
   wa.columns = [{ width: 38 }, { width: 16 }, { width: 56 }];
 
-  label(wa, "A1", "Kapitalkosten (WACC)", { font: TITLE });
+  label(wa, "A1", `Kapitalkosten (WACC) – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
   label(wa, "A2", "Der Diskontsatz, mit dem künftige Cashflows auf heute abgezinst werden.");
 
   section(wa, "A3", "Eigenkapitalkosten");
@@ -226,7 +388,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   const dcf = wb.addWorksheet("DCF");
   dcf.columns = [{ width: 34 }, ...Array.from({ length: 10 }, () => ({ width: 11 }))];
 
-  label(dcf, "A1", "Discounted-Cashflow-Modell", { font: TITLE });
+  label(dcf, "A1", `Discounted-Cashflow-Modell – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
   label(dcf, "A2", `Zweiphasiges Wachstum, anschließend ewige Rente. Beträge in ${mioCur}.`);
 
   const COL = ["B", "C", "D", "E", "F", "G", "H", "I", "J", "K"];
@@ -295,7 +457,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   const mu = wb.addWorksheet("Multiplikatoren");
   mu.columns = [{ width: 34 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 46 }];
 
-  label(mu, "A1", "Bewertung über Multiplikatoren", { font: TITLE });
+  label(mu, "A1", `Bewertung über Multiplikatoren – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
   label(mu, "A2", "Vergleichsansatz: Kennzahl je Anteil mal einem angesetzten Vielfachen.");
 
   ["A3", "B3", "C3", "D3", "E3"].forEach((a, i) =>
@@ -338,7 +500,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   const se = wb.addWorksheet("Sensitivität");
   se.columns = [{ width: 22 }, ...Array.from({ length: 7 }, () => ({ width: 13 }))];
 
-  label(se, "A1", "Sensitivität – fairer Wert je Anteil", { font: TITLE });
+  label(se, "A1", `Sensitivität: fairer Wert je Anteil – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
   label(se, "A2", "Zeilen: ewiges Wachstum · Spalten: Diskontsatz (WACC). Mitte = aktuelle Annahmen.");
 
   label(se, "A4", "ewiges W. \\ WACC", { font: HEAD, fill: HEADFILL });
@@ -408,7 +570,7 @@ function vxCollect(item, chart, fund, a) {
     ? (Fundamentals.get(item.s) || {}).sec || null : null;
 
   const M = v => v == null ? null : v / 1e6;          // absolut -> Mio
-  const marketCapM = M(vxNum(fund && fund.marketCap));
+  let marketCapM = M(vxNum(fund && fund.marketCap));
 
   let shares = M(vxNum(sec && sec.sharesOutstanding));
   let sharesSource = "SEC EDGAR – ausstehende Aktien.";
@@ -416,6 +578,9 @@ function vxCollect(item, chart, fund, a) {
     shares = marketCapM / price;
     sharesSource = "Näherung aus Marktkapitalisierung geteilt durch Kurs.";
   }
+  /* Umgekehrter Weg: liegt die Marktkapitalisierung nicht vor, aber Anteile
+     und Kurs, laesst sie sich sauber ausrechnen. */
+  if (marketCapM == null && shares != null && price) marketCapM = shares * price;
 
   /* Freier Cashflow: bevorzugt der ausgewiesene, sonst der operative Cashflow.
      Der Unterschied wird offen benannt, statt ihn zu verwischen. */
@@ -446,6 +611,7 @@ function vxCollect(item, chart, fund, a) {
   const betaSource = beta != null
     ? "Aus dem Kennzahlenabruf."
     : "Kein Wert vorhanden – Marktdurchschnitt 1,0 angesetzt, bitte prüfen.";
+  const betaIsDefault = beta == null;
   if (beta == null) beta = 1.0;
 
   return {
@@ -455,13 +621,13 @@ function vxCollect(item, chart, fund, a) {
     netDebt, netDebtSource, marketCapM, debtM,
     mcSource: "Kurs mal Anzahl Anteile (Kennzahlenabruf).",
     debtSource: debtM != null ? "SEC EDGAR – langfristige Schulden." : "Buchwert der zinstragenden Schulden.",
-    beta, betaSource,
+    beta, betaSource, betaIsDefault,
     riskFree: 0.025, mrp: 0.055, costDebt: 0.04, taxRate: 0.25,
     g1, g1Source: "Startwert aus dem Umsatzwachstum, auf 15 % gedeckelt.",
     g2: Math.max(0.02, g1 / 2), gt: 0.02,
     eps: ps(netIncomeM), revPS: ps(revenueM), fcfPS: ps(fcf0), bvPS: ps(equityM),
     peRef: vxNum(fund && fund.trailingPE) ?? vxNum(fund && fund.forwardPE),
-    psRef: vxNum(fund && fund.priceToSales),
+    psRef: (price != null && ps(revenueM)) ? price / ps(revenueM) : null,
     pfcfRef: (price != null && ps(fcf0)) ? price / ps(fcf0) : null,
     pbRef: (price != null && ps(equityM)) ? price / ps(equityM) : null,
   };
