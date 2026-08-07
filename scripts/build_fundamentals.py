@@ -21,6 +21,8 @@ import time
 import urllib.request
 import urllib.error
 
+import dcf_core
+
 HERE = os.path.dirname(__file__)
 WATCHLIST = os.path.join(HERE, "fundamentals_watchlist.txt")
 TARGET = os.path.join(HERE, "..", "data", "fundamentals.json")
@@ -155,6 +157,10 @@ TAGS = {
     "sharesOutstanding": ["CommonStockSharesOutstanding", "CommonStockSharesIssued"],
     "retainedEarnings": ["RetainedEarningsAccumulatedDeficit"],
     "ebit": ["OperatingIncomeLoss"],
+    "capex": ["PaymentsToAcquirePropertyPlantAndEquipment",
+              "PaymentsToAcquireProductiveAssets"],
+    "cash": ["CashAndCashEquivalentsAtCarryingValue",
+             "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"],
     "interestExpense": ["InterestExpense", "InterestAndDebtExpense"],
 }
 
@@ -207,6 +213,85 @@ def from_alphavantage(ticker):
     return out if len(out) > 1 else None
 
 
+def dcf_block(sec, av=None):
+    """Berechnet die DCF-Matrix aus den SEC-Daten eines Titels.
+
+    Bewusst ohne Kurs: gespeichert wird die Matrix ueber ein festes
+    WACC-Raster. Die Zuordnung zum aktuellen Kurs macht das Dashboard.
+    """
+    if not sec:
+        return None
+
+    def mio(v):
+        return None if v is None else v / 1e6
+
+    cfo = mio(sec.get("cashFlowOps"))
+    if not cfo or cfo <= 0:
+        return None
+
+    capex = mio(sec.get("capex"))
+    if capex is not None:
+        fcf0 = cfo - abs(capex)
+        fcf_quelle = "Operativer Cashflow abzueglich Investitionen."
+    else:
+        fcf0 = cfo
+        fcf_quelle = "Nur operativer Cashflow - keine Investitionsdaten."
+    if fcf0 <= 0:
+        return None
+
+    schuld = mio(sec.get("longTermDebt")) or 0.0
+    barmittel = mio(sec.get("cash"))
+    if barmittel is not None:
+        netto = schuld - barmittel
+        netto_quelle = "Langfristige Schulden abzueglich Barmittel."
+    else:
+        netto = schuld
+        netto_quelle = "Schulden ohne Barmittelabzug - keine Daten."
+
+    anteile = mio(sec.get("sharesOutstanding"))
+    if not anteile:
+        return None
+
+    reihe = (sec.get("_series") or {}).get("revenue") or []
+    wachstum = None
+    if len(reihe) >= 2:
+        w = [r[1] if isinstance(r, (list, tuple)) else r for r in reihe[:2]]
+        if w[1]:
+            wachstum = w[0] / w[1] - 1
+
+    beta = av.get("Beta") if av else None
+    g1, g2, g_quelle = dcf_core.wachstum_ableiten(wachstum)
+
+    felder = {}
+    for wacc in [6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0]:
+        res = dcf_core.bewerte(fcf0, wacc, dcf_core.TERMINAL_WACHSTUM, g1, g2,
+                               nettoverschuldung_mio=netto, anteile_mio=anteile)
+        if res:
+            felder[str(wacc)] = {
+                "je_anteil": res["modellwert_je_anteil"],
+                "tv_anteil": res["terminal_value_anteil_prozent"],
+            }
+
+    if not felder:
+        return None
+
+    return {
+        "basis_fcf_mio": round(fcf0, 1),
+        "fcf_quelle": fcf_quelle,
+        "nettoverschuldung_mio": round(netto, 1),
+        "netto_quelle": netto_quelle,
+        "anteile_mio": round(anteile, 1),
+        "wachstum_phase1": g1,
+        "wachstum_phase2": g2,
+        "wachstum_quelle": g_quelle,
+        "beta": beta,
+        "terminal_wachstum": dcf_core.TERMINAL_WACHSTUM,
+        "je_wacc": felder,
+        "hinweis": ("Modellrechnung aus SEC-Daten. Keine Empfehlung. "
+                    "WACC und ewiges Wachstum dominieren das Ergebnis."),
+    }
+
+
 def main():
     tickers = load_watchlist()
     if not tickers:
@@ -231,11 +316,19 @@ def main():
             entry["av"] = av
             ok_av += 1
             time.sleep(13)        # Alpha Vantage Gratis-Limit (~5/min) einhalten
+        if entry.get("sec"):
+            d = dcf_block(entry["sec"], entry.get("av"))
+            if d:
+                entry["dcf"] = d
         if entry:
             entry["updated"] = int(time.time())
             result[t] = entry
         status = ("SEC" if cik and "sec" in entry else "–") + "/" + ("AV" if "av" in entry else "–")
         print(f"  [{i+1}/{len(tickers)}] {t:6s} {status}")
+
+    if not result:
+        print("\nKeine Daten geholt - bestehende Datei bleibt unveraendert.")
+        return
 
     target = os.path.abspath(TARGET)
     os.makedirs(os.path.dirname(target), exist_ok=True)
