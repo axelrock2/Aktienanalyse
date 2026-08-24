@@ -68,26 +68,57 @@ const Cache = {
   }
 };
 
-/* ---------- Netzwerkschicht: mehrere Wege mit automatischem Failover ---------- */
+/* ---------- Netzwerkschicht: mehrere Wege mit automatischem Failover ----------
+   Yahoo sendet selbst keine CORS-Kopfzeilen; ein Zwischenweg ist deshalb Pflicht,
+   nicht Komfort. Stand der Pruefung (siehe README): corsproxy.io verlangt
+   inzwischen einen bezahlten Tarif (HTTP 403), allorigins und codetabs
+   antworteten mit 502/522. Der Textleser r.jina.ai lieferte stabil und spiegelt
+   die eigene Herkunft in Access-Control-Allow-Origin - er steht daher zuerst.
+   Die uebrigen Wege bleiben als Reserve stehen: sie kosten nichts, wenn sie
+   schnell scheitern, und waren zeitweise wieder erreichbar. */
 const PROXIES = [
-  u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
-  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
-  u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u),
+  { name: "jina",
+    url: u => "https://r.jina.ai/" + u,
+    kopf: { "x-respond-with": "text" } },
+  { name: "codetabs",
+    url: u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u) },
+  { name: "allorigins-get",
+    url: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u),
+    schale: d => (typeof d.contents === "string" ? JSON.parse(d.contents) : d) },
+  { name: "allorigins-raw",
+    url: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { name: "corsproxy",
+    url: u => "https://corsproxy.io/?url=" + encodeURIComponent(u) },
 ];
-async function fetchJson(url, validate, timeout = 9000) {
+
+/* Antwort als Text lesen und das JSON herausschneiden. Der Textleser stellt der
+   Antwort je nach Betriebsart ein paar Zeilen Klartext voran ("URL Source: ...");
+   ohne dieses Zurechtschneiden scheitert JSON.parse daran. */
+function jsonAusText(txt) {
+  const i = txt.indexOf("{");
+  if (i < 0) throw new Error("Kein JSON in der Antwort");
+  return JSON.parse(i === 0 ? txt : txt.slice(i));
+}
+
+async function fetchJson(url, validate, timeout = 12000) {
   const start = +(sessionStorage.getItem("ak.proxy") || 0);
   let lastErr = null;
   for (let i = 0; i < PROXIES.length; i++) {
     const idx = (start + i) % PROXIES.length;
+    const weg = PROXIES[idx];
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeout);
     try {
-      const res = await fetch(PROXIES[idx](url), { signal: ctrl.signal });
+      const res = await fetch(weg.url(url), {
+        signal: ctrl.signal,
+        headers: weg.kopf || undefined,
+      });
       clearTimeout(timer);
       if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
+      let data = jsonAusText(await res.text());
+      if (weg.schale) data = weg.schale(data);
       if (validate && !validate(data)) throw new Error("Unerwartetes Format");
-      sessionStorage.setItem("ak.proxy", String(idx));
+      sessionStorage.setItem("ak.proxy", String(idx));   // erfolgreichen Weg merken
       return data;
     } catch (e) { clearTimeout(timer); lastErr = e; }
   }
@@ -144,6 +175,47 @@ const Fundamentals = {
     if (!this.data) return null;
     const base = String(symbol).split(".")[0].toUpperCase();
     return this.data[base] || null;
+  },
+
+  /* Marktkennzahlen in der Form, die loadFundamentals liefert.
+     Zwei Einheiten muessen dabei umgerechnet werden, sonst rechnen die Scores
+     mit falschen Groessenordnungen:
+       - debtToEquity kommt als Verhaeltnis (0,78), die Bewertung erwartet
+         Yahoos Prozentskala (78) - siehe lin(...,20,250) weiter unten.
+       - recommendation kommt als "Strong Buy", der Rest des Programms liest
+         Yahoos Schluessel "strong_buy". */
+  async marktKennzahlen(symbol, kursWaehrung) {
+    await this.load();
+    const e = this.get(symbol);
+    const m = e && e.markt;
+    if (!m) return null;
+    const z = v => (typeof v === "number" && isFinite(v)) ? v : null;
+
+    /* Verhaeltniszahlen (KGV, ROE, Margen, Beta) sind waehrungsneutral und
+       gelten fuer jede Notierung desselben Unternehmens. Betragsgroessen sind
+       es nicht: die Watchlist fuehrt "SAP", das ist der US-Hinterlegungsschein
+       in USD; wer SAP.DE ansieht, sieht EUR. Ein USD-Kursziel neben einem
+       EUR-Kurs waere stillschweigend falsch - deshalb hier weglassen, statt
+       eine Zahl zu zeigen, der man glauben koennte. */
+    const gleicheWaehrung = !kursWaehrung || !m.kursWaehrung
+      || String(kursWaehrung).toUpperCase() === String(m.kursWaehrung).toUpperCase();
+    const betrag = v => (gleicheWaehrung ? z(v) : null);
+
+    const out = {
+      opMargin: z(m.opMargin), profitMargin: z(m.profitMargin),
+      roe: z(m.roe), revGrowth: z(m.revGrowth),
+      debtToEquity: z(m.debtToEquity) != null ? m.debtToEquity * 100 : null,
+      fcf: betrag(m.fcf),
+      trailingPE: z(m.trailingPE), forwardPE: z(m.forwardPE),
+      divYield: z(m.divYield), marketCap: betrag(m.marketCap),
+      peg: z(m.peg), beta: z(m.beta),
+      targetMean: betrag(m.targetMean),
+      recommendation: m.recommendation
+        ? String(m.recommendation).toLowerCase().replace(/\s+/g, "_") : null,
+      quelle: m.source || "data/fundamentals.json",
+      kursWaehrung: m.kursWaehrung || null,
+    };
+    return Object.values(out).some(v => v != null && v !== out.quelle) ? out : null;
   },
 };
 
@@ -234,10 +306,21 @@ function computeScores(entry, live) {
   return out;
 }
 
-async function loadFundamentals(symbol) {
-  const key = "fund." + symbol;
+async function loadFundamentals(symbol, kursWaehrung) {
+  const key = "fund." + symbol + (kursWaehrung ? "." + kursWaehrung : "");
   const cached = Cache.get(key, 12 * 60 * 60 * 1000);
   if (cached) return cached === "none" ? null : cached;
+
+  /* Zuerst die taeglich per GitHub Action gefuellte Datei: kein Netzweg, sofort
+     verfuegbar. Der Yahoo-Baustein quoteSummary verlangt seit 2024 ein
+     Cookie-und-Crumb-Paar; ueber einen CORS-Zwischenweg ist das grundsaetzlich
+     nicht zu erfuellen und endet mit "Invalid Crumb". Ihn zuerst zu versuchen
+     hiesse, bei jedem Titel alle Zwischenwege leerlaufen zu lassen. */
+  try {
+    const lokal = await Fundamentals.marktKennzahlen(symbol, kursWaehrung);
+    if (lokal) { Cache.set(key, lokal); return lokal; }
+  } catch (e) { /* Datei fehlt oder ist unlesbar -> Yahoo versuchen */ }
+
   const modules = "financialData,defaultKeyStatistics,summaryDetail,price";
   for (const host of ["query1", "query2"]) {
     try {
@@ -868,7 +951,7 @@ async function fillCard(card, f) {
   card.querySelector(".rm").onclick = () => Favs.remove(f.s);
   try {
     const [chart, bench] = await Promise.all([loadChart(f.s), loadBenchmark()]);
-    const fund = await loadFundamentals(f.s).catch(() => null);
+    const fund = await loadFundamentals(f.s, chart.meta && chart.meta.currency).catch(() => null);
     const a = analyse(chart, fund, bench);
     analysisCache.set(f.s, { chart, fund, a, t: Date.now() });
     const cur = chart.meta.currency || "";
@@ -998,7 +1081,7 @@ async function openDetail(item) {
     else {
       const bench = await loadBenchmark();
       chart = await loadChart(item.s);
-      fund = await loadFundamentals(item.s).catch(() => null);
+      fund = await loadFundamentals(item.s, chart.meta && chart.meta.currency).catch(() => null);
       a = analyse(chart, fund, bench);
       analysisCache.set(item.s, { chart, fund, a, t: Date.now() });
     }
@@ -1654,7 +1737,7 @@ async function openDossier(item){
     else{
       const bench = await loadBenchmark();
       chart = await loadChart(item.s);
-      fund = await loadFundamentals(item.s).catch(()=>null);
+      fund = await loadFundamentals(item.s, chart.meta && chart.meta.currency).catch(()=>null);
       a = analyse(chart, fund, bench);
       analysisCache.set(item.s,{chart,fund,a,t:Date.now()});
     }

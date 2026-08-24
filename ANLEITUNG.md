@@ -263,15 +263,24 @@ Das Analyse-Dossier kann Piotroski-F-Score, Altman-Z-Score und eine DCF-Näherun
 aus echten Bilanzdaten berechnen. Diese kommen von **SEC EDGAR** – einer
 kostenlosen, offiziellen Quelle der US-Börsenaufsicht, die auch große europäische
 und asiatische Konzerne erfasst (SAP, Toyota, ASML, AstraZeneca reichen dort ihr
-Form 20-F ein). Optional lässt sich **Alpha Vantage** für zusätzliche US-Kennzahlen
+Form 20-F ein). Dazu kommen die Marktkennzahlen – KGV, PEG, Beta, Margen, ROE,
+Verschuldung und das Analystenkursziel – von **stockanalysis.com**, ebenfalls ohne
+Schlüssel. Optional lässt sich **Alpha Vantage** für zusätzliche US-Kennzahlen
 anbinden.
+
+Warum die Marktkennzahlen nicht mehr von Yahoo kommen: Yahoo verlangt für diesen
+Baustein seit 2024 ein Cookie-und-Crumb-Paar. Über einen CORS-Zwischenweg lässt
+sich das grundsätzlich nicht erfüllen – der Aufruf endet mit „Invalid Crumb".
+Deshalb werden diese Zahlen einmal täglich serverseitig geholt und als fertige
+Datei ausgeliefert. Für dich heißt das: Sie sind sofort da, ohne Ladezeit.
 
 Eine GitHub Action holt diese Daten täglich. Einrichtung:
 
 **1. Workflow anlegen** – wie beim Newsfeed über *Add file → Create new file*, Pfad
 `.github/workflows/fundamentals.yml`, Inhalt aus `WORKFLOW-FUNDAMENTALS-INHALT.txt`.
 
-**2. Skript und Watchlist hochladen** – `scripts/build_fundamentals.py` und
+**2. Skripte und Watchlist hochladen** – `scripts/build_fundamentals.py`,
+`scripts/market_source.py`, `scripts/dcf_core.py` und
 `scripts/fundamentals_watchlist.txt` in den Ordner `scripts/`.
 
 **3. (Optional) Alpha-Vantage-Schlüssel als Secret hinterlegen** – einen kostenlosen
@@ -377,7 +386,10 @@ Das Dossier ist ein Recherche- und Strukturierungswerkzeug, **keine Anlageberatu
 | Problem | Lösung |
 |---|---|
 | Karte zeigt „Kursdaten gerade nicht erreichbar" | Auf **Erneut versuchen** klicken. Die freien Datenwege haben gelegentlich kurze Aussetzer; das Cockpit probiert automatisch mehrere Wege durch. |
-| Qualitäts-Score zeigt „n. v." | Fundamentaldaten sind für diesen Titel gerade nicht abrufbar. Timing-Score und Zonen funktionieren trotzdem. Später erneut öffnen. |
+| Qualitäts-Score zeigt „n. v." | Der Titel steht nicht auf `fundamentals_watchlist.txt` und Yahoo liefert die Kennzahlen nicht mehr direkt. Ticker dort ergänzen und den Workflow einmal manuell starten. Timing-Score und Zonen funktionieren unabhängig davon. |
+| Gar nichts lädt, überall „–" | Die Zwischenwege für Kursdaten sind ausgefallen. In `app.js` unter `PROXIES` einen weiteren Dienst ergänzen – siehe Abschnitt „Woher die Daten kommen" in der README. |
+| Kein Kursziel bei einem Xetra-Titel | Beabsichtigt: Die Watchlist führt den US-Hinterlegungsschein in USD, die Xetra-Notierung steht in Euro. Ein Kursziel aus der falschen Währung wäre irreführend, deshalb bleibt das Feld leer. KGV, ROE und Margen gelten für beide Notierungen und werden angezeigt. |
+| Action bricht mit „HTTP 403" ab | `www.sec.gov` weist Anfragen aus Rechenzentren zeitweise ab. Das Skript weicht dann selbsttätig aus und nutzt zuletzt die Sicherung `data/cik_map.json`. Nur wenn diese Datei fehlt, bleibt der Lauf ohne Bilanzdaten. |
 | Seite zeigt 404 | Schritt 3 prüfen (Branch `main`, Ordner `/ (root)`), 2 Minuten warten, neu laden. |
 | Suche findet einen exotischen Titel nicht | Ticker mit Börsenkürzel direkt eingeben (z. B. `.DE` Xetra, `.T` Tokio, `.HK` Hongkong, `.KS` Korea) – die Online-Suche hilft zusätzlich. |
 | Newsfeed bleibt leer | Action „Nachrichten aktualisieren" im Reiter **Actions** einmal manuell starten; prüfen, ob `.github/workflows/news.yml` korrekt angelegt wurde. |

@@ -27,9 +27,43 @@ gehostet kostenlos über GitHub Pages, ohne Server und ohne Konto.
 - **Euro-Kursanzeige** im Depot: Kurse direkt in der Anzeigewährung, Originalkurs als Zusatz
 
 - **Bilanz-Scores im Dossier** (Piotroski, Altman-Z, DCF-Näherung) aus SEC EDGAR, optional Alpha Vantage – via täglicher GitHub Action, schlüsselfrei
+- **Fundamentaldaten** (KGV, PEG, Margen, ROE, Verschuldung, Beta, Analystenkursziel) täglich serverseitig geholt und als `data/fundamentals.json` ausgeliefert – im Browser ohne Netzwerkweg sofort verfügbar
 
 - **Bewertungsmodell als .xlsx** je Titel (DCF, WACC, Multiplikatoren, Sensitivität) mit echten Formeln, öffnet in Numbers
 
 ## Aufbau
 
 `index.html` (Grundgerüst) · `styles.css` (Aussehen) · `app.js` (Analyse, Suche, Dossier, Nachrichten) · `depot.js` (Depot)
+
+## Woher die Daten kommen
+
+Die Seite läuft ohne eigenen Server. Das schränkt ein, welche Quellen überhaupt
+in Frage kommen – die folgende Aufteilung ist die Antwort darauf.
+
+| Daten | Weg | Warum so |
+|---|---|---|
+| Kurse, Charts, Suche | Yahoo, im Browser über einen Zwischenweg | Yahoo sendet keine CORS-Kopfzeilen. Ein direkter Aufruf aus der Seite wird vom Browser verworfen, ein Zwischenweg ist deshalb Pflicht. |
+| Bilanzdaten (Umsatz, Eigenkapital, Cashflow) | `data.sec.gov`, täglich per GitHub Action | Amtliche XBRL-Daten, schlüsselfrei, auch für 20-F-Einreicher wie SAP oder Toyota. |
+| Marktkennzahlen (KGV, PEG, Beta, Kursziel) | stockanalysis.com, täglich per GitHub Action | Yahoos `quoteSummary` verlangt seit 2024 ein Cookie-und-Crumb-Paar. Über einen CORS-Zwischenweg ist das nicht erfüllbar; der Aufruf endet mit „Invalid Crumb". |
+| Nachrichten | RSS, stündlich per GitHub Action | Unabhängig von der Kursquelle. |
+
+**Zwischenwege für Kursdaten.** Die Liste steht in `app.js` unter `PROXIES`, der
+erste erfolgreiche wird für die Sitzung gemerkt. Solche Gratisdienste
+verschwinden erfahrungsgemäß ohne Vorwarnung – bei der letzten Prüfung
+verlangte corsproxy.io einen bezahlten Tarif (HTTP 403), allorigins und codetabs
+antworteten mit 502 bzw. 522. Wenn alle Wege scheitern, ist das der erste Ort
+zum Nachsehen: ein weiterer Eintrag in `PROXIES` genügt, es braucht keine
+Änderung an der Logik.
+
+**Watchlist der Fundamentaldaten.** Welche Titel täglich geholt werden, steht in
+`scripts/fundamentals_watchlist.txt` – eine Zeile je Ticker. Diese Liste liegt
+bewusst getrennt vom Depot: sie ist öffentlich, das Depot bleibt lokal.
+
+**Zwei Grenzen, die man kennen sollte.**
+Erstens deckt stockanalysis.com nicht jede Notierung ab; wo eine US-Notierung
+existiert (z. B. `NVO` statt `NOVO-B.CO`), ist sie der zuverlässigere Eintrag.
+Zweitens sind Kursziele währungsbehaftet: die Watchlist führt `SAP`, das ist der
+US-Hinterlegungsschein in USD. Wer `SAP.DE` in Euro ansieht, bekommt deshalb
+kein Kursziel angezeigt – lieber keine Zahl als eine aus der falschen Währung.
+Verhältniszahlen wie KGV oder ROE sind davon nicht betroffen und gelten für
+beide Notierungen.
