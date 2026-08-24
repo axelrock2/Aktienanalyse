@@ -45,6 +45,18 @@ in Frage kommen – die folgende Aufteilung ist die Antwort darauf.
 | Kurse, Charts, Suche | Yahoo, im Browser über einen Zwischenweg | Yahoo sendet keine CORS-Kopfzeilen. Ein direkter Aufruf aus der Seite wird vom Browser verworfen, ein Zwischenweg ist deshalb Pflicht. |
 | Bilanzdaten (Umsatz, Eigenkapital, Cashflow) | `data.sec.gov`, täglich per GitHub Action | Amtliche XBRL-Daten, schlüsselfrei, auch für 20-F-Einreicher wie SAP oder Toyota. |
 | Marktkennzahlen (KGV, PEG, Beta, Kursziel) | stockanalysis.com, täglich per GitHub Action | Yahoos `quoteSummary` verlangt seit 2024 ein Cookie-und-Crumb-Paar. Über einen CORS-Zwischenweg ist das nicht erfüllbar; der Aufruf endet mit „Invalid Crumb". |
+
+Gelesen wird die Seite mit **Scrapling** (`requirements.txt`) – und zwar entlang
+der Tabellenstruktur, nicht per Textsuche. Der Unterschied ist nicht kosmetisch:
+Begriffe wie „Market Cap" oder „Revenue" stehen bei der Quelle auch in der
+Navigation. Eine Textsuche trifft die zuerst und trägt still den falschen Wert
+ein, während eine Zeile aus `<tr>` mit zwei `<td>` eindeutig ist. Nebenbei
+liefert derselbe Durchgang fünf Kennzahlen mehr (P/FCF, EV/EBIT, Debt/EBITDA,
+Insider- und Institutionenanteil).
+
+Bewusst **ohne** das Extra `[fetchers]`: Das zöge curl_cffi und eine komplette
+Browser-Engine nach. Beide Quellen antworten auf gewöhnliche Anfragen, der
+Abruf läuft über die Standardbibliothek – das hält die tägliche Action leicht.
 | Nachrichten | RSS, stündlich per GitHub Action | Unabhängig von der Kursquelle. |
 
 **Zwischenwege für Kursdaten.** Die Liste steht in `app.js` unter `PROXIES`, der
