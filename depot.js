@@ -210,7 +210,14 @@ function depotSeries(positions, charts, bench, rateOf) {
       outT.push(d); outV.push(value); outB.push(units * bp);
     }
     if (outT.length < 3) return null;
-    return { t: outT, value: outV, bench: outB, startTs: outT[0], approx: false };
+    /* Vergleich ueber den tatsaechlichen Haltezeitraum. Weil die Vergleichslinie
+       dieselben Betraege zu denselben Zeitpunkten in den Index legt, sind die
+       beiden Endwerte direkt vergleichbar - anders als zwei Renditen ueber
+       verschieden lange Zeitraeume. */
+    const tage = Math.round((outT[outT.length - 1] - outT[0]) / 86400000);
+    return { t: outT, value: outV, bench: outB, startTs: outT[0], approx: false,
+             compare: { modus: "exakt", depotEnd: outV[outV.length - 1],
+                        benchEnd: outB[outB.length - 1], windowDays: tage } };
   }
 
   /* ---------- B) Näherung ohne Kaufdaten ----------
@@ -294,13 +301,17 @@ function depotSeries(positions, charts, bench, rateOf) {
     lastB = v;
     outB.push(v);
   }
-  /* Ehrlicher Balkenvergleich als belastbare Ergänzung zur geschätzten Linie. */
-  const bench0 = benchValueAt(outT[0]), bench1 = benchValueAt(outT[outT.length - 1]);
-  const benchRet = (bench0 && bench1) ? bench1 / bench0 - 1 : null;
-  const depotRet = cost > 0 ? valueNow / cost - 1 : null;
+  /* Bewusst OHNE Vergleichszahl. Hier fehlen die Kaufdaten, also ist der
+     Haltezeitraum unbekannt: Die eigene Rendite laeuft "seit Einstand", die
+     Indexrendite ueber ein festes Fenster von zwei Jahren. Frueher wurden genau
+     diese beiden voneinander abgezogen und als "Vorsprung" unter der
+     Ueberschrift "Rendite ueber die letzten 2 Jahre" ausgewiesen. Wer acht Jahre
+     haelt, bekam so einen Vorsprung ausgewiesen, den es nie gab. Eine Zahl, der
+     man nicht glauben darf, ist schlechter als keine - deshalb steht hier
+     stattdessen der Hinweis auf "gehalten seit". */
   const windowDays = Math.round((outT[outT.length - 1] - outT[0]) / 86400000);
   return { t: outT, value: outV, bench: outB, startTs: outT[0], approx: true,
-           compare: { depotRet, benchRet, windowDays, cost, valueNow } };
+           compare: null, windowDays };
 }
 
 /* ---------- Gruppierung ---------- */
@@ -376,15 +387,30 @@ async function depotBuildRows() {
   if (!items.length) return { rows: [], charts: new Map() };
   await depotEnsureFx(items.map(p => p.cur));
 
+  /* Kursspanne am aeltesten Kaufdatum ausrichten. Mit der Standardspanne von
+     zwei Jahren wurde ein laengerer Haltezeitraum stillschweigend abgeschnitten:
+     Wer seit fuenf Jahren haelt, bekam "Nach 2,0 Jahren" zu sehen. */
+  const seitListe = items.map(p => p.since ? Date.parse(p.since + "T00:00:00Z") : null)
+                         .filter(x => x && isFinite(x));
+  const jahreZurueck = seitListe.length
+    ? (Date.now() - Math.min(...seitListe)) / (365 * 86400000) : 0;
+  const spanne = jahreZurueck > 9 ? "max" : jahreZurueck > 4 ? "10y"
+               : jahreZurueck > 1.8 ? "5y" : "2y";
+
   const charts = new Map(), rows = [];
   await Promise.all(items.map(p => new Promise(resolve => {
     Queue.push(async () => {
       let chart = null, a = null;
       try {
-        chart = await loadChart(p.sym);
+        chart = await loadChart(p.sym, spanne);
         charts.set(p.sym, chart);
         const bench = await loadBenchmark();
-        a = analyse(chart, null, bench);
+        /* Fundamentaldaten mitgeben. Zuvor stand hier fest null - dadurch blieb
+           der Qualitaets-Score im Depot grundsaetzlich leer, auch fuer Titel,
+           deren Kennzahlen laengst vorlagen. */
+        const fund = await loadFundamentals(p.sym, chart.meta && chart.meta.currency)
+                             .catch(() => null);
+        a = analyse(chart, fund, bench);
       } catch (e) { /* Kurs nicht verfügbar */ }
       const cur = (chart && chart.meta.currency) || p.cur || "";
       const rate = depotRate(cur);
@@ -407,7 +433,7 @@ async function depotBuildRows() {
     });
   })));
   rows.sort((x, y) => (y.value ?? -1) - (x.value ?? -1));
-  return { rows, charts };
+  return { rows, charts, spanne };
 }
 
 /* ---------- Zeichnen ---------- */
@@ -437,10 +463,11 @@ async function renderDepot() {
   DepotUI.busy = true;
   box.innerHTML = `<div class="dp-loading"><span class="spin"></span> Depot wird berechnet …</div>`;
 
-  let rows = [], charts = new Map(), series = null;
+  let rows = [], charts = new Map(), series = null, spanne = "5y";
   try {
-    ({ rows, charts } = await depotBuildRows());
-    const bench = await loadChart("ACWI", "5y").catch(() => loadBenchmark());
+    ({ rows, charts, spanne } = await depotBuildRows());
+    /* Vergleichsindex ueber dieselbe Spanne wie die Positionen holen. */
+    const bench = await loadChart("ACWI", spanne || "5y").catch(() => loadBenchmark());
     series = depotSeries(Depot.list(), charts, bench, depotRate);
   } catch (e) { /* unten abgefangen */ }
   DepotUI.rows = rows; DepotUI.series = series;
@@ -450,9 +477,12 @@ async function renderDepot() {
   const cur = depotCur();
   const missing = rows.filter(r => !r.ok || r.value == null);
 
-  const perf = series
+  /* Nur im exakten Fall aussagekraeftig: dort hat die Vergleichslinie dieselben
+     Zahlungen erhalten. In der Naeherung stuenden hier zwei Zahlen aus
+     verschieden langen Zeitraeumen nebeneinander. */
+  const perf = (series && !series.approx && series.bench.at(-1) > 0)
     ? `<div class="dp-c"><span>gegenüber Welt-Index</span><b class="${chgCls(series.value.at(-1) - series.bench.at(-1))}">${
-        series.bench.at(-1) > 0 ? fmtPct(series.value.at(-1) / series.bench.at(-1) - 1) : "–"}</b></div>`
+        fmtPct(series.value.at(-1) / series.bench.at(-1) - 1)}</b></div>`
     : "";
 
   box.innerHTML = `
@@ -477,9 +507,9 @@ async function renderDepot() {
           ? `<canvas id="dpline"></canvas>`
           : `<div class="dp-note" style="margin:0">Für die Wertkurve fehlen noch ausreichende Kursdaten.</div>`}</div>
         ${series ? `<p class="dp-curvenote">${series.approx
-          ? "N\u00e4herung: Die Kurve beginnt bei deinem <b>Einstand</b> und endet beim heutigen Wert – deine Gesamtrendite stimmt, der Weg dorthin ist gesch\u00e4tzt. Die Vergleichslinie legt denselben Einstandsbetrag zum Startzeitpunkt in den Welt-Index. F\u00fcr einen exakten Verlauf trage bei den Positionen ein \u201egehalten seit\u201c ein."
+          ? "N\u00e4herung: Die Kurve beginnt bei deinem <b>Einstand</b> und endet beim heutigen Wert. Der Endwert stimmt, der Weg dorthin ist gesch\u00e4tzt \u2013 und die gesamte Entwicklung wird in das gezeigte Fenster gestaucht, auch wenn du l\u00e4nger h\u00e4ltst. Die Steigung ist deshalb kein Ma\u00df f\u00fcr dein Tempo, und die Vergleichslinie ist nur eine Orientierung. F\u00fcr einen belastbaren Verlauf und Vergleich trage bei den Positionen ein \u201egehalten seit\u201c ein."
           : "Exakter Verlauf ab deinen Kaufdaten. Die Vergleichslinie erh\u00e4lt dieselben Betr\u00e4ge zu denselben Zeitpunkten im Welt-Index."}</p>` : ""}
-        ${series && series.approx && series.compare ? dpCompareBar(series.compare) : ""}
+        ${series ? (series.compare ? dpCompareBar(series.compare) : dpCompareHinweis()) : ""}
       </div>
       <div class="dp-panel">
         <div class="dp-panel-h"><h4>Gewichtung</h4>
@@ -550,28 +580,45 @@ function dpRow(r) {
   </tr>`;
 }
 
-/* Belastbarer Balkenvergleich: reale Depotrendite gegen Index über dasselbe Fenster */
+/* Vergleich gegen den Welt-Index - nur mit Kaufdaten, sonst gaebe es keinen
+   gemeinsamen Zeitraum. Verglichen werden zwei Endbetraege, nicht zwei
+   Renditen: Die Vergleichslinie hat dieselben Betraege zu denselben
+   Zeitpunkten erhalten, damit ist der Unterschied allein die Anlageentscheidung. */
 function dpCompareBar(c) {
-  if (c.depotRet == null || c.benchRet == null) return "";
+  if (!c || c.modus !== "exakt") return "";
+  const { depotEnd, benchEnd } = c;
+  if (!(depotEnd > 0) || !(benchEnd > 0)) return "";
+
   const jahre = c.windowDays / 365;
-  const fenster = jahre >= 1.4 ? (jahre.toFixed(1).replace(".", ",") + " Jahre")
-                : c.windowDays >= 45 ? (Math.round(c.windowDays / 30) + " Monate")
-                : (c.windowDays + " Tage");
-  const span = Math.max(Math.abs(c.depotRet), Math.abs(c.benchRet), 0.02);
-  const bar = (val, cls) => {
-    const w = Math.min(Math.abs(val) / span * 100, 100);
-    return `<div class="dp-cmp-row">
-      <span class="dp-cmp-lab">${cls === "you" ? "Dein Depot" : "Welt-Index"}</span>
-      <div class="dp-cmp-track"><div class="dp-cmp-fill ${cls} ${val < 0 ? "neg" : ""}" style="width:${w}%"></div></div>
-      <b class="dp-cmp-val ${chgCls(val)}">${fmtPct(val)}</b></div>`;
-  };
-  const diff = c.depotRet - c.benchRet;
+  const zeitraum = jahre >= 1.4 ? (jahre.toFixed(1).replace(".", ",") + " Jahren")
+                 : c.windowDays >= 45 ? (Math.round(c.windowDays / 30) + " Monaten")
+                 : (c.windowDays + " Tagen");
+
+  const span = Math.max(depotEnd, benchEnd);
+  const balken = (wert, cls, text) => `<div class="dp-cmp-row">
+      <span class="dp-cmp-lab">${text}</span>
+      <div class="dp-cmp-track"><div class="dp-cmp-fill ${cls}" style="width:${Math.min(wert / span * 100, 100)}%"></div></div>
+      <b class="dp-cmp-val">${dpMoney(wert)}</b></div>`;
+
+  const diff = depotEnd / benchEnd - 1;
   return `<div class="dp-cmp">
-    <div class="dp-cmp-h">Rendite über die letzten ${fenster}
-      <span title="Da kein Kaufdatum hinterlegt ist, wird ein festes Fenster verwendet. Deine Rendite (Einstand bis heute) ist exakt; sie wird hier dem Welt-Index über diesen Zeitraum gegenübergestellt.">ⓘ</span></div>
-    ${bar(c.depotRet, "you")}
-    ${bar(c.benchRet, "idx")}
-    <div class="dp-cmp-diff ${chgCls(diff)}">${diff >= 0 ? "Vorsprung" : "Rückstand"} ${fmtPct(Math.abs(diff))}</div>
+    <div class="dp-cmp-h">Nach ${zeitraum}: dein Depot gegen dieselben K\u00e4ufe im Welt-Index
+      <span title="Die Vergleichslinie erh\u00e4lt exakt deine Betr\u00e4ge zu exakt deinen Kaufzeitpunkten. Verglichen werden deshalb die beiden Endwerte - das ist unabh\u00e4ngig davon, wie lange und wie gestaffelt du gekauft hast.">\u24d8</span></div>
+    ${balken(depotEnd, "you", "Dein Depot")}
+    ${balken(benchEnd, "idx", "Welt-Index")}
+    <div class="dp-cmp-diff ${chgCls(diff)}">${diff >= 0 ? "Vorsprung" : "R\u00fcckstand"} ${fmtPct(Math.abs(diff), false)}</div>
+  </div>`;
+}
+
+/* Steht kein Kaufdatum bereit, gibt es keinen gemeinsamen Zeitraum - dann den
+   Weg dorthin zeigen, statt eine unvergleichbare Zahl. */
+function dpCompareHinweis() {
+  return `<div class="dp-cmp dp-cmp-leer">
+    <div class="dp-cmp-h">Vergleich mit dem Welt-Index</div>
+    <p class="dp-note" style="margin:0">Daf\u00fcr fehlt der Zeitraum: Ohne Kaufdatum ist unbekannt,
+    wie lange du h\u00e4ltst - deine Rendite l\u00e4uft seit Einstand, die des Index \u00fcber ein festes Fenster.
+    Trage bei den Positionen ein <b>\u201egehalten seit\u201c</b> ein, dann wird hier verglichen,
+    was dieselben Betr\u00e4ge zu denselben Zeitpunkten im Index ergeben h\u00e4tten.</p>
   </div>`;
 }
 

@@ -71,6 +71,28 @@ zum Nachsehen: ein weiterer Eintrag in `PROXIES` genügt, es braucht keine
 `scripts/fundamentals_watchlist.txt` – eine Zeile je Ticker. Diese Liste liegt
 bewusst getrennt vom Depot: sie ist öffentlich, das Depot bleibt lokal.
 
+**Titel außerhalb der Watchlist.** Für sie holt die Seite die Kennzahlen beim
+Öffnen live nach – dieselbe Quelle, nur über den Zwischenweg und in Textform
+(rund 6 KB statt 200 KB HTML). Damit hat praktisch jeder Titel der Datenbank
+einen Qualitäts-Score, nicht nur die sechzehn aus der Watchlist. Ergebnisse
+werden zwölf Stunden zwischengespeichert; die Watchlist bleibt trotzdem
+sinnvoll, weil ihre Titel ohne jede Wartezeit da sind.
+
+**Kein Rückfall mehr auf Yahoos `quoteSummary`.** Der Baustein verlangt ein
+Cookie-und-Crumb-Paar, das ein CORS-Zwischenweg nicht mitliefern kann – die
+Antwort lautet ausnahmslos „Invalid Crumb". Er konnte also nie etwas beitragen,
+kostete aber bei jedem nicht auffindbaren Titel zwei Hosts mal fünf
+Zwischenwege an Wartezeit. Ohne ihn steht ein Fehlschlag nach unter einer
+Sekunde fest statt nach einer Minute.
+
+**Depot-Vergleich braucht ein Kaufdatum.** Der Vergleich gegen den Welt-Index
+erscheint nur, wenn bei allen Positionen ein „gehalten seit" eingetragen ist.
+Ohne dieses Datum ist der Haltezeitraum unbekannt – die eigene Rendite liefe
+seit Einstand, die des Index über ein festes Fenster. Solche Zahlen lassen sich
+nicht voneinander abziehen, deshalb steht dort ein Hinweis statt einer
+Vergleichszahl. Mit Kaufdatum werden zwei Endbeträge verglichen: dein Depot
+gegen dieselben Beträge zu denselben Zeitpunkten im Index.
+
 **Zwei Grenzen, die man kennen sollte.**
 Erstens deckt stockanalysis.com nicht jede Notierung ab; wo eine US-Notierung
 existiert (z. B. `NVO` statt `NOVO-B.CO`), ist sie der zuverlässigere Eintrag.
