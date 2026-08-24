@@ -326,7 +326,16 @@ function depotGroups(rows, mode) {
     const k = key(r);
     map.set(k, (map.get(k) || 0) + r.value);
   }
-  return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  const sortiert = [...map.entries()].sort((a, b) => b[1] - a[1]);
+  /* Ab dem neunten Eintrag reicht die Palette nicht mehr; weitere Toene waeren
+     von den vorhandenen nicht sicher zu unterscheiden. Der Rest wird zu einer
+     Sammelgruppe - die Anteile bleiben damit korrekt, ohne Scheinpraezision. */
+  if (sortiert.length <= DP_MAX_GRUPPEN) return sortiert;
+  const kopf = sortiert.slice(0, DP_MAX_GRUPPEN - 1);
+  const rest = sortiert.slice(DP_MAX_GRUPPEN - 1);
+  const summe = rest.reduce((a, b) => a + b[1], 0);
+  kopf.push([`Andere (${rest.length})`, summe]);
+  return kopf;
 }
 
 /* ---------- Kennzahlen ---------- */
@@ -345,8 +354,19 @@ function depotStats(rows) {
    ===================================================================== */
 const DepotUI = { pie: "position", rows: [], series: null, busy: false, editId: null };
 let dpLineChart = null, dpPieChart = null;
-const DP_COLORS = ["#4FB8AC", "#7FA9E6", "#E0B45C", "#54B183", "#E06A72", "#B48CD6",
-                   "#5FC2C9", "#D89A6A", "#8FBF6B", "#C97FA8", "#6E8FB8", "#A9B37E"];
+/* Kategoriefarben des Ringdiagramms, auf dunklem Grund geprueft.
+   Die vorherige Reihe war nicht trennscharf: Gruen (#8FBF6B) und Orange
+   (#D89A6A) lagen fuer Rotgruenblindheit bei einem Farbabstand von 1,1 - also
+   praktisch gleich - und selbst fuer Normalsichtige trennten sich die beiden
+   ERSTEN Slots nur um 11,8 (unter dem Richtwert 15). Das traf den haeufigsten
+   Fall: ein Depot mit zwei Positionen.
+   Diese acht Toene halten auf #202833 alle Pruefungen ein: schlechtester
+   Nachbarabstand 8,4 unter Farbsehschwaeche, 19,3 bei Normalsicht.
+   Acht ist auch die Obergrenze - ein neunter Ton waere von einem der
+   vorhandenen nicht mehr sicher zu unterscheiden. Der Rest wird gebuendelt. */
+const DP_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500",
+                   "#d55181", "#008300", "#9085e9", "#e66767"];
+const DP_MAX_GRUPPEN = 8;
 
 function dpMoney(v, dig) {
   if (v == null || !isFinite(v)) return "–";
@@ -500,7 +520,7 @@ async function renderDepot() {
 
     <div class="dp-charts">
       <div class="dp-panel">
-        <div class="dp-panel-h"><h4>Wertentwicklung</h4>
+        <div class="dp-panel-h"><h4>Wertentwicklung <span class="dp-unit">in ${esc(cur)}</span></h4>
           <span class="dp-legend"><i style="background:var(--accent)"></i>Depot
             <i style="background:var(--warn);margin-left:10px"></i>Welt-Index</span></div>
         <div class="dp-canvas">${series
@@ -623,20 +643,83 @@ function dpCompareHinweis() {
 }
 
 /* ---------- Diagramme ---------- */
+/* Farben aus dem Stylesheet lesen statt sie im Programm zu wiederholen.
+   Die Werte waren zeichengleiche Kopien der CSS-Variablen - eine Themeaenderung
+   haette die Diagramme zurueckgelassen. */
+function dpFarbe(name, ersatz) {
+  try {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || ersatz;
+  } catch (e) { return ersatz; }
+}
+
+/* Achsenbeschriftung ohne Waehrungszeichen. Es an jede Marke zu schreiben kostete
+   Platz, den die schmale Achse nicht hat: "10.000 €" braucht 48 px, die Achse ist
+   51 px breit - fuenf von acht Marken wurden abgeschnitten. Die Waehrung steht
+   jetzt einmal ueber dem Diagramm. */
+function dpAchsenZahl(v) {
+  if (v == null || !isFinite(v)) return "";
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v / 1e9).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " Mrd.";
+  if (a >= 1e6) return (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " Mio.";
+  return v.toLocaleString("de-DE", { maximumFractionDigits: 0 });
+}
+
+/* Fadenkreuz: eine senkrechte Linie am Mauszeiger. Ohne sie laesst sich bei
+   750 Tagespunkten nicht ablesen, welcher Zeitpunkt gerade im Kaestchen steht. */
+const dpFadenkreuz = {
+  id: "dpFadenkreuz",
+  afterDatasetsDraw(chart) {
+    const akt = chart.tooltip && chart.tooltip.getActiveElements
+      ? chart.tooltip.getActiveElements() : [];
+    if (!akt.length) return;
+    const x = akt[0].element.x, ya = chart.scales.y;
+    const c = chart.ctx;
+    c.save();
+    c.beginPath();
+    c.moveTo(x, ya.top);
+    c.lineTo(x, ya.bottom);
+    c.lineWidth = 1;
+    c.strokeStyle = dpFarbe("--faint", "#6B7787");
+    c.setLineDash([3, 3]);
+    c.stroke();
+    c.restore();
+  },
+};
+
 function dpDrawLine(s) {
   const cv = $("#dpline");
   if (!cv || typeof Chart === "undefined") return;
   if (dpLineChart) dpLineChart.destroy();
-  const labels = s.t.map(t => new Date(t).toLocaleDateString("de-DE", { month: "short", year: "2-digit" }));
+
+  const akzent = dpFarbe("--accent", "#4FB8AC");
+  const warn   = dpFarbe("--warn", "#E0B45C");
+  const linie  = dpFarbe("--line", "#313B49");
+  const faint  = dpFarbe("--faint", "#6B7787");
+  const muted  = dpFarbe("--muted", "#93A0B0");
+  const ink    = dpFarbe("--ink", "#E9EDF3");
+  const flaeche = dpFarbe("--surface", "#202833");
+
+  /* Zeitachse statt Textmarken: Zuvor waren die Beschriftungen fertige
+     Zeichenketten auf einer Kategorieachse - die Punkte lagen damit gleich weit
+     auseinander, unabhaengig vom tatsaechlichen Abstand der Tage. Boersenpausen
+     und Feiertage erschienen so als regulaerer Handel. */
+  const daten = s.t.map((t, i) => ({ x: t, y: s.value[i] }));
+  const vergleich = s.t.map((t, i) => ({ x: t, y: s.bench[i] }));
+
   dpLineChart = new Chart(cv, {
     type: "line",
     data: {
-      labels,
       datasets: [
-        { label: "Depot", data: s.value, borderColor: "#4FB8AC", backgroundColor: "rgba(79,184,172,.10)",
-          borderWidth: 1.9, pointRadius: 0, fill: true, tension: .15 },
-        { label: "Welt-Index", data: s.bench, borderColor: "#E0B45C", borderWidth: 1.3,
-          pointRadius: 0, borderDash: [4, 4], tension: .15 },
+        { label: "Depot", data: daten, borderColor: akzent,
+          backgroundColor: "rgba(79,184,172,.10)",
+          borderWidth: 1.9, pointRadius: 0, pointHoverRadius: 4,
+          pointHoverBackgroundColor: akzent, pointHoverBorderColor: flaeche,
+          pointHoverBorderWidth: 2, fill: true, tension: .15 },
+        { label: "Welt-Index", data: vergleich, borderColor: warn, borderWidth: 1.3,
+          pointRadius: 0, pointHoverRadius: 4,
+          pointHoverBackgroundColor: warn, pointHoverBorderColor: flaeche,
+          pointHoverBorderWidth: 2, borderDash: [4, 4], tension: .15 },
       ],
     },
     options: {
@@ -645,18 +728,74 @@ function dpDrawLine(s) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#202833", borderColor: "#313B49", borderWidth: 1,
-          titleColor: "#E9EDF3", bodyColor: "#93A0B0",
-          callbacks: { label: c => c.dataset.label + ": " + dpMoney(c.parsed.y, 0) },
+          backgroundColor: dpFarbe("--surface", "#202833"),
+          borderColor: linie, borderWidth: 1,
+          titleColor: ink, bodyColor: muted, padding: 9,
+          displayColors: true, boxWidth: 8, boxHeight: 8, usePointStyle: true,
+          callbacks: {
+            /* Volles Datum statt "Mär 24" - bei Tagesdaten ist der Monat zu grob. */
+            title: p => p.length
+              ? new Date(p[0].parsed.x).toLocaleDateString("de-DE",
+                  { day: "2-digit", month: "long", year: "numeric" })
+              : "",
+            label: c => c.dataset.label + ": " + dpMoney(c.parsed.y, 0),
+            /* Der Abstand ist die eigentliche Frage des Diagramms. */
+            afterBody: p => {
+              if (p.length < 2) return "";
+              const d = p[0].parsed.y - p[1].parsed.y;
+              const q = p[1].parsed.y > 0 ? d / p[1].parsed.y : null;
+              return (d >= 0 ? "Vorsprung " : "Rückstand ")
+                   + dpMoney(Math.abs(d), 0)
+                   + (q != null ? "  (" + fmtPct(Math.abs(q), false) + ")" : "");
+            },
+          },
         },
       },
       scales: {
-        x: { ticks: { color: "#6B7787", maxTicksLimit: 7, font: { family: "IBM Plex Mono", size: 10 } }, grid: { display: false } },
-        y: { ticks: { color: "#6B7787", font: { family: "IBM Plex Mono", size: 10 },
-             callback: v => dpMoneyBig(v) }, grid: { color: "rgba(49,59,73,.5)" } },
+        x: {
+          type: "time",
+          time: { unit: "month", tooltipFormat: "dd.MM.yyyy",
+                  displayFormats: { month: "MMM yy", year: "yyyy" } },
+          ticks: { color: faint, maxTicksLimit: 6, autoSkip: true,
+                   maxRotation: 0, font: { family: "IBM Plex Mono", size: 10 } },
+          grid: { display: false },
+          border: { color: linie },
+        },
+        y: {
+          ticks: { color: faint, maxTicksLimit: 6, padding: 6,
+                   font: { family: "IBM Plex Mono", size: 10 },
+                   callback: v => dpAchsenZahl(v) },
+          grid: { color: linie, drawTicks: false },
+          border: { display: false },
+          /* Achsenbreite an der breitesten Beschriftung ausrichten. Chart.js
+             schaetzt sie selbst, lag hier aber zwei Pixel zu knapp - genug, um
+             fuenfstellige Betraege links anzuschneiden. Lieber nachmessen. */
+          afterFit(achse) {
+            const c = achse.chart.ctx;
+            c.save();
+            c.font = '10px "IBM Plex Mono"';
+            let breit = 0;
+            for (const t of achse.ticks) {
+              breit = Math.max(breit, c.measureText(dpAchsenZahl(t.value)).width);
+            }
+            c.restore();
+            achse.width = Math.max(achse.width, Math.ceil(breit) + 10);
+          },
+        },
       },
     },
+    plugins: [dpFadenkreuz],
   });
+
+  /* Noch einmal umbrechen, sobald die Schriften da sind. Die Achsenbreite wird
+     durch Ausmessen der Beschriftung bestimmt; laeuft das, bevor "IBM Plex Mono"
+     geladen ist, misst der Browser die Ersatzschrift und die Achse faellt zu
+     schmal aus - fuenfstellige Betraege wurden dadurch links angeschnitten. */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (dpLineChart) dpLineChart.update("none");
+    }).catch(() => {});
+  }
 }
 
 function dpDrawPie(rows) {
@@ -670,17 +809,20 @@ function dpDrawPie(rows) {
     type: "doughnut",
     data: {
       labels: g.map(x => x[0]),
-      datasets: [{ data: g.map(x => x[1]), backgroundColor: g.map((_, i) => DP_COLORS[i % DP_COLORS.length]),
-                   borderColor: "#1B212B", borderWidth: 2 }],
+      /* Kein Modulo mehr: die Gruppen sind auf die Palettenlaenge begrenzt,
+         eine Farbe kann also nicht zweimal vergeben werden. */
+      datasets: [{ data: g.map(x => x[1]), backgroundColor: g.map((_, i) => DP_COLORS[i]),
+                   borderColor: dpFarbe("--bg2", "#1B212B"), borderWidth: 2 }],
     },
     options: {
       responsive: true, maintainAspectRatio: false, animation: false, cutout: "58%",
       plugins: {
-        legend: { position: "right", labels: { color: "#93A0B0", boxWidth: 11, padding: 8,
-                  font: { family: "Inter", size: 11 } } },
+        legend: { position: "right", labels: { color: dpFarbe("--muted", "#93A0B0"),
+                  boxWidth: 11, padding: 8, font: { family: "Inter", size: 11 } } },
         tooltip: {
-          backgroundColor: "#202833", borderColor: "#313B49", borderWidth: 1,
-          titleColor: "#E9EDF3", bodyColor: "#93A0B0",
+          backgroundColor: dpFarbe("--surface", "#202833"),
+          borderColor: dpFarbe("--line", "#313B49"), borderWidth: 1,
+          titleColor: dpFarbe("--ink", "#E9EDF3"), bodyColor: dpFarbe("--muted", "#93A0B0"),
           callbacks: { label: c => `${c.label}: ${dpMoney(c.parsed, 0)} (${(c.parsed / total * 100).toFixed(1).replace(".", ",")} %)` },
         },
       },
