@@ -591,8 +591,34 @@ function vxCollect(item, chart, fund, a) {
   const M = v => v == null ? null : v / 1e6;          // absolut -> Mio
   let marketCapM = M(vxNum(fund && fund.marketCap));
 
-  let shares = M(vxNum(sec && sec.sharesOutstanding));
-  let sharesSource = "SEC EDGAR – ausstehende Aktien.";
+  /* Waehrungsprobe. Die SEC-Bilanz steht in der BERICHTSwaehrung des Konzerns,
+     die Kursdaten in der Waehrung der Notierung. Bei US-Unternehmen ist das
+     dasselbe, bei Auslandseinreichern nicht: Toyota berichtet in JPY, der
+     Hinterlegungsschein notiert in USD. Zuvor landeten beide Groessen
+     ungeprueft in derselben Mappe - ein Cashflow in USD neben Schulden in JPY.
+     Betroffen war jeder Auslandseinreicher der Watchlist (6 von 16).
+     Passt die Waehrung nicht, bleiben die Bilanzposten leer und gelb: ein
+     Feld, das sichtbar fehlt, ist besser als eine Zahl in falscher Waehrung. */
+  const secWhg = (sec && sec.waehrung) ? String(sec.waehrung).toUpperCase() : null;
+  const secPasst = !secWhg || !cur || secWhg === String(cur).toUpperCase();
+  const S = v => secPasst ? vxNum(v) : null;          // Bilanzposten nur bei gleicher Waehrung
+  const whgHinweis = secPasst ? "" :
+    ` Nicht uebernommen: die Bilanz steht in ${secWhg}, die Notierung in ${cur}.`;
+
+  /* Anteilszahl: die Marktangabe hat Vorrang. Der XBRL-Posten stimmt bei
+     US-Einreichern (Apple auf ein Prozent), erfasst bei 20-F-Einreichern aber
+     oft nur eine Aktiengattung - Toyota meldet dort 2,77 Milliarden statt
+     11,84. Jeder Wert je Anteil waere um diesen Faktor verkehrt. */
+  let shares = M(vxNum(fund && fund.sharesOut));
+  let sharesSource = "Anzahl Anteile aus dem Kennzahlenabruf.";
+  const sharesSec = M(vxNum(sec && sec.sharesOutstanding));
+  if (shares == null) {
+    shares = sharesSec;
+    sharesSource = "SEC EDGAR – ausstehende Aktien.";
+  } else if (sharesSec && Math.abs(sharesSec / shares - 1) > 0.1) {
+    sharesSource += ` Hinweis: die SEC-Bilanz nennt ${Math.round(sharesSec).toLocaleString("de-DE")} Mio –`
+                  + " bei Auslandseinreichern erfasst der Posten oft nur eine Aktiengattung.";
+  }
   if (shares == null && marketCapM != null && price) {
     shares = marketCapM / price;
     sharesSource = "Näherung aus Marktkapitalisierung geteilt durch Kurs.";
@@ -611,6 +637,18 @@ function vxCollect(item, chart, fund, a) {
   }
   if (fcf0 == null) fcfSource = "Bitte eintragen: operativer Cashflow abzüglich Investitionen.";
 
+  /* Ein negativer Cashflow taugt nicht als Basisjahr: Das Modell schriebe ihn
+     zehn Jahre fort und lieferte einen negativen Unternehmenswert - eine Zahl,
+     die wie ein Ergebnis aussieht, aber keines ist. Kommt bei Konzernen mit
+     eigener Finanzsparte vor (Toyota) und in Investitionsspitzen. Feld bleibt
+     leer und gelb, mit Begruendung. */
+  if (fcf0 != null && fcf0 <= 0) {
+    fcfSource = `Ausgewiesener freier Cashflow ist negativ (${Math.round(fcf0).toLocaleString("de-DE")} Mio ${cur}).`
+              + " Als Basisjahr ungeeignet – bitte einen normalisierten Cashflow eintragen"
+              + " (Mittel mehrerer Jahre oder um Sondereffekte bereinigt).";
+    fcf0 = null;
+  }
+
   /* Zinsen nach Steuern zurechnen. Der ausgewiesene freie Cashflow ist nach
      Zinsen; das Modell zinst ihn aber mit dem WACC ab und zieht danach die
      Nettoverschuldung ab. Ohne diese Zurechnung traegt die Schuld zweimal.
@@ -618,8 +656,8 @@ function vxCollect(item, chart, fund, a) {
      zusammenpassen – bei Konzernen mit eigener Finanzsparte steckt der
      Grossteil der Schuld in kurzfristigen Posten und fehlt in der Bilanzzeile,
      dann waere die Zurechnung einseitig. */
-  const zinsM = M(vxNum(sec && sec.interestExpense));
-  const schuldM = M(vxNum(sec && sec.longTermDebt));
+  const zinsM = M(S(sec && sec.interestExpense));
+  const schuldM = M(S(sec && sec.longTermDebt));
   if (fcf0 != null && zinsM) {
     const satz = (schuldM && schuldM > 0) ? Math.abs(zinsM) / schuldM : null;
     const stimmig = satz != null && satz <= 0.12;
@@ -633,15 +671,22 @@ function vxCollect(item, chart, fund, a) {
     }
   }
 
-  const debtM = M(vxNum(sec && sec.longTermDebt));
-  const netDebt = debtM;
-  const netDebtSource = debtM != null
-    ? "SEC EDGAR – langfristige Schulden. Barmittel sind NICHT abgezogen: bitte abziehen."
-    : "Zinstragende Schulden abzüglich Barmittel. Negativ = Nettoliquidität.";
+  /* Nettoverschuldung = Schulden abzueglich Barmittel. Die Barmittel standen
+     bereits in den Daten, wurden aber nicht abgezogen - stattdessen bat ein
+     Hinweis den Nutzer darum. Bei Apple sind das 2,46 USD je Anteil, bei
+     Microsoft 2,82, die dem Eigenkapitalwert schlicht fehlten. */
+  const debtM = M(S(sec && sec.longTermDebt));
+  const cashM = M(S(sec && sec.cash));
+  const netDebt = debtM != null ? (debtM - (cashM || 0)) : null;
+  const netDebtSource = debtM == null
+    ? ("Zinstragende Schulden abzüglich Barmittel. Negativ = Nettoliquidität." + whgHinweis)
+    : cashM != null
+      ? "SEC EDGAR – langfristige Schulden abzüglich Barmittel."
+      : "SEC EDGAR – langfristige Schulden. Keine Barmittel ausgewiesen: bitte prüfen.";
 
-  const revenueM = M(vxNum(sec && sec.revenue));
-  const netIncomeM = M(vxNum(sec && sec.netIncome));
-  const equityM = M(vxNum(sec && sec.equity));
+  const revenueM = M(S(sec && sec.revenue));
+  const netIncomeM = M(S(sec && sec.netIncome));
+  const equityM = M(S(sec && sec.equity));
   const ps = v => (v != null && shares) ? v / shares : null;
 
   /* Wachstumsstart aus dem Umsatzwachstum, bewusst gedeckelt – ein DCF mit
@@ -661,7 +706,8 @@ function vxCollect(item, chart, fund, a) {
     price, fcf0, fcfSource, shares, sharesSource,
     netDebt, netDebtSource, marketCapM, debtM,
     mcSource: "Kurs mal Anzahl Anteile (Kennzahlenabruf).",
-    debtSource: debtM != null ? "SEC EDGAR – langfristige Schulden." : "Buchwert der zinstragenden Schulden.",
+    debtSource: debtM != null ? "SEC EDGAR – langfristige Schulden."
+                              : ("Buchwert der zinstragenden Schulden." + whgHinweis),
     beta, betaSource, betaIsDefault,
     riskFree: 0.025, mrp: 0.055, costDebt: 0.04, taxRate: 0.25,
     g1, g1Source: "Startwert aus dem Umsatzwachstum, auf 15 % gedeckelt.",
