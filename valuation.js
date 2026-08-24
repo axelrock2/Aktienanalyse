@@ -25,6 +25,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   const YELLOW = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFF00" } };
   const HEADFILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F3864" } };
   const SUBFILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDCE6F1" } };
+  const MITTEFILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };  // Basisfall
 
   const MONEY = '#,##0.00;(#,##0.00);-';
   const MIO = '#,##0;(#,##0);-';
@@ -396,7 +397,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   label(dcf, "A4", "Kalenderjahr", { font: BOLD, fill: SUBFILL });
   label(dcf, "A5", "Wachstumsrate");
   label(dcf, "A6", "Freier Cashflow");
-  label(dcf, "A7", "Diskontfaktor");
+  label(dcf, "A7", "Diskontfaktor (Jahresmitte)");
   label(dcf, "A8", "Barwert");
 
   const baseYear = new Date().getFullYear();
@@ -407,7 +408,11 @@ function buildValuationWorkbook(ExcelJS, d) {
     formula(dcf, c + "5", `IF(${c}$3<=5,Annahmen!$B$8,Annahmen!$B$9)`, { numFmt: PCT });
     formula(dcf, c + "6",
       i === 0 ? `Annahmen!$B$5*(1+${c}5)` : `${COL[i - 1]}6*(1+${c}5)`, { numFmt: MIO });
-    formula(dcf, c + "7", `1/(1+Annahmen!$B$17)^${c}$3`, { numFmt: '0.000' });
+    /* Jahresmitte: Cashflows fallen ueber das Jahr verteilt an, nicht gebuendelt
+       am 31.12. Abgezinst wird deshalb ueber 0,5 / 1,5 / 2,5 Jahre. Die frueher
+       verwendete Abzinsung zum Jahresende unterschaetzte den Wert je nach
+       Zinssatz um 3 bis 4 Prozent. */
+    formula(dcf, c + "7", `1/(1+Annahmen!$B$17)^(${c}$3-0.5)`, { numFmt: '0.000' });
     formula(dcf, c + "8", `${c}6*${c}7`, { numFmt: MIO });
   });
 
@@ -501,7 +506,7 @@ function buildValuationWorkbook(ExcelJS, d) {
   se.columns = [{ width: 22 }, ...Array.from({ length: 7 }, () => ({ width: 13 }))];
 
   label(se, "A1", `Sensitivität: fairer Wert je Anteil – ${d.name || d.sym} (${d.sym})`, { font: TITLE });
-  label(se, "A2", "Zeilen: ewiges Wachstum · Spalten: Diskontsatz (WACC). Mitte = aktuelle Annahmen.");
+  label(se, "A2", "Zeilen: ewiges Wachstum · Spalten: Diskontsatz (WACC). Die hervorgehobene Mittelzelle trägt die Annahmen des Modells – ihr Wert muss dem Blatt „DCF“ entsprechen.");
 
   label(se, "A4", "ewiges W. \\ WACC", { font: HEAD, fill: HEADFILL });
   const SCOL = ["B", "C", "D", "E", "F", "G", "H"];
@@ -521,11 +526,24 @@ function buildValuationWorkbook(ExcelJS, d) {
       const r_ = `${c}$4`, gt = `$A${row}`;
       const g1 = "Annahmen!$B$8", g2 = "Annahmen!$B$9";
       const k1 = `((1+${g1})/(1+${r_}))`, k2 = `((1+${g2})/(1+${r_}))`;
-      const s1 = `${k1}*(1-${k1}^5)/(1-${k1})`;
-      const s2 = `(1+${g1})^5/(1+${r_})^5*${k2}*(1-${k2}^5)/(1-${k2})`;
+      /* Die geometrische Summe k*(1-k^5)/(1-k) teilt durch Null, sobald das
+         Wachstum genau dem Diskontsatz entspricht - dann ist k = 1. Da die
+         Achse in Halbprozentschritten um die Annahme laeuft, trifft das
+         regelmaessig: in einer 7x7-Tabelle rund 8 Prozent der Felder, die
+         dadurch leer blieben. Bei k = 1 ist die Summe schlicht 5. */
+      const s1 = `IF(${g1}=${r_},5,${k1}*(1-${k1}^5)/(1-${k1}))`;
+      const s2 = `(1+${g1})^5/(1+${r_})^5*IF(${g2}=${r_},5,${k2}*(1-${k2}^5)/(1-${k2}))`;
       const tv = `(1+${g1})^5*(1+${g2})^5*(1+${gt})/((${r_}-${gt})*(1+${r_})^10)`;
-      const f = `IF(${r_}<=${gt},"",IFERROR((Annahmen!$B$5*(${s1}+${s2}+${tv})-Annahmen!$B$15)/Annahmen!$B$13,""))`;
-      formula(se, c + row, f, { numFmt: MONEY });
+      /* (1+r)^0,5 hebt die Summe auf Jahresmitte an - identisch zum Blatt DCF,
+         wo jeder Diskontfaktor den Exponenten n-0,5 traegt. */
+      const f = `IF(${r_}<=${gt},"",IFERROR((Annahmen!$B$5*(${s1}+${s2}+${tv})*(1+${r_})^0.5-Annahmen!$B$15)/Annahmen!$B$13,""))`;
+      /* Mittelzelle hervorheben: Dort stehen genau die Annahmen des Modells,
+         ihr Wert muss dem Ergebnis im Blatt DCF entsprechen. Das ist die
+         Sichtpruefung, ob die Tabelle richtig aufgebaut ist. */
+      const istMitte = (c === "E" && row === 8);
+      formula(se, c + row, f, istMitte
+        ? { numFmt: MONEY, font: BOLD, fill: MITTEFILL }
+        : { numFmt: MONEY });
     });
   }
 
@@ -557,6 +575,7 @@ function vxLoadLib() {
   return vxLibProm;
 }
 
+const VX_STEUERSATZ = 0.25;          // wie scripts/dcf_core.py
 const vxNum = v => (typeof v === "number" && isFinite(v)) ? v : null;
 const vxClamp = (v, lo, hi) => v == null ? null : Math.min(hi, Math.max(lo, v));
 
@@ -591,6 +610,28 @@ function vxCollect(item, chart, fund, a) {
     fcfSource = "SEC EDGAR – OPERATIVER Cashflow (Investitionen noch nicht abgezogen, bitte prüfen).";
   }
   if (fcf0 == null) fcfSource = "Bitte eintragen: operativer Cashflow abzüglich Investitionen.";
+
+  /* Zinsen nach Steuern zurechnen. Der ausgewiesene freie Cashflow ist nach
+     Zinsen; das Modell zinst ihn aber mit dem WACC ab und zieht danach die
+     Nettoverschuldung ab. Ohne diese Zurechnung traegt die Schuld zweimal.
+     Uebersprungen wird sie, wenn Zinsaufwand und ausgewiesene Schuld nicht
+     zusammenpassen – bei Konzernen mit eigener Finanzsparte steckt der
+     Grossteil der Schuld in kurzfristigen Posten und fehlt in der Bilanzzeile,
+     dann waere die Zurechnung einseitig. */
+  const zinsM = M(vxNum(sec && sec.interestExpense));
+  const schuldM = M(vxNum(sec && sec.longTermDebt));
+  if (fcf0 != null && zinsM) {
+    const satz = (schuldM && schuldM > 0) ? Math.abs(zinsM) / schuldM : null;
+    const stimmig = satz != null && satz <= 0.12;
+    if (stimmig || Math.abs(zinsM) <= 0.15 * Math.abs(fcf0)) {
+      fcf0 += Math.abs(zinsM) * (1 - VX_STEUERSATZ);
+      fcfSource += ` Zinsaufwand nach Steuern zugerechnet (${Math.round(VX_STEUERSATZ * 100)} % Steuersatz), damit der Cashflow zum WACC passt.`;
+    } else {
+      fcfSource += " Zinsaufwand NICHT zugerechnet: er passt nicht zur ausgewiesenen Schuld"
+                 + (satz != null ? ` (impliziter Zinssatz ${(satz * 100).toFixed(1)} %)` : "")
+                 + " – vermutlich eigene Finanzsparte. Bitte selbst prüfen.";
+    }
+  }
 
   const debtM = M(vxNum(sec && sec.longTermDebt));
   const netDebt = debtM;

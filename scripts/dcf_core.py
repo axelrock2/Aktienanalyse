@@ -19,7 +19,35 @@ WACHSTUM_DECKEL = 15.0
 WACHSTUM_FALLBACK = 5.0
 BETA_FALLBACK = 1.0
 
-UNGEEIGNETE_BRANCHEN = {"Financial Services", "Real Estate"}
+# Fuer welche Geschaeftsmodelle eine Cashflow-DCF nicht traegt.
+# Geprueft wird der SIC-Schluessel der SEC, nicht der Sektorname: In der
+# Ticker-Datenbank steht Visa unter "Financials", obwohl es ein
+# Zahlungsdienstleister mit ganz normalem Cashflow ist - eine Ausgrenzung nach
+# Sektor haette es faelschlich mit erwischt. Der SIC-Schluessel trennt sauber:
+# JPMorgan 6021 (National Commercial Banks), Visa 7389 (Business Services).
+#
+# 6000-6499  Banken, Kreditinstitute, Broker, Versicherer: Zinsgeschaeft und
+#            Kredite sind operatives Geschaeft, freier Cashflow sagt nichts.
+# 6500-6599  Immobilien, 6798 REIT: werden ueber FFO bewertet, nicht ueber FCF.
+SIC_UNGEEIGNET = ((6000, 6499), (6500, 6599), (6798, 6798))
+
+
+def dcf_ungeeignet(sic):
+    """(True, Grund) wenn eine Cashflow-DCF fuer dieses Geschaeftsmodell
+       methodisch nicht traegt. Ohne SIC-Schluessel wird nichts ausgeschlossen."""
+    try:
+        n = int(str(sic).strip())
+    except (TypeError, ValueError):
+        return False, None
+    for von, bis in SIC_UNGEEIGNET:
+        if von <= n <= bis:
+            grund = ("Banken und Versicherer" if n <= 6499 else "Immobiliengesellschaften")
+            return True, (
+                "SIC %d: Fuer %s traegt eine Cashflow-DCF nicht - "
+                "Zins- und Kreditgeschaeft ist hier operatives Geschaeft. "
+                "Ueblich sind stattdessen Dividendenbarwert- oder "
+                "Residualgewinnmodelle." % (n, grund))
+    return False, None
 
 
 def wachstum_ableiten(umsatzwachstum=None):
@@ -80,26 +108,36 @@ def kapitalkosten(beta=None, marktkap_mio=None, fremdkapital_mio=None,
     }
 
 
-def rechne_dcf(fcf0, wacc, terminal_wachstum, g1, g2, jahre=10):
+def rechne_dcf(fcf0, wacc, terminal_wachstum, g1, g2, jahre=10,
+               jahresmitte=True):
     """Zweiphasige DCF. Gibt (Barwert Prognose, Barwert Terminal Value).
 
     Gibt None zurueck, wenn der WACC nicht ueber dem ewigen Wachstum liegt -
     dann divergiert der Terminal Value.
+
+    jahresmitte: Cashflows fallen ueber das Jahr verteilt an, nicht gebuendelt
+    am 31.12. Abgezinst wird deshalb ueber 0,5 / 1,5 / 2,5 Jahre statt ueber
+    1 / 2 / 3. Das ist die uebliche Konvention; die fruehere Abzinsung zum
+    Jahresende unterschaetzte den Wert je nach Zinssatz um 3 bis 4 Prozent.
     """
     if wacc <= terminal_wachstum:
         return None
 
     w = wacc / 100
     gt = terminal_wachstum / 100
+    versatz = 0.5 if jahresmitte else 0.0
     barwert = 0.0
     fcf = fcf0
 
     for jahr in range(1, jahre + 1):
         fcf *= 1 + (g1 / 100 if jahr <= jahre / 2 else g2 / 100)
-        barwert += fcf / (1 + w) ** jahr
+        barwert += fcf / (1 + w) ** (jahr - versatz)
 
+    # Der Terminal Value wird mit demselben Versatz abgezinst wie der Cashflow
+    # des letzten Prognosejahres - sonst klaffte zwischen Jahr 10 und der
+    # ewigen Rente ein halbes Jahr Luecke.
     tv = fcf * (1 + gt) / (w - gt)
-    return barwert, tv / (1 + w) ** jahre
+    return barwert, tv / (1 + w) ** (jahre - versatz)
 
 
 def bewerte(fcf0, wacc, terminal_wachstum, g1, g2,
@@ -168,11 +206,33 @@ def _selbsttest():
     """Prueft die Rechnung gegen von Hand nachvollziehbare Werte."""
     fehler = 0
 
+    # Ewige Rente ohne Wachstum: 100 / 10 % = 1000, abgezinst zur Jahresmitte
+    # also 1000 * 1,1^0,5. Zum Jahresende waeren es glatt 1000.
     r = rechne_dcf(100, 10, 0, 0, 0)
-    gesamt = r[0] + r[1]
-    if abs(gesamt - 1000) > 1:
-        print("  FEHLER ewige Rente: %.1f statt ~1000" % gesamt)
+    erwartet = 1000 * 1.10 ** 0.5
+    if abs(r[0] + r[1] - erwartet) > 1:
+        print("  FEHLER ewige Rente (Jahresmitte): %.1f statt ~%.1f"
+              % (r[0] + r[1], erwartet))
         fehler += 1
+
+    r_ende = rechne_dcf(100, 10, 0, 0, 0, jahresmitte=False)
+    if abs(r_ende[0] + r_ende[1] - 1000) > 1:
+        print("  FEHLER ewige Rente (Jahresende): %.1f statt ~1000"
+              % (r_ende[0] + r_ende[1]))
+        fehler += 1
+
+    # Der Versatz muss den Wert genau um den halben Zinsschritt anheben
+    if abs(sum(r) / sum(r_ende) - 1.10 ** 0.5) > 1e-9:
+        print("  FEHLER: Jahresmitte hebt den Wert nicht um (1+w)^0,5")
+        fehler += 1
+
+    # Ungeeignete Geschaeftsmodelle erkennen
+    for sic, soll in ((6021, True), (6798, True), (7389, False),
+                      (3711, False), (None, False), ("", False)):
+        ist, _ = dcf_ungeeignet(sic)
+        if ist != soll:
+            print("  FEHLER SIC %s: %s statt %s" % (sic, ist, soll))
+            fehler += 1
 
     if rechne_dcf(100, 2, 3, 5, 5) is not None:
         print("  FEHLER: WACC <= ewiges Wachstum nicht abgefangen")

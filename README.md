@@ -93,6 +93,28 @@ nicht voneinander abziehen, deshalb steht dort ein Hinweis statt einer
 Vergleichszahl. Mit Kaufdatum werden zwei Endbeträge verglichen: dein Depot
 gegen dieselben Beträge zu denselben Zeitpunkten im Index.
 
+**Wann kein DCF gerechnet wird.** Für zwei Gruppen trägt eine Cashflow-Bewertung
+methodisch nicht, dort erscheint statt einer Zahl eine Begründung:
+
+- **Banken, Versicherer, Immobiliengesellschaften** – erkannt am SIC-Schlüssel der
+  SEC (6000–6499, 6500–6599, 6798). Zins- und Kreditgeschäft ist dort operatives
+  Geschäft, freier Cashflow sagt nichts. Bewusst nicht nach Sektorname: Visa steht
+  in der Ticker-Datenbank unter „Financials", ist aber ein Zahlungsdienstleister
+  mit ganz normalem Cashflow – der SIC-Schlüssel trennt sauber (JPMorgan 6021,
+  Visa 7389).
+- **Konzerne mit eigener Finanzsparte** (Toyota, VW) – erkannt daran, dass
+  Zinsaufwand und ausgewiesene Schuld nicht zusammenpassen. Bei Toyota ergäbe sich
+  ein impliziter Zinssatz von 15,5 %, weil der Großteil der Autobank-Schulden in
+  kurzfristigen Posten steht und in der Bilanzzeile fehlt. Der Zinsaufwand voll
+  zurückrechnen, aber nur die langfristige Schuld abziehen – das wäre einseitig.
+
+**Cashflow vor Fremdkapitalkosten.** Der ausgewiesene freie Cashflow ist nach
+Zinsen. Das Modell zinst mit dem WACC ab und zieht danach die Nettoverschuldung
+ab; ohne Rückrechnung der Zinsen nach Steuern trüge die Schuld zweimal.
+
+**Abzinsung zur Jahresmitte.** Cashflows fallen über das Jahr verteilt an, nicht
+gebündelt am 31.12. Abgezinst wird deshalb über 0,5 / 1,5 / 2,5 Jahre.
+
 **Zwei Grenzen, die man kennen sollte.**
 Erstens deckt stockanalysis.com nicht jede Notierung ab; wo eine US-Notierung
 existiert (z. B. `NVO` statt `NOVO-B.CO`), ist sie der zuverlässigere Eintrag.
