@@ -160,15 +160,22 @@ async function loadChart(symbol, range = "2y") {
    wie bisher, nur eben oft gefuellt. */
 const Fundamentals = {
   data: null,
-  loaded: false,
-  async load() {
-    if (this.loaded) return this.data;
-    this.loaded = true;
-    try {
-      const r = await fetch("data/fundamentals.json?v=" + Date.now());
-      if (r.ok) { const j = await r.json(); this.data = j.data || {}; }
-    } catch (e) { this.data = null; }
-    return this.data;
+  prom: null,
+  /* Das laufende Versprechen merken, nicht ein Ja/Nein-Kennzeichen.
+     Zuvor wurde "geladen" gesetzt, BEVOR der Abruf zurueck war. Rufen mehrere
+     Karten gleichzeitig auf - und genau das tun sie -, bekamen alle ausser der
+     ersten sofort data = null zurueck, fielen auf Yahoo zurueck und schrieben
+     dort ein "none" in den Zwischenspeicher. Ergebnis waren Karten, denen die
+     Kennzahlen scheinbar zufaellig fehlten. Gleiches Muster wie bei
+     loadBenchmark() weiter unten. */
+  load() {
+    if (!this.prom) {
+      this.prom = fetch("data/fundamentals.json?v=" + Date.now())
+        .then(r => r.ok ? r.json() : null)
+        .then(j => { this.data = (j && j.data) || {}; return this.data; })
+        .catch(() => { this.data = null; return null; });
+    }
+    return this.prom;
   },
   /* Rohdaten fuer ein Symbol; probiert das Basissymbol ohne Boersenkuerzel */
   get(symbol) {

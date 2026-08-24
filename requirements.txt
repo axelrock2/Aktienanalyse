@@ -1,0 +1,11 @@
+# Abhaengigkeiten der GitHub Actions. Absichtlich klein gehalten.
+#
+# scrapling liefert den HTML-Parser fuer scripts/market_source.py. Gelesen wird
+# entlang der Tabellenstruktur statt per Textsuche - Begriffe wie "Market Cap"
+# stehen bei der Quelle auch in der Navigation, und eine Textsuche traegt dann
+# still den falschen Wert ein.
+#
+# Bewusst OHNE das Extra [fetchers]: das zoege curl_cffi und eine komplette
+# Browser-Engine nach. Die Quellen antworten auf gewoehnliche Anfragen, der
+# Abruf laeuft ueber die Standardbibliothek.
+scrapling>=0.4,<0.5

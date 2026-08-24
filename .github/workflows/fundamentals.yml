@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Abhaengigkeiten installieren
+        run: python3 -m pip install --quiet -r requirements.txt
+
       - name: Fundamentaldaten holen
         env:
           # Optional. Ohne hinterlegtes Secret wird der Alpha-Vantage-Schritt
