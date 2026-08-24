@@ -281,7 +281,10 @@ Eine GitHub Action holt diese Daten täglich. Einrichtung:
 
 **2. Skripte und Watchlist hochladen** – `scripts/build_fundamentals.py`,
 `scripts/market_source.py`, `scripts/dcf_core.py` und
-`scripts/fundamentals_watchlist.txt` in den Ordner `scripts/`.
+`scripts/fundamentals_watchlist.txt` in den Ordner `scripts/`. Dazu
+`requirements.txt` ins Hauptverzeichnis – darin steht die einzige externe
+Abhängigkeit (Scrapling, der HTML-Parser). Der Workflow installiert sie selbst;
+lokal genügt `pip install -r requirements.txt` mit Python 3.10 oder neuer.
 
 **3. (Optional) Alpha-Vantage-Schlüssel als Secret hinterlegen** – einen kostenlosen
 Schlüssel gibt es auf alphavantage.co. Dann im Repository unter *Settings → Secrets
@@ -389,6 +392,7 @@ Das Dossier ist ein Recherche- und Strukturierungswerkzeug, **keine Anlageberatu
 | Qualitäts-Score zeigt „n. v." | Der Titel steht nicht auf `fundamentals_watchlist.txt` und Yahoo liefert die Kennzahlen nicht mehr direkt. Ticker dort ergänzen und den Workflow einmal manuell starten. Timing-Score und Zonen funktionieren unabhängig davon. |
 | Gar nichts lädt, überall „–" | Die Zwischenwege für Kursdaten sind ausgefallen. In `app.js` unter `PROXIES` einen weiteren Dienst ergänzen – siehe Abschnitt „Woher die Daten kommen" in der README. |
 | Kein Kursziel bei einem Xetra-Titel | Beabsichtigt: Die Watchlist führt den US-Hinterlegungsschein in USD, die Xetra-Notierung steht in Euro. Ein Kursziel aus der falschen Währung wäre irreführend, deshalb bleibt das Feld leer. KGV, ROE und Margen gelten für beide Notierungen und werden angezeigt. |
+| Action bricht mit „Scrapling fehlt" ab | Der Installationsschritt im Workflow fehlt oder schlug fehl. `requirements.txt` muss im Hauptverzeichnis liegen und der Schritt „Abhaengigkeiten installieren" vor dem Holen stehen. Das Skript bricht hier absichtlich sichtbar ab, statt auf eine schwächere Leseweise auszuweichen – die lieferte still falsche Werte. |
 | Action bricht mit „HTTP 403" ab | `www.sec.gov` weist Anfragen aus Rechenzentren zeitweise ab. Das Skript weicht dann selbsttätig aus und nutzt zuletzt die Sicherung `data/cik_map.json`. Nur wenn diese Datei fehlt, bleibt der Lauf ohne Bilanzdaten. |
 | Seite zeigt 404 | Schritt 3 prüfen (Branch `main`, Ordner `/ (root)`), 2 Minuten warten, neu laden. |
 | Suche findet einen exotischen Titel nicht | Ticker mit Börsenkürzel direkt eingeben (z. B. `.DE` Xetra, `.T` Tokio, `.HK` Hongkong, `.KS` Korea) – die Online-Suche hilft zusätzlich. |
