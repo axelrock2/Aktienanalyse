@@ -59,6 +59,8 @@ AV_KEY = os.environ.get("ALPHAVANTAGE_KEY", "").strip()
 
 TICKERMAP = "https://www.sec.gov/files/company_tickers.json"
 FACTS = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
+# Traegt den SIC-Schluessel; daraus ergibt sich, ob eine Cashflow-DCF ueberhaupt passt.
+SUBMISSIONS = "https://data.sec.gov/submissions/CIK{cik}.json"
 # www.sec.gov beantwortet Anfragen aus Rechenzentren oft mit HTTP 403, waehrend
 # data.sec.gov normal antwortet. Dieser oeffentliche Textleser holt die Datei
 # stellvertretend; er ist nur fuer die Ticker-Tabelle noetig, nicht fuer die Daten.
@@ -352,6 +354,12 @@ def from_sec(cik):
     waehrung = haupt_waehrung(facts) or "USD"
     out = {"source": "SEC EDGAR", "waehrung": waehrung,
            "entityName": facts.get("entityName")}
+
+    # Branchenschluessel holen - entscheidet spaeter, ob ein DCF gerechnet wird
+    stamm = http_json(SUBMISSIONS.format(cik=cik), tries=2) or {}
+    if stamm.get("sic"):
+        out["sic"] = stamm.get("sic")
+        out["sicText"] = stamm.get("sicDescription")
     for key, tags in TAGS.items():
         v = latest_val(facts, tags, unit_hint=waehrung)
         if v is not None:
@@ -403,7 +411,7 @@ def from_alphavantage(ticker):
     return out if len(out) > 1 else None
 
 
-def dcf_block(sec, av=None):
+def dcf_block(sec, av=None, markt=None):
     """Berechnet die DCF-Matrix aus den SEC-Daten eines Titels.
 
     Bewusst ohne Kurs: gespeichert wird die Matrix ueber ein festes
@@ -411,6 +419,16 @@ def dcf_block(sec, av=None):
     """
     if not sec:
         return None
+
+    # Geschaeftsmodelle, fuer die eine Cashflow-DCF nicht traegt, gar nicht
+    # erst rechnen. Frueher stand dafuer eine Konstante UNGEEIGNETE_BRANCHEN
+    # im Rechenkern, die nirgends abgefragt wurde - Banken bekamen also doch
+    # ein Modell. JPMorgan entging dem nur zufaellig, weil sein operativer
+    # Cashflow negativ ist; bei positivem waere eine sinnlose Zahl entstanden.
+    ungeeignet, grund = dcf_core.dcf_ungeeignet(sec.get("sic"))
+    if ungeeignet:
+        return {"nicht_anwendbar": True, "grund": grund,
+                "sic": sec.get("sic"), "branche": sec.get("sicText")}
 
     def mio(v):
         return None if v is None else v / 1e6
@@ -426,6 +444,46 @@ def dcf_block(sec, av=None):
     else:
         fcf0 = cfo
         fcf_quelle = "Nur operativer Cashflow - keine Investitionsdaten."
+
+    # Zinsen nach Steuern zurechnen. Der operative Cashflow ist bereits nach
+    # Zinsen ausgewiesen; wer ihn mit dem WACC abzinst UND anschliessend die
+    # Nettoverschuldung abzieht, belastet die Schulden zweimal. Die Abzinsung
+    # mit dem WACC verlangt den Cashflow VOR Fremdkapitalkosten.
+    # Toyota zeigt die Groessenordnung: dessen Zinsaufwand ist rund 45 Prozent
+    # des operativen Cashflows (Autobank), der Modellwert lag dadurch etwa
+    # 60 Prozent zu niedrig. Bei schuldenarmen Titeln sind es wenige Prozent.
+    zins = mio(sec.get("interestExpense"))
+    schuld_roh = mio(sec.get("longTermDebt")) or 0.0
+
+    # Gegenprobe, bevor Zinsen zugerechnet werden: Passen Zinsaufwand und
+    # ausgewiesene Schuld zusammen? Bei Konzernen mit eigener Bank (Toyota, VW)
+    # steckt der groesste Teil der Verbindlichkeiten in kurzfristigen Posten der
+    # Finanzsparte und fehlt in LongTermDebtNoncurrent. Der Zinsaufwand gehoert
+    # aber zur GESAMTEN Schuld. Wer ihn dann voll zurechnet und nur die
+    # langfristige Schuld abzieht, rechnet einseitig schoen - bei Toyota kam so
+    # das Zwei- bis Dreifache des Boersenkurses heraus.
+    # Erkennbar am impliziten Zinssatz: Toyota 15,5 Prozent auf die erfasste
+    # Schuld, Apple 5,0 Prozent. Ueber 12 Prozent ist die Bilanz unvollstaendig.
+    if zins and abs(zins) > 0.15 * cfo:
+        satz = (abs(zins) / schuld_roh) if schuld_roh > 0 else None
+        if satz is None or satz > 0.12:
+            return {"nicht_anwendbar": True,
+                    "grund": ("Zinsaufwand und ausgewiesene Verbindlichkeiten passen nicht "
+                              "zusammen (impliziter Zinssatz %s). Typisch fuer Konzerne mit "
+                              "eigener Finanzsparte: Deren Schulden stehen groesstenteils in "
+                              "kurzfristigen Posten und fehlen in der Bilanzposition. Eine "
+                              "Cashflow-DCF wuerde den Wert dadurch deutlich zu hoch "
+                              "ausweisen." % ("nicht berechenbar" if satz is None
+                                              else "%.1f Prozent" % (satz * 100))),
+                    "sic": sec.get("sic"), "branche": sec.get("sicText")}
+
+    if zins:
+        fcf0 += abs(zins) * (1 - dcf_core.STEUERSATZ / 100)
+        fcf_quelle += (" Zinsaufwand nach Steuern zugerechnet (%.0f Prozent Steuersatz), "
+                       "damit der Cashflow zum WACC passt." % dcf_core.STEUERSATZ)
+    else:
+        fcf_quelle += " Kein Zinsaufwand ausgewiesen - Cashflow unveraendert uebernommen."
+
     if fcf0 <= 0:
         return None
 
@@ -438,7 +496,22 @@ def dcf_block(sec, av=None):
         netto = schuld
         netto_quelle = "Schulden ohne Barmittelabzug - keine Daten."
 
-    anteile = mio(sec.get("sharesOutstanding"))
+    # Anteilszahl: die Marktquelle hat Vorrang. Der XBRL-Wert stimmt bei
+    # US-Einreichern gut (Apple und JPMorgan auf ein Prozent genau), geht bei
+    # 20-F-Einreichern aber daneben: Toyota meldet dort 2,77 Milliarden, waehrend
+    # tatsaechlich rund 11,8 Milliarden Anteile umlaufen - Faktor 4,3. Ein
+    # Modellwert je Anteil waere damit um denselben Faktor verkehrt.
+    anteile = mio((markt or {}).get("sharesOut"))
+    anteile_quelle = "Anteile aus den Marktkennzahlen."
+    anteile_sec = mio(sec.get("sharesOutstanding"))
+    if not anteile:
+        anteile = anteile_sec
+        anteile_quelle = "Anteile aus der SEC-Bilanz - keine Marktangabe vorhanden."
+    elif anteile_sec and abs(anteile_sec / anteile - 1) > 0.1:
+        anteile_quelle += (" Hinweis: die SEC-Bilanz nennt %.0f Millionen, also das "
+                           "%.2f-fache; bei Auslandseinreichern erfasst der XBRL-Posten "
+                           "oft nur eine Aktiengattung."
+                           % (anteile_sec, anteile_sec / anteile))
     if not anteile:
         return None
 
@@ -454,7 +527,7 @@ def dcf_block(sec, av=None):
             if neuer and alter:
                 wachstum = neuer / alter - 1
 
-    beta = (av or {}).get("Beta")
+    beta = (av or {}).get("Beta") or (markt or {}).get("beta")
     g1, g2, g_quelle = dcf_core.wachstum_ableiten(wachstum)
 
     felder = {}
@@ -470,10 +543,11 @@ def dcf_block(sec, av=None):
     if not felder:
         return None
 
-    # Plausibilitaetsschranke: bei Konzernen mit eigener Bank (Toyota, VW) ist die
-    # gemeldete Nettoverschuldung so gross, dass das Modell negative Kurswerte
-    # ausspuckt. Solche Ergebnisse sind keine Bewertung, sondern ein Artefakt -
-    # dann lieber nichts liefern als eine Zahl, der man glauben koennte.
+    # Letzte Plausibilitaetsschranke. Die eigentliche Ursache negativer Werte -
+    # ein nach Zinsen ausgewiesener Cashflow, der mit dem WACC abgezinst und
+    # zusaetzlich um die Nettoverschuldung gekuerzt wurde - ist oben behoben.
+    # Diese Pruefung bleibt als Netz fuer Faelle mit unvollstaendiger Bilanz:
+    # ein negativer Wert je Anteil ist keine Bewertung, sondern ein Artefakt.
     werte = [v["je_anteil"] for v in felder.values() if v.get("je_anteil") is not None]
     if not werte or min(werte) <= 0:
         return None
@@ -484,6 +558,7 @@ def dcf_block(sec, av=None):
         "nettoverschuldung_mio": round(netto, 1),
         "netto_quelle": netto_quelle,
         "anteile_mio": round(anteile, 1),
+        "anteile_quelle": anteile_quelle,
         "wachstum_phase1": g1,
         "wachstum_phase2": g2,
         "wachstum_quelle": g_quelle,
@@ -548,7 +623,7 @@ def main():
         # 4) DCF-Matrix - ein Rechenfehler darf nie den ganzen Lauf kosten
         if entry.get("sec"):
             try:
-                d = dcf_block(entry["sec"], entry.get("av") or entry.get("markt"))
+                d = dcf_block(entry["sec"], entry.get("av"), entry.get("markt"))
                 if d:
                     entry["dcf"] = d
             except Exception as e:
