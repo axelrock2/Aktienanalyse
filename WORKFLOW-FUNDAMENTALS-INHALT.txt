@@ -3,10 +3,15 @@ name: Fundamentaldaten aktualisieren
 on:
   schedule:
     - cron: "30 5 * * *"      # taeglich 05:30 UTC
-  workflow_dispatch:          # erlaubt manuelles Ausloesen ueber die Actions-Seite
+  workflow_dispatch:          # manueller Start ueber den Actions-Tab
 
 permissions:
   contents: write
+
+# Nicht zwei Laeufe gleichzeitig: beide wuerden dieselbe Datei schreiben.
+concurrency:
+  group: fundamentals
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -21,13 +26,20 @@ jobs:
 
       - name: Fundamentaldaten holen
         env:
+          # Optional. Ohne hinterlegtes Secret wird der Alpha-Vantage-Schritt
+          # uebersprungen - SEC EDGAR und stockanalysis.com brauchen keinen Schluessel.
           ALPHAVANTAGE_KEY: ${{ secrets.ALPHAVANTAGE_KEY }}
         run: python3 scripts/build_fundamentals.py
 
       - name: Aenderungen committen
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add data/fundamentals.json
-          git diff --staged --quiet || git commit -m "Fundamentaldaten aktualisiert"
+          git config user.name "fundamentals-bot"
+          git config user.email "actions@users.noreply.github.com"
+          # cik_map.json ist die Sicherung der Ticker->CIK-Tabelle: einmal geholt,
+          # traegt sie kuenftige Laeufe auch dann, wenn www.sec.gov abweist.
+          git add data/fundamentals.json data/cik_map.json
+          git diff --cached --quiet && echo "Keine Aenderungen." && exit 0
+          git commit -m "Fundamentaldaten aktualisiert ($(date -u +%F))"
+          # Der Nachrichten-Lauf committet stuendlich in denselben Zweig.
+          git pull --rebase --autostash || true
           git push
