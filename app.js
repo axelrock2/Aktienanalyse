@@ -421,6 +421,10 @@ async function loadMarktLive(symbol) {
     evSales: saZahl(st["EV / Sales"]),
     insiderHold: saZahl(st["Owned by Insiders (%)"]),
     instHold: saZahl(st["Owned by Institutions (%)"]),
+    /* Anzahl Anteile: fuer das Bewertungsmodell unverzichtbar und der
+       verlaesslichere Wert als der XBRL-Posten, der bei Auslandseinreichern
+       oft nur eine Aktiengattung erfasst. */
+    sharesOut: saZahl(st["Shares Outstanding"]),
     revGrowth: null, targetMean: null, recommendation: null,
     quelle: "stockanalysis.com (live)",
     kursWaehrung: ziel.waehrung,

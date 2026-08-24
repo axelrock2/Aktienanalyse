@@ -115,6 +115,26 @@ ab; ohne Rückrechnung der Zinsen nach Steuern trüge die Schuld zweimal.
 **Abzinsung zur Jahresmitte.** Cashflows fallen über das Jahr verteilt an, nicht
 gebündelt am 31.12. Abgezinst wird deshalb über 0,5 / 1,5 / 2,5 Jahre.
 
+**Woher die Zahlen im Bewertungsmodell kommen – und wie du sie prüfst.**
+Die Mappe trennt Eingaben strikt vom Rechenweg: **blau** = Eingabe, **schwarz** =
+Formel, **grün** = Verweis auf ein anderes Blatt, **gelb hinterlegt** = Annahme,
+die du prüfen solltest. Jede abgeleitete Zelle ist eine echte Excel-Formel –
+änderst du eine Annahme, rechnet alles neu.
+
+Zwei eingebaute Kontrollen:
+
+- Das Blatt **„Suche"** listet für jeden Eingabewert die Zielzelle, den genauen
+  Fundort (Navigationspfad bei TradingView), das erwartete Format und einen
+  Hinweis auf die häufigste Falle. Die letzte Spalte prüft sich selbst:
+  `=IF(Annahmen!B5="";"→ fehlt";"ok")`.
+- Die **Übersicht** zählt daraus zusammen: „Noch offen: N von 14 Werten."
+
+**Währungsprobe.** Die SEC-Bilanz steht in der Berichtswährung des Konzerns, die
+Kursdaten in der Währung der Notierung. Bei US-Unternehmen ist das dasselbe, bei
+Auslandseinreichern nicht – Toyota berichtet in JPY, der Hinterlegungsschein
+notiert in USD. Passt beides nicht zusammen, bleiben die Bilanzposten leer und
+gelb statt in falscher Währung gefüllt zu werden.
+
 **Zwei Grenzen, die man kennen sollte.**
 Erstens deckt stockanalysis.com nicht jede Notierung ab; wo eine US-Notierung
 existiert (z. B. `NVO` statt `NOVO-B.CO`), ist sie der zuverlässigere Eintrag.
