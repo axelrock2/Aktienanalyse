@@ -79,7 +79,8 @@ const Cache = {
 const PROXIES = [
   { name: "jina",
     url: u => "https://r.jina.ai/" + u,
-    kopf: { "x-respond-with": "text" } },
+    kopf: { "x-respond-with": "text" },
+    text: true },   // kann auch ganze Seiten als Klartext liefern
   { name: "codetabs",
     url: u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u) },
   { name: "allorigins-get",
@@ -100,12 +101,15 @@ function jsonAusText(txt) {
   return JSON.parse(i === 0 ? txt : txt.slice(i));
 }
 
-async function fetchJson(url, validate, timeout = 12000) {
+async function fetchDurch(url, { alsText = false, validate, timeout = 12000 } = {}) {
   const start = +(sessionStorage.getItem("ak.proxy") || 0);
   let lastErr = null;
   for (let i = 0; i < PROXIES.length; i++) {
     const idx = (start + i) % PROXIES.length;
     const weg = PROXIES[idx];
+    /* Seiten in Textform koennen nur Wege liefern, die das ausdruecklich
+       anbieten - die uebrigen reichen HTML durch, das hier niemand braucht. */
+    if (alsText && !weg.text) continue;
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeout);
     try {
@@ -115,14 +119,24 @@ async function fetchJson(url, validate, timeout = 12000) {
       });
       clearTimeout(timer);
       if (!res.ok) throw new Error("HTTP " + res.status);
-      let data = jsonAusText(await res.text());
-      if (weg.schale) data = weg.schale(data);
+      const roh = await res.text();
+      let data;
+      if (alsText) {
+        data = roh;
+      } else {
+        data = jsonAusText(roh);
+        if (weg.schale) data = weg.schale(data);
+      }
       if (validate && !validate(data)) throw new Error("Unerwartetes Format");
       sessionStorage.setItem("ak.proxy", String(idx));   // erfolgreichen Weg merken
       return data;
     } catch (e) { clearTimeout(timer); lastErr = e; }
   }
   throw lastErr || new Error("Keine Datenquelle erreichbar");
+}
+
+function fetchJson(url, validate, timeout = 12000) {
+  return fetchDurch(url, { validate, timeout });
 }
 
 /* ---------- Kursdaten (Yahoo Chart-API) ---------- */
@@ -313,6 +327,118 @@ function computeScores(entry, live) {
   return out;
 }
 
+/* ---------- Marktkennzahlen live, fuer Titel ausserhalb der Watchlist ----------
+   Die taegliche Datei deckt nur die Watchlist ab - fuer alles andere gaebe es
+   sonst keinen Qualitaets-Score, weil Yahoos quoteSummary seit der Crumb-Pflicht
+   ausfaellt. Dieselbe Quelle wie serverseitig, nur ueber den Textleser: der
+   liefert die Seite als "Beschriftung<Tab>Wert" je Zeile, rund 6 KB statt 200 KB
+   HTML, und spart damit das Zerlegen von Markup im Browser. */
+const SA_BOERSEN = {
+  DE:"etr", F:"etr", BE:"etr", MU:"etr", SG:"etr", HM:"etr", DU:"etr",
+  L:"lon", PA:"epa", AS:"ams", BR:"ebr", LS:"els", MI:"bit", MC:"bme",
+  SW:"swx", VI:"vie", ST:"sto", CO:"cph", OL:"osl", HE:"hel", IC:"ice",
+  WA:"wse", PR:"pse", AT:"ath", IS:"ist", TO:"tsx", V:"cve", MX:"bmv",
+  SA:"bvmf", BA:"bcba", SN:"bcs", T:"tyo", HK:"hkg", SS:"sha", SZ:"she",
+  TW:"tpe", KS:"krx", KQ:"krx", SI:"sgx", NS:"nse", BO:"bom", AX:"asx",
+  NZ:"nzx", JO:"jse", TA:"tase",
+};
+const SA_WAEHRUNG = {
+  etr:"EUR", epa:"EUR", ams:"EUR", ebr:"EUR", els:"EUR", bit:"EUR", bme:"EUR",
+  vie:"EUR", hel:"EUR", ath:"EUR", lon:"GBp", swx:"CHF", sto:"SEK", cph:"DKK",
+  osl:"NOK", ice:"ISK", wse:"PLN", pse:"CZK", ist:"TRY", tsx:"CAD", cve:"CAD",
+  bmv:"MXN", bvmf:"BRL", bcba:"ARS", bcs:"CLP", tyo:"JPY", hkg:"HKD",
+  sha:"CNY", she:"CNY", tpe:"TWD", krx:"KRW", sgx:"SGD", nse:"INR",
+  bom:"INR", asx:"AUD", nzx:"NZD", jse:"ZAR", tase:"ILS",
+};
+
+function saAdresse(symbol) {
+  const sym = String(symbol).trim().toUpperCase();
+  if (!sym) return null;
+  if (!sym.includes(".")) return { url: `https://stockanalysis.com/stocks/${sym.toLowerCase()}/`, waehrung: "USD" };
+  const i = sym.lastIndexOf(".");
+  const boerse = SA_BOERSEN[sym.slice(i + 1)];
+  if (!boerse) return null;
+  return { url: `https://stockanalysis.com/quote/${boerse}/${sym.slice(0, i)}/`,
+           waehrung: SA_WAEHRUNG[boerse] || null };
+}
+
+/* "27.62%" -> 0.2762 | "136.68B" -> 1.3668e11 | "1,482.93" -> 1482.93 */
+function saZahl(t) {
+  if (!t) return null;
+  const s = String(t).trim();
+  if (!s || ["-","--","n/a","N/A","Upgrade"].includes(s)) return null;
+  const m = s.match(/^\$?\s*(-?[\d,]+\.?\d*)\s*([KMBT])?\s*(%)?/);
+  if (!m) return null;
+  let v = parseFloat(m[1].replace(/,/g, ""));
+  if (!isFinite(v)) return null;
+  if (m[2]) v *= { K:1e3, M:1e6, B:1e9, T:1e12 }[m[2]];
+  if (m[3]) v /= 100;
+  return v;
+}
+
+/* Klartextseite -> { Beschriftung: Wert }. Navigationszeilen haben keinen
+   Tabulator und fallen dabei von selbst heraus. */
+function saPaare(text) {
+  const out = {};
+  for (const zeile of String(text).split("\n")) {
+    const i = zeile.indexOf("\t");
+    if (i <= 0) continue;
+    const k = zeile.slice(0, i).trim(), v = zeile.slice(i + 1).trim();
+    if (k && v && !(k in out)) out[k] = v;
+  }
+  return out;
+}
+
+async function loadMarktLive(symbol) {
+  const ziel = saAdresse(symbol);
+  if (!ziel) return null;
+  /* Beide Seiten gleichzeitig: die Kennzahlen stehen unter "statistics",
+     Kursziel und Analystenurteil nur auf der Uebersicht. */
+  const [statText, uebText] = await Promise.all([
+    fetchDurch(ziel.url + "statistics/", { alsText: true, timeout: 9000 }).catch(() => null),
+    fetchDurch(ziel.url, { alsText: true, timeout: 9000 }).catch(() => null),
+  ]);
+  if (!statText) return null;
+  const st = saPaare(statText);
+  if (Object.keys(st).length < 5) return null;      // Fehlerseite statt Titel
+
+  const out = {
+    opMargin: saZahl(st["Operating Margin"]),
+    profitMargin: saZahl(st["Profit Margin"]),
+    roe: saZahl(st["Return on Equity (ROE)"]),
+    debtToEquity: saZahl(st["Debt / Equity"]) != null ? saZahl(st["Debt / Equity"]) * 100 : null,
+    fcf: saZahl(st["Free Cash Flow"]),
+    trailingPE: saZahl(st["PE Ratio"]),
+    forwardPE: saZahl(st["Forward PE"]),
+    divYield: saZahl(st["Dividend Yield"]),
+    marketCap: saZahl(st["Market Cap"]),
+    peg: saZahl(st["PEG Ratio"]),
+    beta: saZahl(st["Beta (5Y)"]),
+    /* zusaetzlich fuer das Dossier */
+    pbRatio: saZahl(st["PB Ratio"]),
+    psRatio: saZahl(st["PS Ratio"]),
+    evEbitda: saZahl(st["EV / EBITDA"]),
+    evSales: saZahl(st["EV / Sales"]),
+    insiderHold: saZahl(st["Owned by Insiders (%)"]),
+    instHold: saZahl(st["Owned by Institutions (%)"]),
+    revGrowth: null, targetMean: null, recommendation: null,
+    quelle: "stockanalysis.com (live)",
+    kursWaehrung: ziel.waehrung,
+  };
+
+  if (uebText) {
+    const ue = saPaare(uebText);
+    out.targetMean = saZahl(ue["Price Target"]);
+    const urteil = (ue["Analysts"] || "").trim();
+    if (["Strong Buy","Buy","Hold","Sell","Strong Sell"].includes(urteil))
+      out.recommendation = urteil.toLowerCase().replace(/\s+/g, "_");
+    /* "466.82B +14.2%" - Betrag und Veraenderung in einer Zelle */
+    const m = String(ue["Revenue (ttm)"] || "").match(/([+-][\d.,]+)\s*%/);
+    if (m) out.revGrowth = parseFloat(m[1].replace(/,/g, "")) / 100;
+  }
+  return Object.values(out).some(v => typeof v === "number" && isFinite(v)) ? out : null;
+}
+
 async function loadFundamentals(symbol, kursWaehrung) {
   const key = "fund." + symbol + (kursWaehrung ? "." + kursWaehrung : "");
   const cached = Cache.get(key, 12 * 60 * 60 * 1000);
@@ -328,26 +454,31 @@ async function loadFundamentals(symbol, kursWaehrung) {
     if (lokal) { Cache.set(key, lokal); return lokal; }
   } catch (e) { /* Datei fehlt oder ist unlesbar -> Yahoo versuchen */ }
 
-  const modules = "financialData,defaultKeyStatistics,summaryDetail,price";
-  for (const host of ["query1", "query2"]) {
-    try {
-      const url = `https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}`;
-      const data = await fetchJson(url, d => d && d.quoteSummary && d.quoteSummary.result && d.quoteSummary.result[0], 9000);
-      const r = data.quoteSummary.result[0];
-      const fd = r.financialData || {}, ks = r.defaultKeyStatistics || {}, sd = r.summaryDetail || {}, pr = r.price || {};
-      const out = {
-        opMargin: raw(fd.operatingMargins), profitMargin: raw(fd.profitMargins),
-        roe: raw(fd.returnOnEquity), revGrowth: raw(fd.revenueGrowth),
-        debtToEquity: raw(fd.debtToEquity), fcf: raw(fd.freeCashflow),
-        trailingPE: raw(sd.trailingPE), forwardPE: raw(sd.forwardPE) ?? raw(ks.forwardPE),
-        divYield: raw(sd.dividendYield), marketCap: raw(sd.marketCap) ?? raw(pr.marketCap),
-        peg: raw(ks.pegRatio), beta: raw(sd.beta),
-        targetMean: raw(fd.targetMeanPrice), recommendation: fd.recommendationKey || null,
-      };
-      Cache.set(key, out);
-      return out;
-    } catch (e) { /* nächster Host */ }
-  }
+  /* Zweitens live nachladen. Das deckt die Titel ab, die nicht auf der
+     Watchlist stehen - also den weit groesseren Teil der Datenbank. Ohne
+     diesen Schritt bliebe der Qualitaets-Score dort dauerhaft leer, weil
+     der Yahoo-Weg darunter seit der Crumb-Pflicht nicht mehr traegt. */
+  try {
+    const live = await loadMarktLive(symbol);
+    if (live) {
+      /* Betragsgroessen nur uebernehmen, wenn die Waehrung zur Notierung
+         passt - dieselbe Regel wie bei den Daten aus der Datei. */
+      if (kursWaehrung && live.kursWaehrung &&
+          String(kursWaehrung).toUpperCase() !== String(live.kursWaehrung).toUpperCase()) {
+        live.targetMean = null; live.marketCap = null; live.fcf = null;
+      }
+      Cache.set(key, live);
+      return live;
+    }
+  } catch (e) { /* weiter zu Yahoo */ }
+
+  /* Frueher folgte hier ein Rueckfall auf Yahoos quoteSummary. Der ist ersatzlos
+     entfallen: Der Baustein verlangt ein Cookie-und-Crumb-Paar, das ein
+     CORS-Zwischenweg prinzipiell nicht mitliefern kann - die Antwort lautet
+     ausnahmslos {"error":{"code":"Unauthorized","description":"Invalid Crumb"}}.
+     Er konnte also nie etwas beitragen, kostete aber bei jedem nicht
+     auffindbaren Titel zwei Hosts mal fuenf Zwischenwege an Wartezeit, bevor
+     die Karte aufgab. Jetzt steht das Ergebnis sofort fest. */
   Cache.set(key, "none");
   return null;
 }
@@ -1422,35 +1553,43 @@ function dsFactors(chart,fund,risk,deep){
   return f;
 }
 
-/* ---------- Erweiterte Live-Daten (mehr Yahoo-Module + News) ---------- */
+/* ---------- Erweiterte Daten fuers Dossier ----------
+   Frueher kamen sie aus Yahoos quoteSummary mit neun Modulen. Der Weg ist seit
+   der Crumb-Pflicht tot: Ueber einen CORS-Zwischenweg antwortet er ausnahmslos
+   "Invalid Crumb". Er lieferte also nichts, blockierte aber beim Oeffnen eines
+   Dossiers zwei Hosts mal fuenf Zwischenwege lang. Die Kennzahlen stehen
+   ohnehin in derselben Quelle, aus der auch die Bewertung stammt - von dort
+   werden sie jetzt uebernommen. Was es dort nicht gibt (Analystenzahl,
+   Empfehlungsverlauf, Insiderkaeufe, Termin der naechsten Zahlen), bleibt leer
+   und wird im Dossier als "nicht verfuegbar" gekennzeichnet - so, wie es die
+   uebrigen Abschnitte auch handhaben. */
 async function dsLoadDeep(symbol){
   const key="deep."+symbol;
   const cached=Cache.get(key,6*60*60*1000);
   if(cached)return cached==="none"?null:cached;
-  const mods="financialData,defaultKeyStatistics,summaryDetail,price,recommendationTrend,calendarEvents,earningsTrend,netSharePurchaseActivity,majorHoldersBreakdown";
-  for(const host of["query1","query2"]){
-    try{
-      const url=`https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${mods}`;
-      const data=await fetchJson(url,d=>d&&d.quoteSummary&&d.quoteSummary.result&&d.quoteSummary.result[0],10000);
-      const r=data.quoteSummary.result[0];
-      const fd=r.financialData||{},ks=r.defaultKeyStatistics||{},sd=r.summaryDetail||{};
-      const rt=(r.recommendationTrend&&r.recommendationTrend.trend||[])[0]||{};
-      const cal=r.calendarEvents||{},et=r.earningsTrend||{},ns=r.netSharePurchaseActivity||{},mh=r.majorHoldersBreakdown||{};
-      const out={
-        priceToBook:raw(ks.priceToBook), evEbitda:raw(ks.enterpriseToEbitda), evSales:raw(ks.enterpriseToRevenue),
-        priceToSales:raw(sd.priceToSalesTrailing12Months), pegForward:raw(ks.pegRatio),
-        targetLow:raw(fd.targetLowPrice), targetMean:raw(fd.targetMeanPrice), targetHigh:raw(fd.targetHighPrice),
-        recKey:fd.recommendationKey||null, numAnalysts:raw(fd.numberOfAnalystOpinions),
-        recTrend:{buy:(rt.strongBuy||0)+(rt.buy||0), hold:rt.hold||0, sell:(rt.sell||0)+(rt.strongSell||0)},
-        earningsDate:(cal.earnings&&cal.earnings.earningsDate&&cal.earnings.earningsDate[0]&&cal.earnings.earningsDate[0].raw)||null,
-        instHold:raw(mh.institutionsPercentHeld), insiderHold:raw(mh.insidersPercentHeld),
-        insiderNet:raw(ns.netPercentInsiderShares),
-        epsFwd:raw(et.trend&&et.trend.find&&(et.trend.find(x=>x.period==="+1y")||{}).earningsEstimate&&(et.trend.find(x=>x.period==="+1y")||{}).earningsEstimate.avg),
-      };
-      Cache.set(key,out);return out;
-    }catch(e){}
-  }
-  Cache.set(key,"none");return null;
+
+  let m=null;
+  try{
+    const e=Fundamentals.get(symbol);
+    m=(e&&e.markt)||await loadMarktLive(symbol);
+  }catch(err){ m=null; }
+  if(!m){ Cache.set(key,"none"); return null; }
+
+  const z=v=>(typeof v==="number"&&isFinite(v))?v:null;
+  const out={
+    priceToBook:z(m.pbRatio), evEbitda:z(m.evEbitda), evSales:z(m.evSales),
+    priceToSales:z(m.psRatio), pegForward:z(m.peg),
+    targetLow:null, targetMean:z(m.targetMean), targetHigh:null,
+    recKey:m.recommendation?String(m.recommendation).toLowerCase().replace(/\s+/g,"_"):null,
+    numAnalysts:null, recTrend:null,
+    earningsDate:null,
+    instHold:z(m.institutionenAnteil)??z(m.instHold),
+    insiderHold:z(m.insiderAnteil)??z(m.insiderHold),
+    insiderNet:null, epsFwd:null,
+    quelle:m.source||m.quelle||"stockanalysis.com",
+  };
+  Cache.set(key,out);
+  return out;
 }
 async function dsLoadNews(symbol){
   const key="news."+symbol;
@@ -1501,11 +1640,16 @@ function buildDossier(item,chart,fund,a,deep,news,bench,demo,scores){
   let scenario=`${naFetch}`;
   if(deep&&deep.targetMean){
     const up=v=>v?P(v/price-1):"–";
+    /* Tiefst- und Hoechstziel liefert die heutige Quelle nicht. Leere Zeilen
+       anzuzeigen taeuscht eine Spanne vor, die nicht vorliegt - deshalb nur,
+       was wirklich da ist. */
+    const zeile=(name,v,basis)=>v?`<tr><td>${name}</td><td>${money2(v)}</td>
+      <td class="${chgCls(v/price-1)}">${up(v)}</td><td>${basis}</td></tr>`:"";
     scenario=`<table class="dstab"><tr><th>Szenario</th><th>Ankerkurs</th><th>Abstand</th><th>Basis</th></tr>
-      <tr><td>Bear</td><td>${money2(deep.targetLow)}</td><td class="${chgCls(deep.targetLow/price-1)}">${up(deep.targetLow)}</td><td>Analysten-Tiefstziel</td></tr>
-      <tr><td>Base</td><td>${money2(deep.targetMean)}</td><td class="${chgCls(deep.targetMean/price-1)}">${up(deep.targetMean)}</td><td>Analysten-Durchschnittsziel</td></tr>
-      <tr><td>Bull</td><td>${money2(deep.targetHigh)}</td><td class="${chgCls(deep.targetHigh/price-1)}">${up(deep.targetHigh)}</td><td>Analysten-Höchstziel</td></tr></table>
-      <p class="dshint">Ankerpunkte aus dem Analystenkonsens ersetzen keine eigene Szenariorechnung – Eintrittswahrscheinlichkeiten und Begründungen trägst du selbst ein.</p>`;
+      ${zeile("Bear",deep.targetLow,"Analysten-Tiefstziel")}
+      ${zeile("Base",deep.targetMean,"Analysten-Durchschnittsziel")}
+      ${zeile("Bull",deep.targetHigh,"Analysten-Höchstziel")}</table>
+      <p class="dshint">${(deep.targetLow||deep.targetHigh)?"":"Nur das Durchschnittsziel liegt vor; Tiefst- und Höchstziel sind derzeit nicht abrufbar. "}Ankerpunkte aus dem Analystenkonsens ersetzen keine eigene Szenariorechnung – Eintrittswahrscheinlichkeiten und Begründungen trägst du selbst ein.</p>`;
   }
 
   /* Technik */
