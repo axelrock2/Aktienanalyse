@@ -455,3 +455,38 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 .p-xlsx:hover{background:var(--surface2);border-color:var(--warn)}
 .p-xlsx:disabled{opacity:.6;cursor:default}
 .p-xlsx small{display:block;font:400 11.5px var(--sans);color:var(--muted);margin-top:2px;letter-spacing:0}
+
+/* ---------- Chancenraum ---------- */
+.chancenbox{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px 12px;margin-bottom:16px}
+.ch-sortzeile{display:flex;align-items:center;gap:8px;margin:10px 0 4px;font-size:11.5px;color:var(--faint);flex-wrap:wrap}
+.ch-sort{background:none;border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:3px 10px;font:inherit;font-size:11.5px;cursor:pointer}
+.ch-sort:hover{border-color:var(--accent);color:var(--ink)}
+.ch-sort.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.ch-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.ch-row{display:grid;grid-template-columns:44px minmax(150px,1.6fr) repeat(4,minmax(74px,.8fr)) auto;
+        align-items:center;gap:10px;padding:9px 11px;background:var(--surface);
+        border:1px solid var(--line);border-radius:9px}
+.ch-row:hover{border-color:var(--accent)}
+.ch-pkt{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);text-align:center}
+.ch-titel b{display:block;font-size:13px;color:var(--ink);font-weight:600}
+.ch-titel i{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:2px}
+.ch-lage{font-weight:600}
+.ch-in_zone{color:var(--accent)}
+.ch-nahe{color:var(--warn)}
+.ch-umfeld{color:var(--muted)}
+.ch-warn{color:var(--down)}
+.ch-zahl{text-align:right}
+.ch-zahl span{display:block;font-size:10px;color:var(--faint);letter-spacing:.02em}
+.ch-zahl b{font-family:var(--mono);font-size:12.5px;color:var(--ink);font-weight:600}
+.ch-akt{display:flex;gap:6px;flex-shrink:0}
+.ch-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:7px;
+        padding:5px 9px;font:inherit;font-size:11.5px;cursor:pointer;white-space:nowrap}
+.ch-btn:hover{border-color:var(--accent);color:var(--ink)}
+.ch-merk.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.ch-leer{padding:16px 4px;font-size:13px;color:var(--muted);line-height:1.55}
+.ch-fuss{margin-top:11px;font-size:11.5px;color:var(--faint);line-height:1.6}
+@media(max-width:900px){
+  .ch-row{grid-template-columns:38px 1fr auto;grid-auto-rows:min-content;row-gap:8px}
+  .ch-zahl{text-align:left;grid-column:span 1}
+  .ch-akt{grid-column:1/-1;justify-content:flex-end}
+}

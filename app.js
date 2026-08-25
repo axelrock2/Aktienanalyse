@@ -34,7 +34,33 @@ const raw = v => (v && typeof v === "object") ? (isFinite(v.raw) ? v.raw : null)
 const chgCls = v => v == null ? "neu" : v > 0.0001 ? "pos" : v < -0.0001 ? "neg" : "neu";
 
 /* ---------- Lokaler Cache (localStorage, mit Ablauf) ---------- */
+/* Wie lange ein Zwischenspeicher-Eintrag hoechstens liegen bleiben darf, egal
+   wofuer er gedacht war. Ohne diese Grenze sammeln sich Kurse und Kennzahlen
+   von Titeln an, die man einmal angesehen und danach nie wieder geoeffnet hat -
+   geloescht wurde bisher erst, wenn der Speicher voll lief. */
+const CACHE_MAX_ALTER = 7 * 24 * 60 * 60 * 1000;      // sieben Tage
+
 const Cache = {
+  /* Abgelaufenes aufraeumen. Laeuft einmal beim Start, nicht bei jedem Zugriff:
+     Es geht um Speicherplatz, nicht um Genauigkeit - die Frische pruefen die
+     Aufrufer ohnehin einzeln ueber ihre eigene Haltbarkeit. */
+  prune() {
+    let weg = 0;
+    try {
+      const jetzt = Date.now();
+      for (const k of Object.keys(localStorage)) {
+        if (!k.startsWith("ak.cache.")) continue;
+        try {
+          const it = JSON.parse(localStorage.getItem(k));
+          if (!it || typeof it.t !== "number" || jetzt - it.t > CACHE_MAX_ALTER) {
+            localStorage.removeItem(k); weg++;
+          }
+        } catch (e) { localStorage.removeItem(k); weg++; }
+      }
+    } catch (e) {}
+    return weg;
+  },
+
   /* wie get(), liefert zusätzlich den Speicherzeitpunkt */
   getEntry(key, ttlMs) {
     try {
@@ -819,6 +845,156 @@ function initNews() {
   loadNews();
 }
 
+/* ---------- Chancenraum -----------------------------------------------------
+   Zeigt Titel, deren Kurs nahe an der Zonenbasis steht und die noch Luft bis
+   Ziel 1 haben. Die Liste wird taeglich serverseitig gerechnet
+   (scripts/build_chancen.py) und liegt als data/chancen.json bereit - im
+   Browser ist damit kein einziger Kursabruf noetig, der Raum steht sofort.
+
+   Zur Zonenlogik: Die Zonenbasis ist die naechste Unterstuetzung UNTERHALB des
+   Kurses. Sie wandert mit dem Kurs mit, ein Titel kann also nie unter seiner
+   eigenen Einstiegszone stehen. Gemessen wird deshalb der ABSTAND zur Basis:
+   je kleiner, desto naeher ist der Kurs zurueckgekommen.
+
+   Drei Lagen, vom Server vergeben:
+     in_zone  - bis 3,5 Prozent ueber der Basis (die Zonenbreite selbst)
+     nahe     - bis 8 Prozent darueber
+     umfeld   - bis 20 Prozent darueber; weiter entfernt kommt nichts hinein   */
+const Chancen = {
+  daten: null, prom: null, lage: "alle", sortier: "punkte",
+  load() {
+    if (!this.prom) {
+      this.prom = fetch("data/chancen.json?v=" + Date.now())
+        .then(r => r.ok ? r.json() : null)
+        .then(j => { this.daten = j; return j; })
+        .catch(() => { this.daten = null; return null; });
+    }
+    return this.prom;
+  },
+};
+
+const CH_LAGEN = { in_zone: "In der Zone", nahe: "Nahe", umfeld: "Umfeld" };
+
+/* Stammdaten. Bevorzugt aus der Datei selbst - der Server legt Name, Land und
+   Sektor bei, damit die Anzeige nicht auf die 1,8 MB grosse Tickerdatenbank
+   warten muss. Nur wenn dort nichts steht, wird sie befragt. */
+function chStamm(sym) {
+  const t = (Chancen.daten && Chancen.daten.titel || []).find(x => x.sym === sym);
+  if (t && t.name && t.name !== sym) {
+    return { s: sym, n: t.name, c: t.land || "", e: "", sec: t.sektor || "" };
+  }
+  const r = (typeof DB !== "undefined" && DB.rows && DB.rows.length)
+    ? DB.rows.find(x => x[0] === sym) : null;
+  return r ? { s: sym, n: r[1], c: r[2] || "", e: r[3] || "", sec: r[4] || "" }
+           : { s: sym, n: (t && t.name) || sym, c: "", e: "", sec: "" };
+}
+const chNameFuer = sym => chStamm(sym).n;
+
+function renderChancen() {
+  const body = $("#chancenbody"), meta = $("#chancenmeta");
+  if (!body) return;
+  const d = Chancen.daten;
+
+  if (!d || !Array.isArray(d.titel)) {
+    meta.textContent = "nicht verfügbar";
+    body.innerHTML = `<div class="ch-leer">Die Liste <code>data/chancen.json</code> fehlt oder ist
+      unlesbar. Sie entsteht täglich über die Aktion „Chancenraum aktualisieren“.</div>`;
+    return;
+  }
+  if (!d.titel.length) {
+    meta.textContent = "0 Treffer";
+    body.innerHTML = `<div class="ch-leer">Zurzeit steht kein Titel des Korbs nahe genug an seiner
+      Zonenbasis. Das ist ein Ergebnis, kein Fehler – in steigenden Märkten bleibt der Raum oft leer.</div>`;
+    return;
+  }
+
+  const alter = d.generated ? Math.round((Date.now() / 1000 - d.generated) / 3600) : null;
+  meta.textContent = `${d.titel.length} von ${d.geprueft} Titeln`
+    + (alter != null ? ` · Stand vor ${alter < 24 ? alter + " Std" : Math.round(alter / 24) + " Tg"}` : "");
+
+  const gefiltert = d.titel.filter(t => Chancen.lage === "alle" || t.lage === Chancen.lage);
+  gefiltert.sort((a, b) => Chancen.sortier === "naehe"
+    ? a.naehe_prozent - b.naehe_prozent
+    : Chancen.sortier === "chance" ? b.chance_prozent - a.chance_prozent
+    : b.punkte - a.punkte);
+
+  const zaehl = k => d.titel.filter(t => t.lage === k).length;
+  const chips = ["alle", "in_zone", "nahe", "umfeld"].map(k => {
+    const n = k === "alle" ? d.titel.length : zaehl(k);
+    const txt = k === "alle" ? "Alle" : CH_LAGEN[k];
+    return `<button class="nb-chip${Chancen.lage === k ? " on" : ""}" data-lage="${k}">${txt}<i>${n}</i></button>`;
+  }).join("");
+
+  const sortChips = [["punkte", "Bewertung"], ["naehe", "Nähe zur Basis"], ["chance", "Luft bis Ziel"]]
+    .map(([k, l]) => `<button class="ch-sort${Chancen.sortier === k ? " on" : ""}" data-sort="${k}">${l}</button>`).join("");
+
+  const zeilen = gefiltert.map(t => {
+    const gemerkt = Favs.has(t.sym);
+    const w = t.waehrung || "";
+    return `<div class="ch-row" data-sym="${esc(t.sym)}">
+      <div class="ch-pkt" title="Bewertung aus Nähe zur Zonenbasis (60 %) und Luft bis Ziel 1 (40 %)">${t.punkte}</div>
+      <div class="ch-titel">
+        <b>${esc(chNameFuer(t.sym))}</b>
+        <i>${esc(t.sym)} · <span class="ch-lage ch-${t.lage}">${CH_LAGEN[t.lage] || t.lage}</span>${
+          t.trend_auf ? "" : ' · <span class="ch-warn">unter GD 200</span>'}</i>
+      </div>
+      <div class="ch-zahl"><span>Kurs</span><b>${moneyNum(t.kurs, w, t.kurs < 10 ? 2 : 1)}</b></div>
+      <div class="ch-zahl"><span>zur Basis</span><b class="up">+${fmtNum(t.naehe_prozent, "", 1)} %</b></div>
+      <div class="ch-zahl"><span>bis Ziel 1</span><b class="up">+${fmtNum(t.chance_prozent, "", 1)} %</b></div>
+      <div class="ch-zahl"><span>C/R</span><b>${t.crv != null ? fmtNum(t.crv, "", 1) : "–"}</b></div>
+      <div class="ch-akt">
+        <button class="ch-btn ch-merk${gemerkt ? " on" : ""}" data-merk="${esc(t.sym)}"
+          title="${gemerkt ? "Aus der Merkliste entfernen" : "Zur Merkliste hinzufügen"}">${gemerkt ? "Gemerkt" : "+ Merken"}</button>
+        <button class="ch-btn" data-oeffnen="${esc(t.sym)}" title="Analyse öffnen">Ansehen</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  body.innerHTML = `
+    <div class="nb-chips">${chips}</div>
+    <div class="ch-sortzeile"><span>Sortieren:</span>${sortChips}</div>
+    <div class="ch-list">${zeilen || '<div class="ch-leer">Kein Titel in dieser Lage.</div>'}</div>
+    <p class="ch-fuss">Die Zonenbasis ist die nächste Unterstützung unterhalb des Kurses – sie wandert
+      mit. Gemessen wird der Abstand dorthin, nicht „über oder unter“. Täglich gerechnet, Kurse also bis
+      zu einen Tag alt. Kein Kaufsignal: ein Titel steht hier, weil er zurückgekommen ist, nicht weil er
+      steigen wird.</p>`;
+
+  body.querySelectorAll("[data-lage]").forEach(b => {
+    b.onclick = () => { Chancen.lage = b.dataset.lage; renderChancen(); };
+  });
+  body.querySelectorAll("[data-sort]").forEach(b => {
+    b.onclick = () => { Chancen.sortier = b.dataset.sort; renderChancen(); };
+  });
+  body.querySelectorAll("[data-merk]").forEach(b => {
+    b.onclick = e => {
+      e.stopPropagation();
+      const sym = b.dataset.merk;
+      if (Favs.has(sym)) Favs.remove(sym);
+      else Favs.add(chStamm(sym));
+      renderChancen();
+    };
+  });
+  body.querySelectorAll("[data-oeffnen]").forEach(b => {
+    b.onclick = e => {
+      e.stopPropagation();
+      const sym = b.dataset.oeffnen;
+      openDetail(chStamm(sym));
+    };
+  });
+}
+
+async function initChancen() {
+  const body = $("#chancenbody"), tgl = $("#chancentoggle");
+  if (!body || !tgl) return;
+  let offen = true;
+  try { offen = localStorage.getItem("ak.chancen.open") !== "0"; } catch (e) {}
+  const male = () => { body.style.display = offen ? "" : "none"; tgl.textContent = offen ? "Einklappen" : "Ausklappen"; };
+  male();
+  tgl.onclick = () => { offen = !offen; try { localStorage.setItem("ak.chancen.open", offen ? "1" : "0"); } catch (e) {} male(); };
+  await Chancen.load();
+  renderChancen();
+}
+
 /* ---------- Anzeigewährung (reine Darstellungs-Umrechnung) -----------------
    WICHTIG: Sämtliche Analysen (Renditen, RSI, Momentum, Scores, Risikomaße,
    Zonen) rechnen ausschließlich mit den Originalkursen. Hier wird nur die
@@ -930,6 +1106,9 @@ async function initDB() {
     DB.rows = await res.json();
     DB.norm = DB.rows.map(r => (r[0] + " " + r[1]).toLowerCase());
     DB.ready = true;
+    /* Der Chancenraum steht oft schon, bevor die Namen da sind - dann traegt er
+       nur Symbole. Einmal nachziehen. */
+    if (typeof Chancen !== "undefined" && Chancen.daten) renderChancen();
     state.innerHTML = "<b>" + DB.rows.length.toLocaleString("de-DE") + "</b> Titel · sofort durchsuchbar";
   } catch (e) {
     state.innerHTML = "Lokale Datenbank nicht geladen – Online-Suche aktiv";
@@ -1947,10 +2126,12 @@ async function openDossier(item){
    Wird erst nach dem Laden aller Skriptdateien ausgeführt, damit auch
    Funktionen aus depot.js sicher zur Verfügung stehen. */
 document.addEventListener("DOMContentLoaded", () => {
+  Cache.prune();
   initDB();
   initFx();
   renderFavs();
   initNews();
+  initChancen();
   if (typeof initDepot === "function") initDepot();
   initRefresh();
 });

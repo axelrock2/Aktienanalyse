@@ -93,6 +93,32 @@ nicht voneinander abziehen, deshalb steht dort ein Hinweis statt einer
 Vergleichszahl. Mit Kaufdatum werden zwei Endbeträge verglichen: dein Depot
 gegen dieselben Beträge zu denselben Zeitpunkten im Index.
 
+**Chancenraum.** Ein eigener Abschnitt sammelt Titel, deren Kurs nahe an seine
+Zonenbasis zurückgekommen ist und die noch Luft bis Ziel 1 haben. Er füllt sich
+selbst: `scripts/build_chancen.py` rechnet werktags den Korb aus
+`scripts/chancen_watchlist.txt` durch und legt das Ergebnis als
+`data/chancen.json` ab – im Browser ist damit kein einziger Kursabruf nötig.
+
+Zur Einordnung: Die Zonenbasis ist die nächste Unterstützung *unterhalb* des
+Kurses und wandert mit ihm mit. Ein Titel kann deshalb nie unter seiner eigenen
+Einstiegszone stehen – gemessen wird der **Abstand** dorthin, nicht „über oder
+unter". Drei Lagen: **In der Zone** (bis 3,5 % über der Basis), **Nahe** (bis
+8 %), **Umfeld** (bis 20 %). Weiter entfernt kommt nichts hinein, ebenso wenig
+Titel mit unter 5 % Luft bis Ziel 1. Die Bewertung gewichtet Nähe zur Basis mit
+60 % und Luft bis Ziel mit 40 %.
+
+Aus der Liste lässt sich jeder Titel per Klick zur Merkliste hinzufügen oder
+direkt öffnen. Den Korb erweiterst du in `scripts/chancen_watchlist.txt` – eine
+Zeile je Ticker, optional mit Klarnamen dahinter (`HON  Honeywell International`)
+für Titel, die in der Ticker-Datenbank fehlen.
+
+**Speicherplatz.** `data/chancen.json` trägt neben der Liste nur einen kurzen
+Verlauf (Datum und Trefferzahl je Tag, keine Titeldaten), der bei jedem Lauf auf
+**30 Tage** gekürzt wird; die Datei bleibt dadurch bei wenigen Kilobyte. Im
+Browser werden zwischengespeicherte Kurse und Kennzahlen beim Start aufgeräumt,
+sobald sie älter als **sieben Tage** sind – vorher wurde erst gelöscht, wenn der
+Speicher volllief.
+
 **Wann kein DCF gerechnet wird.** Für zwei Gruppen trägt eine Cashflow-Bewertung
 methodisch nicht, dort erscheint statt einer Zahl eine Begründung:
 
