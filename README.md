@@ -102,6 +102,24 @@ Titel 0,69 bis 2,84 ATR, und weil das Ziel typisch näher lag als der Stop, kam
 das Chance/Risiko-Verhältnis strukturell unter 1 heraus (Median 0,98) – obwohl
 die Seite selbst 2:1 als Richtwert nennt. Jetzt: Median **1,67**.
 
+**An 151 Titeln geeicht, nicht an 32.** Die Skalen des Chancenraums stützen sich
+auf eine geschichtete Stichprobe über drei Größenklassen (45 Großunternehmen,
+45 Mittel-, 52 Nebenwerte) und neun Börsen. Die erste Fassung beruhte auf 32
+Großunternehmen – deren Chancen-Verteilung reicht deutlich weiter (90. Perzentil
+28 %) als die des breiten Feldes (17,5 %); eine daran geeichte Skala hätte
+kleinere Titel dauerhaft im unteren Bereich abgebildet. Der Korb enthält deshalb
+jetzt auch Mittel- und Nebenwerte – ohne sie bliebe die Eichung folgenlos.
+
+Bemerkenswert: Die Tagesspanne unterscheidet sich zwischen den Klassen kaum
+(Median 2,17–2,75 %). Stop- und Rauschgrenze gelten deshalb unverändert für
+alle; eine eigene Stopweite je Größe wäre nicht belegt.
+
+**Aufgenommen wird nur, wessen Chance mindestens so groß ist wie sein Risiko**
+(C/R ab 1,0). Das ersetzt die frühere Prozentschwelle auf der Chance, die
+willkürlich war und die andere Hälfte der Rechnung ignorierte. Bewertet wird
+entsprechend das Verhältnis (40 %) statt der Chance allein – die Korrelation der
+beiden liegt bei 0,80, das Verhältnis trägt also eigene Information.
+
 **Chance und Risiko ab derselben Stelle.** Beide werden ab der Mitte der
 Einstiegszone gemessen, also ab dem Kurs, zu dem man kaufen würde. Vorher rechnete
 die Chance ab dem aktuellen Kurs, das C/R aber ab der Zonenmitte – und beide

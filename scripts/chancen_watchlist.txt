@@ -83,3 +83,55 @@ ULVR.L
 6758.T
 TSM
 BABA
+
+# Die folgenden Gruppen sind bewusst dabei: Die Skalen des Chancenraums sind an
+# Titeln aller drei Groessenklassen geeicht, nicht nur an Grossunternehmen -
+# ohne Mittel- und Nebenwerte im Korb bliebe das folgenlos.
+
+# --- Mittelwerte (Größenklasse L) ---
+0388.HK
+2196.HK
+6666.HK
+ABX.TO
+ASX
+BALD-B.ST
+BIP-PA
+BMW.DE
+BNTX
+CDW
+CHD
+CM
+CW
+DB
+ERIBR.HE
+EWL.DE
+FPH.AX
+FRT-PC
+FTNT
+HEIO.AS
+HMC
+HWM
+
+# --- Nebenwerte (Größenklasse M) ---
+0151.HK
+1199.HK
+1686.HK
+2005.HK
+ADT
+ATHM
+AX
+BMED.MI
+CAMT
+CBDG.PA
+CDP
+CE.MI
+CENX
+CSQ
+DNTH
+EGLN.L
+EPAC
+FTS-PH.TO
+GDS
+GPT.AX
+GTES
+HAFN
