@@ -93,6 +93,26 @@ nicht voneinander abziehen, deshalb steht dort ein Hinweis statt einer
 Vergleichszahl. Mit Kaufdatum werden zwei Endbeträge verglichen: dein Depot
 gegen dieselben Beträge zu denselben Zeitpunkten im Index.
 
+**Zonen, Ziele und Stop in Tagesspannen.** Der Stop liegt **1,5 ATR** unter der
+Zonenbasis, und als Ziel 1 zählt nur ein Widerstand, der weiter als **1 ATR**
+über dem Kurs liegt – näher ist Tagesrauschen, kein Niveau. Zuvor stand der Stop
+fest 4,5 % unter der Basis und Ziel 1 war der nächste Hochpunkt überhaupt. An 32
+Titeln nachgemessen war beides untauglich: Der feste Stop entsprach je nach
+Titel 0,69 bis 2,84 ATR, und weil das Ziel typisch näher lag als der Stop, kam
+das Chance/Risiko-Verhältnis strukturell unter 1 heraus (Median 0,98) – obwohl
+die Seite selbst 2:1 als Richtwert nennt. Jetzt: Median **1,67**.
+
+**Chance und Risiko ab derselben Stelle.** Beide werden ab der Mitte der
+Einstiegszone gemessen, also ab dem Kurs, zu dem man kaufen würde. Vorher rechnete
+die Chance ab dem aktuellen Kurs, das C/R aber ab der Zonenmitte – und beide
+standen nebeneinander in derselben Zeile. **Chance ÷ Risiko = C/R** lässt sich
+jetzt von Hand nachrechnen.
+
+**Ziel 2 wird nicht mehr erfunden.** Es ist der nächste Widerstand über Ziel 1,
+sonst das 52-Wochen-Hoch – gibt es keinen, bleibt es leer. Vorher stand dort
+`max(52-Wochen-Hoch, Ziel 1 × 1,06)`: mal das eine, mal das andere, der Abstand
+reichte von 6 bis 120 %.
+
 **Kennzahl-Erklärungen.** Neben Größen, die Erklärung vertragen, steht ein
 kleines **i**. Beim Überfahren mit der Maus erscheint ein Kästchen mit einer
 kurzen Erklärung, beim Wegbewegen verschwindet es; ein Klick hält es fest –

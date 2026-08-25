@@ -185,18 +185,25 @@ def main():
                 "stop": round(z["stop"], 4),
                 "einstieg_tief": round(z["einstieg_tief"], 4),
                 "einstieg_hoch": round(z["einstieg_hoch"], 4),
+                "mitte": round(z["mitte"], 4),
+                "atr": round(z["atr"], 4),
                 "ziel1": round(z["ziel1"], 4),
-                "ziel2": round(z["ziel2"], 4),
+                # Ziel 2 darf fehlen - es wird nicht mehr erfunden, wenn ueber
+                # Ziel 1 kein weiterer Widerstand liegt.
+                "ziel2": round(z["ziel2"], 4) if z["ziel2"] else None,
                 "crv": round(z["crv"], 2) if z["crv"] else None,
                 "trend_auf": z["trend_auf"],
                 "punkte": b["punkte"],
                 "lage": b["lage"],
+                "risiko_prozent": b["risiko_prozent"],
                 "naehe_prozent": b["naehe_prozent"],
                 "chance_prozent": b["chance_prozent"],
             })
-            print("  [%d/%d] %-10s %3d Punkte · %s · %.1f%% zur Basis · %.1f%% bis Ziel"
+            print("  [%d/%d] %-10s %3d Punkte · %-8s · %.1f%% zur Basis · "
+                  "Chance %.1f%% / Risiko %.1f%% = C/R %.2f"
                   % (i, len(symbole), sym, b["punkte"], b["lage"],
-                     b["naehe_prozent"], b["chance_prozent"]))
+                     b["naehe_prozent"], b["chance_prozent"],
+                     b["risiko_prozent"], z["crv"]))
         time.sleep(0.8)          # hoeflich gegenueber dem Textleser bleiben
 
     treffer.sort(key=lambda x: -x["punkte"])

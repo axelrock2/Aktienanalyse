@@ -620,18 +620,43 @@ function analyse(chart, fund, bench) {
     else if (timing < 40 || (quality != null && quality < 35)) ampel = "r";
   } else ampel = "n";
 
-  /* --- Zonen --- */
+  /* --- Zonen ---
+     Stop und Ziele werden in ATR gemessen, also in Tagesspannen. Zuvor lag der
+     Stop fest 4,5 Prozent unter der Basis und Ziel 1 war der naechste
+     Widerstand ueberhaupt. An 32 Titeln nachgemessen war beides untauglich:
+     Der feste Stop entsprach je nach Titel 0,69 bis 2,84 ATR - Faktor vier
+     Unterschied im echten Risiko bei gleicher Prozentzahl. Und weil Ziel 1
+     typisch 2,8 Prozent entfernt lag, der Stop aber 4,3, kam das
+     Chance/Risiko-Verhaeltnis strukturell unter 1 heraus (Median 0,98), obwohl
+     die Seite selbst 2:1 als Richtwert nennt. Jetzt tragen beide Seiten
+     denselben Massstab. Die Werte hier muessen mit scripts/chancen_core.py
+     uebereinstimmen - sonst zeigen Karte und Chancenraum verschiedene Zahlen
+     zum selben Titel. */
+  const ZONENBREITE = 0.035, STOP_ATR = 1.5, RAUSCH_ATR = 1.0;
+  const spanne = dsAtr(chart.h, chart.l, chart.c);
   const pv = pivots(chart);
   const support = Math.max(...pv.lows.filter(x => x < price * 0.995), -Infinity);
-  const resistance = Math.min(...pv.highs.filter(x => x > price * 1.005), Infinity);
   const belowCands = [support, s50, s200].filter(x => x != null && isFinite(x) && x < price * 0.995);
   const zoneFloor = belowCands.length ? Math.max(...belowCands) : lo52;
-  const entryLow = zoneFloor, entryHigh = Math.min(price, zoneFloor * 1.035);
-  const stop = zoneFloor * 0.955;
-  const t1 = isFinite(resistance) ? resistance : hi52;
-  const t2 = Math.max(hi52, t1 * 1.06);
+  const entryLow = zoneFloor, entryHigh = Math.min(price, zoneFloor * (1 + ZONENBREITE));
+  /* Ohne Tagesspanne kein ATR-Mass - dann die alte feste Regel als Rueckfall,
+     damit die Karte nicht voellig leer bleibt. */
+  const stop = spanne ? zoneFloor - STOP_ATR * spanne : zoneFloor * 0.955;
+
+  /* Ein Widerstand naeher als eine Tagesspanne ist kein Niveau, sondern
+     Rauschen - er wird uebersprungen, nicht zum Ziel erklaert. */
+  const schwelle = price + (spanne ? RAUSCH_ATR * spanne : price * 0.005);
+  const ueberKurs = pv.highs.filter(x => x > schwelle).sort((a, b) => a - b);
+  const t1 = ueberKurs.length ? ueberKurs[0] : (hi52 > schwelle ? hi52 : null);
+  /* Ziel 2 ist der naechste Widerstand UEBER Ziel 1 - sonst das 52-Wochen-Hoch,
+     sonst gar keines. Frueher stand hier max(hi52, t1 * 1.06): mal das eine,
+     mal das andere, der Abstand reichte von 6 bis 120 Prozent. Zwei Begriffe
+     unter einem Namen. Fehlt ein zweites Niveau, wird jetzt keines erfunden. */
+  const t2 = t1 == null ? null
+    : (ueberKurs.find(x => x > t1 * 1.01) ?? (hi52 > t1 * 1.01 ? hi52 : null));
   const mid = (entryLow + entryHigh) / 2;
-  const crv = (mid > stop && t1 > mid) ? (t1 - mid) / (mid - stop) : null;
+  const crv = (t1 != null && mid > stop && t1 > mid) ? (t1 - mid) / (mid - stop) : null;
+  const resistance = t1;
 
   return { price, dayChg, s50, s200, rsi, r63, r126, rel, hi52, lo52,
            timing, comps, quality, qcomps, ampel, trendUp,
@@ -856,7 +881,11 @@ function initNews() {
    Anhaltspunkt, nie als Regel. */
 const INFO = {
   crv: ["Chance/Risiko-Verhältnis (C/R)",
-    "Wie viel Kursgewinn bis Ziel 1 auf einen Euro Risiko bis zum Stop kommt. 3,0 heißt: drei Euro mögliche Bewegung nach oben je Euro, den du bei Erreichen des Stops verlierst.\n\nGerechnet ab der Mitte der Einstiegszone, nicht ab dem aktuellen Kurs. Viele Anleger sehen etwa 2,0 als Untergrenze. Die Zahl sagt nichts über die Wahrscheinlichkeit – ein hohes Verhältnis mit sehr unwahrscheinlichem Ziel bleibt eine schlechte Idee."],
+    "Wie viel Kursgewinn bis Ziel 1 auf einen Euro Risiko bis zum Stop kommt. 3,0 heißt: drei Euro mögliche Bewegung nach oben je Euro, den du bei Erreichen des Stops verlierst.\n\nBeide Seiten werden ab der Mitte der Einstiegszone gemessen – also ab dem Kurs, zu dem man kaufen würde, nicht ab dem heutigen. Der Stop liegt 1,5 Tagesspannen (ATR) unter der Zonenbasis, damit er nicht im normalen Rauschen steht.\n\nViele Anleger sehen 2,0 als Untergrenze. Die Zahl sagt nichts über die Wahrscheinlichkeit – ein hohes Verhältnis mit sehr unwahrscheinlichem Ziel bleibt eine schlechte Idee."],
+  chance: ["Chance",
+    "Der Weg bis Ziel 1, gemessen ab der Mitte der Einstiegszone – also ab dem Kurs, zu dem man kaufen würde.\n\nBewusst nicht ab dem heutigen Kurs: Nur mit demselben Bezugspunkt wie beim Risiko ergibt das Verhältnis der beiden (C/R) eine nachvollziehbare Zahl."],
+  risiko: ["Risiko",
+    "Der Weg von der Mitte der Einstiegszone bis zum Stop – was du verlierst, wenn die Unterstützung nicht hält.\n\nDer Stop liegt 1,5 Tagesspannen (ATR) unter der Zonenbasis. Ein fester Prozentsatz wäre hier untauglich: Bei einem ruhigen Titel läge er weit außerhalb, bei einem schwankungsfreudigen mitten im normalen Rauschen."],
   rsi: ["RSI (14)",
     "Relative-Stärke-Index über 14 Tage, Skala 0 bis 100. Er setzt die Aufwärts- gegen die Abwärtsbewegungen der letzten Tage.\n\nÜber 70 gilt herkömmlich als überkauft, unter 30 als überverkauft. Vorsicht: In starken Trends bleibt der RSI wochenlang im Extrem – „überkauft“ heißt nicht „fällt gleich“."],
   gd: ["Gleitende Durchschnitte (GD 50 / GD 200)",
@@ -908,9 +937,9 @@ const INFO = {
   einstiegszone: ["Einstiegszone",
     "Der Bereich zwischen der Zonenbasis und rund 3,5 % darüber – dort, wo ein Rücklauf auf Unterstützung trifft.\n\nKeine Kaufempfehlung, sondern eine Beobachtungsspanne. Ob die Unterstützung hält, weiß man erst danach."],
   stop: ["Stop-Idee",
-    "Ein Kurs knapp unter der Zonenbasis (rund 4,5 %), an dem die Annahme als widerlegt gälte.\n\nEin Vorschlag zur Orientierung, kein gesetzter Auftrag. Zu eng gesetzt wird man vom normalen Rauschen ausgestoppt."],
+    "Ein Kurs 1,5 Tagesspannen (ATR) unter der Zonenbasis, an dem die Annahme als widerlegt gälte.\n\nBewusst in Tagesspannen statt in Prozent: Ein fester Prozentsatz entspricht je nach Titel dem Vierfachen an tatsächlichem Risiko. Wer enger setzt als eine Tagesspanne, wird mit hoher Wahrscheinlichkeit vom normalen Rauschen ausgestoppt.\n\nEin Vorschlag zur Orientierung, kein gesetzter Auftrag."],
   ziel: ["Ziel 1 und Ziel 2",
-    "Ziel 1 ist der nächste nennenswerte Widerstand über dem Kurs – dort stockte die Bewegung zuletzt. Ziel 2 liegt darüber, meist am 52-Wochen-Hoch.\n\nMarken aus dem Kursverlauf, keine Prognose."],
+    "Ziel 1 ist der nächste Widerstand über dem Kurs, der weiter als eine Tagesspanne (ATR) entfernt liegt – dort stockte die Bewegung zuletzt. Näher liegende Hochpunkte werden übersprungen: Sie sind Tagesrauschen, kein Niveau.\n\nZiel 2 ist der nächste Widerstand darüber, sonst das 52-Wochen-Hoch. Gibt es keinen, bleibt Ziel 2 leer – es wird keines errechnet.\n\nMarken aus dem Kursverlauf, keine Prognose."],
   atr: ["ATR (14)",
     "Durchschnittliche Tagesspanne der letzten 14 Tage – wie weit sich der Kurs an einem gewöhnlichen Tag bewegt.\n\nNützlich für den Abstand des Stops: Wer enger setzt als eine ATR, wird mit hoher Wahrscheinlichkeit vom normalen Rauschen erwischt."],
   macd: ["MACD",
@@ -1291,7 +1320,8 @@ function renderChancen() {
       </div>
       <div class="ch-zahl"><span>Kurs</span><b>${moneyNum(t.kurs, w, t.kurs < 10 ? 2 : 1)}</b></div>
       <div class="ch-zahl"><span>zur Basis${infoIcon("zonenbasis")}</span><b class="up">+${fmtNum(t.naehe_prozent, "", 1)} %</b></div>
-      <div class="ch-zahl"><span>bis Ziel 1${infoIcon("ziel")}</span><b class="up">+${fmtNum(t.chance_prozent, "", 1)} %</b></div>
+      <div class="ch-zahl"><span>Chance${infoIcon("chance")}</span><b class="up">+${fmtNum(t.chance_prozent, "", 1)} %</b></div>
+      <div class="ch-zahl"><span>Risiko${infoIcon("risiko")}</span><b class="down">−${fmtNum(t.risiko_prozent, "", 1)} %</b></div>
       <div class="ch-zahl"><span>C/R${infoIcon("crv")}</span><b>${t.crv != null ? fmtNum(t.crv, "", 1) : "–"}</b></div>
       <div class="ch-akt">
         <button class="ch-btn ch-merk${gemerkt ? " on" : ""}" data-merk="${esc(t.sym)}"
@@ -1305,10 +1335,13 @@ function renderChancen() {
     <div class="nb-chips">${chips}</div>
     <div class="ch-sortzeile"><span>Sortieren:</span>${sortChips}</div>
     <div class="ch-list">${zeilen || '<div class="ch-leer">Kein Titel in dieser Lage.</div>'}</div>
-    <p class="ch-fuss">Die Zonenbasis ist die nächste Unterstützung unterhalb des Kurses – sie wandert
-      mit. Gemessen wird der Abstand dorthin, nicht „über oder unter“. Täglich gerechnet, Kurse also bis
-      zu einen Tag alt. Kein Kaufsignal: ein Titel steht hier, weil er zurückgekommen ist, nicht weil er
-      steigen wird.</p>`;
+    <p class="ch-fuss"><b>Chance und Risiko werden beide ab der Mitte der Einstiegszone gemessen</b> – also ab dem Kurs, zu dem man kaufen würde, nicht ab dem heutigen. Nur so ist das
+      Verhältnis der beiden (C/R) nachvollziehbar. Der Stop liegt 1,5 Tagesspannen unter der
+      Zonenbasis, und als Ziel zählt nur ein Widerstand, der weiter als eine Tagesspanne entfernt
+      liegt – näher ist Rauschen, kein Niveau. Die Zonenbasis selbst ist die nächste Unterstützung
+      unterhalb des Kurses; sie wandert mit, gemessen wird der Abstand dorthin. Täglich gerechnet,
+      Kurse also bis zu einen Tag alt. Kein Kaufsignal: ein Titel steht hier, weil er zurückgekommen
+      ist, nicht weil er steigen wird.</p>`;
 
   body.querySelectorAll("[data-lage]").forEach(b => {
     b.onclick = () => { Chancen.lage = b.dataset.lage; renderChancen(); };
@@ -1571,11 +1604,14 @@ function renderFavs() {
    Alle Angaben in Prozent, daher unabhängig von der eingestellten Anzeigewährung. */
 function cardZone(a) {
   const z = a.zones, p = a.price;
-  if (!z || !isFinite(p) || !isFinite(z.stop) || !isFinite(z.entryLow) || !isFinite(z.t1))
+  /* z.t1 kann jetzt null sein, wenn ueber dem Kurs kein belastbares Niveau
+     liegt. isFinite(null) ist true und faengt das NICHT ab - deshalb die
+     ausdrueckliche Pruefung. */
+  if (!z || z.t1 == null || !isFinite(p) || !isFinite(z.stop) || !isFinite(z.entryLow) || !isFinite(z.t1))
     return `<div class="cz-na">Zonen für diesen Titel nicht berechenbar</div>`;
 
   const lo = Math.min(z.stop, p) * 0.99;
-  const hi = Math.max(z.t2, z.t1, p) * 1.01;
+  const hi = Math.max(z.t2 ?? z.t1, z.t1, p) * 1.01;
   const span = hi - lo;
   if (!(span > 0)) return `<div class="cz-na">Zonen für diesen Titel nicht berechenbar</div>`;
   const pos = v => clamp((v - lo) / span * 100, 0, 100);
@@ -1810,8 +1846,8 @@ function renderDetail(item, chart, fund, a) {
       <div class="crv">
         <div class="pill">Stop-Idee<b>${money(z.stop, cur)}</b></div>
         <div class="pill">Einstiegszone${infoIcon("einstiegszone")}<b>${moneyNum(z.entryLow, cur, z.entryLow < 10 ? 2 : 1)} – ${money(z.entryHigh, cur, z.entryHigh < 10 ? 2 : 1)}</b></div>
-        <div class="pill">Ziel 1 (Widerstand)<b>${money(z.t1, cur)}</b></div>
-        <div class="pill">Ziel 2<b>${money(z.t2, cur)}</b></div>
+        ${z.t1 != null ? `<div class="pill">Ziel 1 (Widerstand)<b>${money(z.t1, cur)}</b></div>` : `<div class="pill">Ziel 1<b>kein Niveau</b></div>`}
+        ${z.t2 != null ? `<div class="pill">Ziel 2<b>${money(z.t2, cur)}</b></div>` : ""}
         <div class="pill">Chance/Risiko<b>${z.crv ? z.crv.toFixed(1).replace(".", ",") + " : 1" : "–"}</b></div>
       </div>
       ${!a.trendUp ? `<div class="notice">Profis kaufen selten gegen den Trend: Erst wenn der Kurs die 200-Tage-Linie (${money(a.s200, cur)}) nachhaltig zurückerobert, gewinnen Einstiegszonen an Aussagekraft.</div>` : ""}
@@ -1903,7 +1939,13 @@ function renderDetail(item, chart, fund, a) {
 /* Zonen-Band (Signaturelement) */
 function buildZoneBand(a, cur) {
   const z = a.zones;
-  const lo = z.stop * 0.985, hi = Math.max(z.t2, a.price) * 1.015;
+  /* Ohne belastbares Ziel gaebe es nichts zu zeichnen - dann lieber die
+     Begruendung als ein Band mit erfundener Marke. */
+  if (z.t1 == null) {
+    return `<div class="zb-leer">Über dem Kurs liegt derzeit kein Widerstand, der weiter als
+      eine Tagesspanne entfernt ist – ohne belastbares Ziel wird hier keines gezeichnet.</div>`;
+  }
+  const lo = z.stop * 0.985, hi = Math.max(z.t2 ?? z.t1, a.price) * 1.015;
   const pos = v => clamp((v - lo) / (hi - lo) * 100, 0, 100);
   const f = v => moneyNum(v, cur, v < 20 ? 2 : v < 200 ? 1 : 0);
   const seg = (x1, x2, color, op) => `<div class="zb-seg" style="left:${pos(x1)}%;width:${pos(x2)-pos(x1)}%;background:${color};opacity:${op}"></div>`;
@@ -1920,7 +1962,7 @@ function buildZoneBand(a, cur) {
     <div class="zb-lab bot" style="left:${pos((z.entryLow+z.entryHigh)/2)}%">Einstiegszone<b>${f(z.entryLow)}–${f(z.entryHigh)}</b></div>
     <div class="zb-lab top" style="left:${pos(a.price)}%">Kurs<b>${f(a.price)}</b></div>
     <div class="zb-lab bot" style="left:${pos(z.t1)}%">Ziel 1<b>${f(z.t1)}</b></div>
-    <div class="zb-lab top" style="left:${pos(z.t2)}%">Ziel 2<b>${f(z.t2)}</b></div>
+    ${z.t2 != null ? `<div class="zb-lab top" style="left:${pos(z.t2)}%">Ziel 2<b>${f(z.t2)}</b></div>` : ""}
   </div>
   <div class="zb-legend">
     <span><i style="background:var(--down);opacity:.55"></i>unter Stop</span>

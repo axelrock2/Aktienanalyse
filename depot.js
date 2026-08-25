@@ -582,6 +582,10 @@ function dpRow(r) {
   if (r.a && r.a.zones && r.price != null) {
     const z = r.a.zones;
     if (r.price <= z.stop) zone = `<span class="dp-z bad">unter Stop</span>`;
+    /* z.t1 kann fehlen, wenn ueber dem Kurs kein belastbares Niveau liegt.
+       Ohne diese Pruefung waere "price >= null" wahr - die Position stuende
+       faelschlich auf "Ziel erreicht". */
+    else if (z.t1 == null) zone = `<span class="dp-z">kein Ziel</span>`;
     else if (r.price >= z.t1) zone = `<span class="dp-z good">Ziel erreicht</span>`;
     else zone = `<span class="dp-z">${fmtPct(z.t1 / r.price - 1)} bis Ziel</span>`;
   }
