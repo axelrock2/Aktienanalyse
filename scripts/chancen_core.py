@@ -48,11 +48,30 @@ RAUSCH_ATR = 1.0           # Widerstaende naeher als 1 ATR sind kein Niveau
 # Kennzahl kann also weiter "schlechtes Setup" sagen. Eine engere Rauschgrenze
 # haette alle ueber 1,0 gehoben, das waere eingebaute Schoenfaerberei.
 
-# Skala der Chancen-Punkte, am 10. und 90. Perzentil der gemessenen Verteilung.
-# Zuvor 5 bis 40 Prozent - die 40 wurden nie erreicht, der Median lag bei 13
-# von 100 Punkten, die Skala nutzte ihr unteres Drittel.
-CHANCE_MIN = 0.04
-CHANCE_MAX = 0.28
+# --- Eintritt und Punkteskala ------------------------------------------------
+# Nachkalibriert an 151 Titeln ueber drei Groessenklassen (45 XL, 45 L, 52 M)
+# und neun Boersen. Die erste Fassung stuetzte sich auf 32 Grossunternehmen -
+# deren Chancen-Verteilung reicht deutlich weiter (90. Perzentil 28 Prozent)
+# als die des breiten Feldes (17,5 Prozent). Eine daran geeichte Skala haette
+# Neben- und Mittelwerte dauerhaft im unteren Bereich abgebildet.
+#
+# Bemerkenswert: Die Tagesspanne unterscheidet sich zwischen den Klassen kaum
+# (Median 2,17 bis 2,75 Prozent). STOP_ATR und RAUSCH_ATR gelten deshalb
+# unveraendert fuer alle - eine eigene Stopweite je Groesse waere nicht belegt.
+#
+# Eintritt ueber das Chance/Risiko-Verhaeltnis statt ueber eine Chancen-Schwelle:
+# Wer aufgenommen wird, soll mindestens gewinnen koennen, was er riskiert. Das
+# ist ein sachliches Kriterium; eine blosse Prozentschwelle auf der Chance war
+# willkuerlich und ignorierte die andere Haelfte der Rechnung.
+CRV_MIN = 1.0              # Eintritt: Chance mindestens so gross wie das Risiko
+CHANCE_MIN = 0.025         # kleine Untergrenze gegen Grenzfaelle (10. Perzentil)
+
+# Punkteskala am 10. und 90. Perzentil der AUFGENOMMENEN Titel.
+# Bewertet wird jetzt das C/R statt der Chance allein: Die Korrelation der
+# beiden liegt bei 0,80 - das Verhaeltnis traegt also eigene Information, und
+# eine Chance ohne Blick auf das Risiko ist nur die halbe Aussage.
+CRV_PUNKTE_MIN = 1.0
+CRV_PUNKTE_MAX = 2.8
 
 
 def atr(hochs, tiefs, schluss, n=14):
@@ -175,30 +194,33 @@ def bewerte(z):
     Zwei Groessen tragen die Bewertung:
       Naehe   - Abstand des Kurses zur Zonenbasis. Null heisst: der Kurs steht
                 genau auf der Unterstuetzung.
-      Chance  - Weg bis Ziel 1, gemessen AB DER ZONENMITTE.
+      C/R     - Chance geteilt durch Risiko, beide ab der Mitte der
+                Einstiegszone gerechnet.
 
-    Der Bezugspunkt ist wichtig: Frueher rechnete die Chance ab dem Kurs,
-    das Chance/Risiko-Verhaeltnis aber ab der Zonenmitte - und beide standen
-    nebeneinander in derselben Zeile. Bei Apple etwa "+1,9 Prozent bis Ziel 1"
-    neben einem C/R, das mit 2,8 Prozent rechnete. Jetzt tragen beide denselben
-    Bezug: die Mitte der Einstiegszone, also den Punkt, an dem man kaufen wuerde.
+    Der Bezugspunkt ist wichtig: Frueher rechnete die Chance ab dem Kurs, das
+    Verhaeltnis aber ab der Zonenmitte - und beide standen nebeneinander in
+    derselben Zeile. Jetzt tragen beide denselben Bezug, die Mitte der
+    Einstiegszone, also den Punkt, an dem man kaufen wuerde.
     """
     kurs, basis = z["kurs"], z["einstieg_tief"]
     if not kurs or not basis or basis <= 0:
         return None
+    mitte, crv = z["mitte"], z["crv"]
+    if not mitte or not crv:
+        return None
 
     naehe = kurs / basis - 1                     # 0 = auf der Basis
-    mitte = z["mitte"]
-    chance = z["ziel1"] / mitte - 1 if z["ziel1"] and mitte else None
+    chance = z["ziel1"] / mitte - 1
+    risiko = (mitte - z["stop"]) / mitte
 
     if naehe > NAEHE_GRENZE:
         return None
-    if chance is None or chance < CHANCE_MIN:
+    if crv < CRV_MIN or chance < CHANCE_MIN:
         return None
 
     naehe_punkte = lin(naehe, NAEHE_GRENZE, 0.0)     # naeher = mehr Punkte
-    chance_punkte = lin(chance, CHANCE_MIN, CHANCE_MAX)
-    punkte = round(naehe_punkte * 0.6 + chance_punkte * 0.4)
+    crv_punkte = lin(crv, CRV_PUNKTE_MIN, CRV_PUNKTE_MAX)
+    punkte = round(naehe_punkte * 0.6 + crv_punkte * 0.4)
 
     if naehe <= ZONENBREITE:
         lage = "in_zone"
@@ -210,7 +232,7 @@ def bewerte(z):
     return {"punkte": punkte, "lage": lage,
             "naehe_prozent": round(naehe * 100, 2),
             "chance_prozent": round(chance * 100, 2),
-            "risiko_prozent": round((mitte - z["stop"]) / mitte * 100, 2)}
+            "risiko_prozent": round(risiko * 100, 2)}
 
 
 def _selbsttest():
@@ -259,9 +281,11 @@ def _selbsttest():
 
     # Bewertung: naeher an der Basis muss mehr Punkte geben
     grund = {"kurs": 100, "einstieg_tief": 100, "einstieg_hoch": 103,
-             "mitte": 101.5, "stop": 95, "ziel1": 130, "ziel2": 140}
+             "mitte": 101.5, "stop": 95, "ziel1": 130, "ziel2": 140,
+             "crv": (130 - 101.5) / (101.5 - 95)}
     nah = bewerte(dict(grund))
-    fern = bewerte(dict(grund, kurs=118, einstieg_tief=100, ziel1=150))
+    fern = bewerte(dict(grund, kurs=118, einstieg_tief=100, ziel1=150,
+                        crv=(150 - 101.5) / (101.5 - 95)))
     if not nah or not fern or nah["punkte"] <= fern["punkte"]:
         print("  FEHLER: Naehe zur Basis wird nicht hoeher bewertet"); fehler += 1
     if nah and nah["lage"] != "in_zone":
@@ -276,13 +300,20 @@ def _selbsttest():
         print("  FEHLER: Titel weit ueber der Basis wird aufgenommen"); fehler += 1
 
     # Zu wenig Luft bis Ziel -> ebenfalls nicht
-    if bewerte(dict(grund, ziel1=103)) is not None:
+    if bewerte(dict(grund, ziel1=103, crv=(103 - 101.5) / (101.5 - 95))) is not None:
         print("  FEHLER: Titel ohne Luft bis Ziel wird aufgenommen"); fehler += 1
 
-    # Die Chancen-Skala muss ihren Bereich ausnutzen
-    if abs(lin(CHANCE_MIN, CHANCE_MIN, CHANCE_MAX)) > 1e-9 or \
-       abs(lin(CHANCE_MAX, CHANCE_MIN, CHANCE_MAX) - 100) > 1e-9:
-        print("  FEHLER: Chancen-Skala trifft ihre Endpunkte nicht"); fehler += 1
+    # Die C/R-Skala muss ihren Bereich ausnutzen
+    if abs(lin(CRV_PUNKTE_MIN, CRV_PUNKTE_MIN, CRV_PUNKTE_MAX)) > 1e-9 or \
+       abs(lin(CRV_PUNKTE_MAX, CRV_PUNKTE_MIN, CRV_PUNKTE_MAX) - 100) > 1e-9:
+        print("  FEHLER: C/R-Skala trifft ihre Endpunkte nicht"); fehler += 1
+
+    # Ein Titel mit zu schwachem Verhaeltnis darf nicht aufgenommen werden
+    schwach = {"kurs": 100, "einstieg_tief": 100, "einstieg_hoch": 103,
+               "mitte": 101.5, "stop": 90, "ziel1": 106, "ziel2": None,
+               "crv": (106 - 101.5) / (101.5 - 90)}
+    if bewerte(schwach) is not None:
+        print("  FEHLER: Titel mit C/R unter 1 wird aufgenommen"); fehler += 1
 
     print("Selbsttest bestanden." if not fehler else "%d Fehler." % fehler)
     return fehler == 0

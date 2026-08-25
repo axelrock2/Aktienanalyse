@@ -955,27 +955,7 @@ const INFO = {
   dividendenrendite: ["Dividendenrendite",
     "Die Dividende der letzten zwölf Monate im Verhältnis zum aktuellen Kurs.\n\nEine hohe Rendite entsteht auch dadurch, dass der Kurs gefallen ist – prüfe, ob die Ausschüttung aus dem freien Cashflow gedeckt ist."],
   chancenpunkte: ["Bewertung im Chancenraum",
-    "Ein Wert von 0 bis 100 aus zwei Teilen: Nähe des Kurses zur Zonenbasis (60 %) und Luft bis Ziel 1 (40 %).\n\nDie Nähe wiegt schwerer, weil sie das eigentliche Kriterium ist – ein weit entferntes Ziel kann jeder gefallene Titel vorweisen."],
-  nettomarge: ["Nettomarge",
-    "Was vom Umsatz ganz unten übrig bleibt – nach Kosten, Zinsen und Steuern. 15 % heißt: 15 Cent Gewinn je Euro Umsatz.\n\nEmpfindlicher als die operative Marge, weil Sondereffekte und Steuerthemen durchschlagen. Für den Vergleich über Jahre deshalb beide ansehen."],
-  bruttomarge: ["Bruttomarge",
-    "Umsatz abzüglich der direkten Herstellungskosten, in Prozent vom Umsatz.\n\nZeigt, wie viel Spielraum für Forschung, Vertrieb und Verwaltung bleibt. Softwarehäuser erreichen oft über 70 %, Handel und Industrie deutlich weniger – ein Vergleich lohnt nur innerhalb einer Branche."],
-  umsatzwachstum: ["Umsatzwachstum",
-    "Veränderung des Umsatzes gegenüber dem Vorjahreszeitraum.\n\nWachstum aus eigener Kraft ist mehr wert als zugekauftes – die Kennzahl unterscheidet das nicht. Bei Auslandsumsätzen steckt außerdem der Wechselkurs mit drin."],
-  fcf: ["Freier Cashflow",
-    "Das Geld, das nach laufendem Betrieb und Investitionen tatsächlich übrig bleibt – für Dividenden, Schuldentilgung oder Rückkäufe.\n\nSchwerer zu beschönigen als der Gewinn, weil es um geflossenes Geld geht und nicht um Buchungen. Dauerhaft negativ bei einem reifen Unternehmen ist ein Warnsignal."],
-  marktkap: ["Marktkapitalisierung",
-    "Der Börsenwert des Unternehmens: Kurs mal Anzahl aller Aktien.\n\nNicht mit dem Unternehmenswert verwechseln – der zählt die Schulden hinzu und die Barmittel ab. Bei hoch verschuldeten Firmen klaffen beide weit auseinander."],
-  dcfwert: ["DCF fairer Wert (Näherung)",
-    "Der Barwert der geschätzten künftigen Cashflows, geteilt durch die Anzahl der Aktien – was das Unternehmen wert wäre, wenn die Annahmen zuträfen.\n\nEine Modellrechnung, keine Messung: Diskontsatz und ewiges Wachstum bestimmen das Ergebnis maßgeblich. Ein halber Prozentpunkt mehr Zins verschiebt den Wert erheblich. Als Bandbreite lesen, nie als Zahl."],
-  instbesitz: ["Institutioneller Besitz",
-    "Anteil der Aktien in der Hand von Fonds, Versicherern und Pensionskassen.\n\nHoch heißt: breit analysiert und beobachtet – Überraschungen sind seltener, aber auch der Informationsvorsprung. Bei Verkaufswellen verstärkt ein hoher Anteil die Bewegung."],
-  insiderbesitz: ["Insider-Besitz",
-    "Anteil der Aktien, den Vorstand, Aufsichtsrat und Gründer selbst halten.\n\nEin nennenswerter Eigenanteil gilt als Hinweis auf gleichgerichtete Interessen. Sehr hohe Anteile können umgekehrt bedeuten, dass Minderheitsaktionäre wenig Einfluss haben."],
-  volatilitaet: ["Volatilität (annualisiert)",
-    "Wie stark der Kurs schwankt, hochgerechnet auf ein Jahr. 30 % heißt grob: In zwei von drei Jahren bleibt die Jahresrendite innerhalb von plus/minus 30 Prozentpunkten um ihren Mittelwert.\n\nMisst Schwankung in beide Richtungen – nicht dasselbe wie Verlustrisiko."],
-  empfehlung: ["Analystenempfehlung",
-    "Das zusammengefasste Urteil der beobachtenden Analysten, von „Strong Buy“ bis „Strong Sell“.\n\nMit Abstand zu lesen: Verkaufsempfehlungen sind selten, und das Urteil folgt dem Kurs oft mehr, als es ihm vorausgeht."],
+    "Ein Wert von 0 bis 100 aus zwei Teilen: Nähe des Kurses zur Zonenbasis (60 %) und Chance/Risiko-Verhältnis (40 %).\n\nDie Nähe wiegt schwerer, weil sie das eigentliche Kriterium ist – ein gutes Verhältnis kann auch ein weit entfernter Titel vorweisen. Bewertet wird das Verhältnis, nicht die Chance allein: Eine Chance ohne Blick auf das Risiko ist nur die halbe Aussage.\n\nAufgenommen wird nur, wessen Chance mindestens so groß ist wie sein Risiko (C/R ab 1,0). Die Skalen sind an 151 Titeln über drei Größenklassen geeicht."],
   vergleichsindex: ["Vergleich mit dem Welt-Index",
     "Deine Beträge zu deinen Kaufzeitpunkten, angelegt im Welt-Index statt in deinen Titeln – verglichen werden die beiden Endwerte.\n\nDadurch unabhängig davon, wie lange und wie gestaffelt du gekauft hast. Braucht ein „gehalten seit“ bei jeder Position."],
 };
@@ -1295,7 +1275,7 @@ function renderChancen() {
   const gefiltert = d.titel.filter(t => Chancen.lage === "alle" || t.lage === Chancen.lage);
   gefiltert.sort((a, b) => Chancen.sortier === "naehe"
     ? a.naehe_prozent - b.naehe_prozent
-    : Chancen.sortier === "chance" ? b.chance_prozent - a.chance_prozent
+    : Chancen.sortier === "crv" ? (b.crv ?? 0) - (a.crv ?? 0)
     : b.punkte - a.punkte);
 
   const zaehl = k => d.titel.filter(t => t.lage === k).length;
@@ -1305,7 +1285,7 @@ function renderChancen() {
     return `<button class="nb-chip${Chancen.lage === k ? " on" : ""}" data-lage="${k}">${txt}<i>${n}</i></button>`;
   }).join("");
 
-  const sortChips = [["punkte", "Bewertung"], ["naehe", "Nähe zur Basis"], ["chance", "Luft bis Ziel"]]
+  const sortChips = [["punkte", "Bewertung"], ["naehe", "Nähe zur Basis"], ["crv", "Chance/Risiko"]]
     .map(([k, l]) => `<button class="ch-sort${Chancen.sortier === k ? " on" : ""}" data-sort="${k}">${l}</button>`).join("");
 
   const zeilen = gefiltert.map(t => {
@@ -1335,13 +1315,13 @@ function renderChancen() {
     <div class="nb-chips">${chips}</div>
     <div class="ch-sortzeile"><span>Sortieren:</span>${sortChips}</div>
     <div class="ch-list">${zeilen || '<div class="ch-leer">Kein Titel in dieser Lage.</div>'}</div>
-    <p class="ch-fuss"><b>Chance und Risiko werden beide ab der Mitte der Einstiegszone gemessen</b> – also ab dem Kurs, zu dem man kaufen würde, nicht ab dem heutigen. Nur so ist das
-      Verhältnis der beiden (C/R) nachvollziehbar. Der Stop liegt 1,5 Tagesspannen unter der
-      Zonenbasis, und als Ziel zählt nur ein Widerstand, der weiter als eine Tagesspanne entfernt
-      liegt – näher ist Rauschen, kein Niveau. Die Zonenbasis selbst ist die nächste Unterstützung
-      unterhalb des Kurses; sie wandert mit, gemessen wird der Abstand dorthin. Täglich gerechnet,
-      Kurse also bis zu einen Tag alt. Kein Kaufsignal: ein Titel steht hier, weil er zurückgekommen
-      ist, nicht weil er steigen wird.</p>`;
+    <p class="ch-fuss"><b>Chance und Risiko werden beide ab der Mitte der Einstiegszone gemessen</b> – also ab dem Kurs, zu dem man kaufen würde, nicht ab dem heutigen. Nur so ist ihr
+      Verhältnis (C/R) nachvollziehbar. Aufgenommen wird nur, wessen Chance mindestens so groß ist
+      wie sein Risiko. Der Stop liegt 1,5 Tagesspannen unter der Zonenbasis, und als Ziel zählt nur
+      ein Widerstand weiter als eine Tagesspanne entfernt – näher ist Rauschen, kein Niveau.
+      Die Skalen sind an 151 Titeln über drei Größenklassen geeicht. Täglich gerechnet, Kurse also
+      bis zu einen Tag alt. Kein Kaufsignal: ein Titel steht hier, weil er zurückgekommen ist,
+      nicht weil er steigen wird.</p>`;
 
   body.querySelectorAll("[data-lage]").forEach(b => {
     b.onclick = () => { Chancen.lage = b.dataset.lage; renderChancen(); };
