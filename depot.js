@@ -665,6 +665,156 @@ function dpAchsenZahl(v) {
   return v.toLocaleString("de-DE", { maximumFractionDigits: 0 });
 }
 
+/* ---------- Raeumliche Darstellung ----------
+   Die Kurven bleiben unveraendert - Tiefe entsteht ausschliesslich HINTER und
+   UNTER ihnen. Das ist keine Kosmetik, sondern die Bedingung dafuer, dass man
+   weiter richtig abliest: Wuerde die Extrusion die Linie versetzen, laege der
+   Wert mal an der Vorder-, mal an der Oberkante, und der Abgleich mit der Achse
+   waere hin. So bleibt die Datenlinie immer die Oberkante des Koerpers.
+
+   Aufgebaut wie ein Band, das auf einer Grundflaeche steht:
+     - Seitenflaeche: die Kurve, um (TIEFE_X, TIEFE_Y) nach rechts unten
+       versetzt und gegen das Original geschlossen - das ist die "Dicke".
+     - Beleuchtung: die Seitenflaeche laeuft nach unten dunkler aus, als fiele
+       Licht von oben.
+     - Schlagschatten: weich, versetzt, unter der Linie.
+   Gezeichnet wird in beforeDatasetsDraw, also unter den echten Kurven. */
+const TIEFE_X = 13, TIEFE_Y = 11;
+
+function dpMitAlpha(farbe, alpha) {
+  const f = String(farbe).trim();
+  const kurz = f.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
+  const lang = f.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  let r, g, b;
+  if (lang) { r = parseInt(lang[1], 16); g = parseInt(lang[2], 16); b = parseInt(lang[3], 16); }
+  else if (kurz) { r = parseInt(kurz[1] + kurz[1], 16); g = parseInt(kurz[2] + kurz[2], 16); b = parseInt(kurz[3] + kurz[3], 16); }
+  else return f;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+const dpTiefe = {
+  id: "dpTiefe",
+
+  /* Grundflaeche und Sockel liegen unter allem. */
+  beforeDatasetsDraw(chart) {
+    const c = chart.ctx, b = chart.chartArea;
+    if (!b) return;
+    const grund = dpFarbe("--bg2", "#1B212B");
+
+    c.save();
+    /* Bodenplatte: die Flaeche, auf der die Kurven stehen. Nach hinten rechts
+       versetzt, damit eine Kante sichtbar wird. */
+    c.beginPath();
+    c.moveTo(b.left, b.bottom);
+    c.lineTo(b.right, b.bottom);
+    c.lineTo(b.right + TIEFE_X, b.bottom + TIEFE_Y);
+    c.lineTo(b.left + TIEFE_X, b.bottom + TIEFE_Y);
+    c.closePath();
+    c.fillStyle = dpMitAlpha(grund, 0.85);
+    c.fill();
+    c.strokeStyle = dpMitAlpha(dpFarbe("--line", "#313B49"), 0.9);
+    c.lineWidth = 1;
+    c.stroke();
+
+    /* Jede waagerechte Gitterlinie bekommt eine kurze Fluchtlinie nach hinten
+       rechts. Das ist der wirksamste Hinweis auf eine Flaeche im Raum - ohne
+       ihn liest man den Versatz an Sockel und Seitenwand nur als Rahmen. */
+    const gitter = dpMitAlpha(dpFarbe("--line", "#313B49"), 0.55);
+    c.strokeStyle = gitter;
+    c.lineWidth = 1;
+    for (const t of chart.scales.y.ticks) {
+      const y = chart.scales.y.getPixelForValue(t.value);
+      if (!isFinite(y) || y < b.top || y > b.bottom) continue;
+      c.beginPath();
+      c.moveTo(b.right, y);
+      c.lineTo(b.right + TIEFE_X, y + TIEFE_Y);
+      c.stroke();
+    }
+    /* Die hintere Kante verbindet die Fluchtlinien zu einer Ebene. */
+    c.beginPath();
+    c.moveTo(b.right + TIEFE_X, b.top + TIEFE_Y);
+    c.lineTo(b.right + TIEFE_X, b.bottom + TIEFE_Y);
+    c.stroke();
+
+    /* Schlagschatten je Kurve: eine versetzte, weichgezeichnete Kopie unter der
+       spaeter gezeichneten Linie. Sie hebt die Kurve von der Flaeche ab. Der
+       Versatz ist bewusst klein - er darf nicht als zweite Kurve missverstanden
+       werden. */
+    c.beginPath();
+    c.rect(b.left, b.top, b.width + TIEFE_X, b.height + TIEFE_Y);
+    c.clip();
+    for (let i = chart.data.datasets.length - 1; i >= 0; i--) {
+      const meta = chart.getDatasetMeta(i);
+      if (meta.hidden || !meta.data || meta.data.length < 2) continue;
+      const pts = meta.data.filter(p => isFinite(p.x) && isFinite(p.y));
+      if (pts.length < 2) continue;
+      c.beginPath();
+      c.moveTo(pts[0].x, pts[0].y);
+      for (const pt of pts) c.lineTo(pt.x, pt.y);
+      c.strokeStyle = "rgba(0,0,0,.34)";
+      c.lineWidth = chart.data.datasets[i].borderWidth || 1.5;
+      c.shadowColor = "rgba(0,0,0,.5)";
+      c.shadowBlur = 6;
+      c.shadowOffsetX = 3;
+      c.shadowOffsetY = 4;
+      c.stroke();
+      c.shadowColor = "transparent";
+    }
+    c.restore();
+  },
+
+  /* Seitenwand und Vorderkante gehoeren UEBER die Flaechenfuellung, aber unter
+     die Linien - dafuer ist afterDatasetsDraw mit erneutem Zeichnen der Linie
+     zu spaet. Chart.js bietet keinen Haken dazwischen, deshalb wird der Koerper
+     hier gezeichnet und die Linien darueber bleiben unangetastet: sie werden
+     von Chart.js ohnehin zuletzt gemalt. */
+  afterDatasetsDraw(chart) {
+    const c = chart.ctx, b = chart.chartArea;
+    if (!b) return;
+
+    const meta = chart.getDatasetMeta(0);          // Depot: die gefuellte Reihe
+    if (meta.hidden || !meta.data || meta.data.length < 2) return;
+    const punkte = meta.data.filter(p => isFinite(p.x) && isFinite(p.y));
+    if (punkte.length < 2) return;
+    const grund = chart.data.datasets[0].borderColor;
+    const letzter = punkte[punkte.length - 1];
+
+    c.save();
+
+    /* Rechte Schnittflaeche: der Koerper endet heute, hier sieht man in ihn
+       hinein. Das traegt den raeumlichen Eindruck, ohne die Kurve zu beruehren. */
+    c.beginPath();
+    c.moveTo(letzter.x, letzter.y);
+    c.lineTo(letzter.x + TIEFE_X, letzter.y + TIEFE_Y);
+    c.lineTo(letzter.x + TIEFE_X, b.bottom + TIEFE_Y);
+    c.lineTo(letzter.x, b.bottom);
+    c.closePath();
+    const wand = c.createLinearGradient(0, b.top, 0, b.bottom);
+    wand.addColorStop(0, dpMitAlpha(grund, 0.50));
+    wand.addColorStop(1, dpMitAlpha(grund, 0.22));
+    c.fillStyle = wand;
+    c.fill();
+    c.strokeStyle = dpMitAlpha(grund, 0.55);
+    c.lineWidth = 1;
+    c.stroke();
+
+    /* Vorderkante: der Sockel entlang der Grundlinie, gleiche Versetzung.
+       Erst dieses Band laesst die Flaeche als Koerper mit Dicke lesen. */
+    c.beginPath();
+    c.moveTo(punkte[0].x, b.bottom);
+    c.lineTo(letzter.x, b.bottom);
+    c.lineTo(letzter.x + TIEFE_X, b.bottom + TIEFE_Y);
+    c.lineTo(punkte[0].x + TIEFE_X, b.bottom + TIEFE_Y);
+    c.closePath();
+    c.fillStyle = dpMitAlpha(grund, 0.38);
+    c.fill();
+    c.strokeStyle = dpMitAlpha(grund, 0.5);
+    c.stroke();
+
+    c.restore();
+  },
+};
+
 /* Fadenkreuz: eine senkrechte Linie am Mauszeiger. Ohne sie laesst sich bei
    750 Tagespunkten nicht ablesen, welcher Zeitpunkt gerade im Kaestchen steht. */
 const dpFadenkreuz = {
@@ -712,7 +862,19 @@ function dpDrawLine(s) {
     data: {
       datasets: [
         { label: "Depot", data: daten, borderColor: akzent,
-          backgroundColor: "rgba(79,184,172,.10)",
+          /* Verlauf statt flacher Fuellung: oben dichter, nach unten
+             auslaufend. Gibt der Flaeche eine Lichtrichtung, ohne an den
+             Werten zu ruehren. Faellt auf die bisherige Fuellung zurueck,
+             solange die Zeichenflaeche noch keine Hoehe hat. */
+          backgroundColor: (ctx) => {
+            const b = ctx.chart.chartArea;
+            if (!b) return dpMitAlpha(akzent, 0.10);
+            const g = ctx.chart.ctx.createLinearGradient(0, b.top, 0, b.bottom);
+            g.addColorStop(0, dpMitAlpha(akzent, 0.34));
+            g.addColorStop(0.55, dpMitAlpha(akzent, 0.12));
+            g.addColorStop(1, dpMitAlpha(akzent, 0.02));
+            return g;
+          },
           borderWidth: 1.9, pointRadius: 0, pointHoverRadius: 4,
           pointHoverBackgroundColor: akzent, pointHoverBorderColor: flaeche,
           pointHoverBorderWidth: 2, fill: true, tension: .15 },
@@ -725,6 +887,9 @@ function dpDrawLine(s) {
     options: {
       responsive: true, maintainAspectRatio: false, animation: false,
       interaction: { mode: "index", intersect: false },
+      /* Platz unten und rechts, damit der versetzte Koerper nicht an der
+         Achse klebt. */
+      layout: { padding: { bottom: TIEFE_Y + 2, right: TIEFE_X + 2 } },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -784,7 +949,7 @@ function dpDrawLine(s) {
         },
       },
     },
-    plugins: [dpFadenkreuz],
+    plugins: [dpTiefe, dpFadenkreuz],
   });
 
   /* Noch einmal umbrechen, sobald die Schriften da sind. Die Achsenbreite wird
