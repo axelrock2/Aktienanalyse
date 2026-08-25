@@ -501,7 +501,7 @@ async function renderDepot() {
      Zahlungen erhalten. In der Naeherung stuenden hier zwei Zahlen aus
      verschieden langen Zeitraeumen nebeneinander. */
   const perf = (series && !series.approx && series.bench.at(-1) > 0)
-    ? `<div class="dp-c"><span>gegenüber Welt-Index</span><b class="${chgCls(series.value.at(-1) - series.bench.at(-1))}">${
+    ? `<div class="dp-c"><span>gegenüber Welt-Index${typeof infoIcon === "function" ? infoIcon("vergleichsindex") : ""}</span><b class="${chgCls(series.value.at(-1) - series.bench.at(-1))}">${
         fmtPct(series.value.at(-1) / series.bench.at(-1) - 1)}</b></div>`
     : "";
 
@@ -623,7 +623,7 @@ function dpCompareBar(c) {
   const diff = depotEnd / benchEnd - 1;
   return `<div class="dp-cmp">
     <div class="dp-cmp-h">Nach ${zeitraum}: dein Depot gegen dieselben K\u00e4ufe im Welt-Index
-      <span title="Die Vergleichslinie erh\u00e4lt exakt deine Betr\u00e4ge zu exakt deinen Kaufzeitpunkten. Verglichen werden deshalb die beiden Endwerte - das ist unabh\u00e4ngig davon, wie lange und wie gestaffelt du gekauft hast.">\u24d8</span></div>
+      ${typeof infoIcon === "function" ? infoIcon("vergleichsindex") : ""}</div>
     ${balken(depotEnd, "you", "Dein Depot")}
     ${balken(benchEnd, "idx", "Welt-Index")}
     <div class="dp-cmp-diff ${chgCls(diff)}">${diff >= 0 ? "Vorsprung" : "R\u00fcckstand"} ${fmtPct(Math.abs(diff), false)}</div>

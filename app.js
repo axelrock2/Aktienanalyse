@@ -845,6 +845,241 @@ function initNews() {
   loadNews();
 }
 
+/* ---------- Kennzahl-Erklaerungen ------------------------------------------
+   Ein kleines i neben schwer verstaendlichen Groessen. Beim Ueberfahren mit der
+   Maus erscheint ein Kaestchen, beim Wegbewegen verschwindet es wieder; ein
+   Klick haelt es fest, damit es auf Tastatur und Fingerbedienung ebenfalls
+   funktioniert - dort gibt es kein "Ueberfahren".
+
+   Die Texte erklaeren, WAS die Zahl misst und WIE man sie liest, nicht was man
+   kaufen soll. Wo eine uebliche Spanne hilft, steht sie dabei - immer als
+   Anhaltspunkt, nie als Regel. */
+const INFO = {
+  crv: ["Chance/Risiko-Verhältnis (C/R)",
+    "Wie viel Kursgewinn bis Ziel 1 auf einen Euro Risiko bis zum Stop kommt. 3,0 heißt: drei Euro mögliche Bewegung nach oben je Euro, den du bei Erreichen des Stops verlierst.\n\nGerechnet ab der Mitte der Einstiegszone, nicht ab dem aktuellen Kurs. Viele Anleger sehen etwa 2,0 als Untergrenze. Die Zahl sagt nichts über die Wahrscheinlichkeit – ein hohes Verhältnis mit sehr unwahrscheinlichem Ziel bleibt eine schlechte Idee."],
+  rsi: ["RSI (14)",
+    "Relative-Stärke-Index über 14 Tage, Skala 0 bis 100. Er setzt die Aufwärts- gegen die Abwärtsbewegungen der letzten Tage.\n\nÜber 70 gilt herkömmlich als überkauft, unter 30 als überverkauft. Vorsicht: In starken Trends bleibt der RSI wochenlang im Extrem – „überkauft“ heißt nicht „fällt gleich“."],
+  gd: ["Gleitende Durchschnitte (GD 50 / GD 200)",
+    "Der Mittelwert der Schlusskurse der letzten 50 bzw. 200 Handelstage. Sie glätten das Rauschen und zeigen die Richtung.\n\nKurs über dem GD 200 gilt weithin als Aufwärtstrend, darunter als Abwärtstrend. Der GD 50 reagiert schneller, dreht aber auch öfter falsch."],
+  relstaerke: ["Relative Stärke",
+    "Die eigene Kursentwicklung im Vergleich zum Welt-Index über denselben Zeitraum. +8 % bedeutet: acht Prozentpunkte besser als der Index.\n\nMisst nicht, ob der Titel gestiegen ist, sondern ob er sich besser gehalten hat als der Markt – in fallenden Märkten kann das auch ein kleineres Minus sein."],
+  beta: ["Beta",
+    "Wie stark der Kurs auf Marktbewegungen ausschlägt. 1,0 heißt: bewegt sich im Gleichschritt mit dem Markt. 1,5 heißt: schwankt rund 50 % stärker, in beide Richtungen. Unter 1,0 ruhiger als der Markt.\n\nBeta misst Schwankung, nicht Qualität – ein niedriges Beta macht ein schlechtes Unternehmen nicht sicher."],
+  sharpe: ["Sharpe Ratio",
+    "Rendite je Einheit Schwankung: Wie viel Ertrag hat das eingegangene Auf und Ab gebracht?\n\nÜber 1,0 gilt als ordentlich, über 2,0 als sehr gut, negativ heißt: die Schwankung hat sich nicht ausgezahlt. Der Haken: Sharpe bestraft Ausschläge nach oben genauso wie nach unten – dafür gibt es Sortino."],
+  sortino: ["Sortino Ratio",
+    "Wie Sharpe, aber es zählen nur die Ausschläge nach unten. Aufwärtsschwankungen stören einen Anleger schließlich nicht.\n\nDeshalb meist höher als Sharpe. Ein großer Abstand zwischen beiden heißt: Die Schwankung entstand überwiegend nach oben."],
+  var: ["Value at Risk 95 % (1 Tag)",
+    "Der Verlust, der an 19 von 20 Handelstagen nicht überschritten wird. −2,4 % heißt: An etwa einem Tag im Monat war das Minus größer.\n\nWichtig: Die Kennzahl sagt nichts darüber, WIE viel größer. Genau das beantwortet der CVaR."],
+  cvar: ["CVaR 95 % (1 Tag)",
+    "Der durchschnittliche Verlust an genau den schlechten Tagen, die der Value at Risk nicht mehr abdeckt – also das Mittel der schlimmsten fünf Prozent.\n\nAussagekräftiger als der VaR, weil er die Ausreißer nicht abschneidet, sondern misst."],
+  drawdown: ["Maximaler Drawdown",
+    "Der größte Rückgang vom Höchststand bis zum darauffolgenden Tief im betrachteten Zeitraum.\n\nBeantwortet die Frage: Wie schmerzhaft war es im schlimmsten Fall, dabeizubleiben? −55 % heißt, aus 10.000 € wurden zwischenzeitlich 4.500 €."],
+  kgv: ["KGV – Kurs-Gewinn-Verhältnis",
+    "Der Kurs geteilt durch den Gewinn je Aktie. 20 heißt: Du zahlst das Zwanzigfache eines Jahresgewinns.\n\nNur innerhalb derselben Branche vergleichbar. Wachstumswerte tragen dauerhaft höhere KGV, zyklische Werte zeigen ausgerechnet am Hochpunkt niedrige – dort ist ein tiefes KGV eher Warnung als Schnäppchen."],
+  kgve: ["KGV erwartet (Forward-KGV)",
+    "Wie das KGV, aber mit dem für das kommende Jahr GESCHÄTZTEN Gewinn.\n\nDeshalb meist niedriger als das aktuelle KGV – es beruht auf Analystenschätzungen, die sich irren können und in Abschwüngen typischerweise zu optimistisch sind."],
+  peg: ["PEG-Ratio",
+    "Das KGV geteilt durch das erwartete Gewinnwachstum in Prozent. Setzt den Preis ins Verhältnis zum Wachstum.\n\nUnter 1,0 gilt herkömmlich als günstig bewertet. Steht und fällt mit der Wachstumsschätzung – bei schwankendem Gewinn ist die Zahl kaum brauchbar."],
+  kbv: ["KBV – Kurs-Buchwert-Verhältnis",
+    "Der Kurs geteilt durch das bilanzielle Eigenkapital je Aktie. Unter 1,0 heißt: Die Börse bewertet das Unternehmen unter seinem Buchwert.\n\nAussagekräftig bei Banken und Industrie. Bei Software oder Marken kaum – deren Wert steht gar nicht in der Bilanz."],
+  kuv: ["KUV – Kurs-Umsatz-Verhältnis",
+    "Der Kurs geteilt durch den Umsatz je Aktie. Nützlich, wenn ein Unternehmen noch keinen Gewinn schreibt.\n\nBlendet aus, ob vom Umsatz etwas übrig bleibt – ein niedriges KUV bei dauerhaften Verlusten ist kein Argument."],
+  evebitda: ["EV/EBITDA",
+    "Unternehmenswert (Börsenwert plus Nettoschulden) geteilt durch den operativen Gewinn vor Abschreibungen.\n\nFairer als das KGV, weil Schulden mitzählen und Steuer- sowie Abschreibungsunterschiede herausfallen. Deshalb bei Übernahmen die übliche Größe."],
+  roe: ["Eigenkapitalrendite (ROE)",
+    "Gewinn im Verhältnis zum eingesetzten Eigenkapital. 20 % heißt: Je 100 € Eigenkapital entstehen 20 € Gewinn im Jahr.\n\nHoch ist gut – aber Vorsicht: Viele Schulden treiben die Kennzahl nach oben, ohne dass das Geschäft besser wird. Immer zusammen mit der Verschuldung lesen."],
+  opmarge: ["Operative Marge",
+    "Wie viel vom Umsatz nach den laufenden Kosten übrig bleibt, vor Zinsen und Steuern. 25 % heißt: 25 Cent je Euro Umsatz.\n\nEin guter Hinweis auf Preissetzungsmacht. Nur innerhalb einer Branche vergleichbar – Handel arbeitet naturgemäß mit dünnen Margen."],
+  de: ["Verschuldung (Debt/Equity)",
+    "Schulden im Verhältnis zum Eigenkapital. 50 heißt: 50 € Schulden je 100 € Eigenkapital.\n\nUnter 100 gilt breit als solide, über 200 als hoch. Versorger und Immobilien tragen üblicherweise mehr, Softwarehäuser fast nichts."],
+  fcfrendite: ["FCF-Rendite",
+    "Freier Cashflow im Verhältnis zum Börsenwert – die Verzinsung, die das Unternehmen aus eigener Kraft erwirtschaftet.\n\nSchwerer zu beschönigen als der Gewinn, weil tatsächlich geflossenes Geld gemessen wird. 5 % und mehr gelten als ordentlich."],
+  altman: ["Altman Z-Score",
+    "Ein Frühwarnwert für Zahlungsschwierigkeiten, aus fünf Bilanzkennzahlen.\n\nÜber 2,99 gilt als sicher, unter 1,81 als gefährdet, dazwischen als Graubereich. Entwickelt für Industriebetriebe – bei Banken und Softwarehäusern kaum aussagekräftig."],
+  piotroski: ["Piotroski F-Score",
+    "Neun Ja/Nein-Prüfungen zu Ertragskraft, Verschuldung und Effizienz, je ein Punkt.\n\n8 bis 9 heißt: Die Bilanz hat sich auf breiter Front verbessert. Unter 3 ist ein Warnsignal. Misst die Veränderung zum Vorjahr, nicht die absolute Qualität."],
+  timing: ["Timing-Score",
+    "Fasst Trend, RSI, relative Stärke und Volumen zu einem Wert von 0 bis 100 zusammen – die Frage lautet: Läuft es gerade?\n\nSagt nichts über die Qualität des Unternehmens. Ein hoher Timing-Score bei schwacher Bilanz ist ein Momentum-Trade, keine Beteiligung."],
+  qualitaet: ["Qualitäts-Score",
+    "Fasst Margen, Eigenkapitalrendite, Wachstum, Verschuldung, Cashflow und Bewertung zu einem Wert von 0 bis 100 zusammen – die Frage lautet: gutes Unternehmen zu vernünftigem Preis?\n\nBraucht mindestens drei der sechs Bausteine, sonst bleibt er leer."],
+  zonenbasis: ["Zonenbasis",
+    "Die nächste Unterstützung UNTERHALB des Kurses – je nachdem welche am höchsten liegt: ein vorheriges Kurstief, der GD 50 oder der GD 200.\n\nSie wandert mit dem Kurs mit. Ein Titel kann deshalb nie unter seiner eigenen Einstiegszone stehen; aussagekräftig ist der Abstand dorthin."],
+  einstiegszone: ["Einstiegszone",
+    "Der Bereich zwischen der Zonenbasis und rund 3,5 % darüber – dort, wo ein Rücklauf auf Unterstützung trifft.\n\nKeine Kaufempfehlung, sondern eine Beobachtungsspanne. Ob die Unterstützung hält, weiß man erst danach."],
+  stop: ["Stop-Idee",
+    "Ein Kurs knapp unter der Zonenbasis (rund 4,5 %), an dem die Annahme als widerlegt gälte.\n\nEin Vorschlag zur Orientierung, kein gesetzter Auftrag. Zu eng gesetzt wird man vom normalen Rauschen ausgestoppt."],
+  ziel: ["Ziel 1 und Ziel 2",
+    "Ziel 1 ist der nächste nennenswerte Widerstand über dem Kurs – dort stockte die Bewegung zuletzt. Ziel 2 liegt darüber, meist am 52-Wochen-Hoch.\n\nMarken aus dem Kursverlauf, keine Prognose."],
+  atr: ["ATR (14)",
+    "Durchschnittliche Tagesspanne der letzten 14 Tage – wie weit sich der Kurs an einem gewöhnlichen Tag bewegt.\n\nNützlich für den Abstand des Stops: Wer enger setzt als eine ATR, wird mit hoher Wahrscheinlichkeit vom normalen Rauschen erwischt."],
+  macd: ["MACD",
+    "Der Abstand zweier gleitender Durchschnitte plus eine Signallinie. Kreuzt der MACD die Signallinie nach oben, gilt das als Hinweis auf drehendes Momentum.\n\nWie alle gleitenden Verfahren reagiert er verzögert und liefert in Seitwärtsphasen viele Fehlsignale."],
+  bollinger: ["Bollinger %B",
+    "Wo der Kurs innerhalb des Bollinger-Bandes steht: 0 heißt am unteren Band, 1 am oberen, 0,5 in der Mitte.\n\nÜber 1 oder unter 0 heißt: außerhalb des Bandes – in Trends durchaus normal, kein Signal für sich."],
+  korrelation: ["Korrelation zum Welt-Index",
+    "Wie im Gleichschritt sich der Titel mit dem Weltmarkt bewegt. 1,0 heißt völlig gleichläufig, 0 kein Zusammenhang, negativ gegenläufig.\n\nEntscheidend für Streuung: Zehn Titel mit Korrelation 0,9 sind kaum breiter aufgestellt als einer."],
+  pos52: ["52-Wochen-Position",
+    "Wo der Kurs zwischen dem Tief und dem Hoch der letzten 52 Wochen steht. 0 % heißt am Jahrestief, 100 % am Jahreshoch.\n\nEinordnung, kein Signal – nahe am Hoch heißt sowohl „starker Trend“ als auch „wenig Luft nach oben“, je nach Lesart."],
+  analystenziel: ["Analysten-Kursziel Ø",
+    "Der Mittelwert der Kursziele der beobachtenden Analysten, meist auf zwölf Monate.\n\nMit Abstand zu lesen: Kursziele werden oft dem Kurs nachgezogen statt ihm voraus, und Verkaufsempfehlungen sind selten."],
+  dividendenrendite: ["Dividendenrendite",
+    "Die Dividende der letzten zwölf Monate im Verhältnis zum aktuellen Kurs.\n\nEine hohe Rendite entsteht auch dadurch, dass der Kurs gefallen ist – prüfe, ob die Ausschüttung aus dem freien Cashflow gedeckt ist."],
+  chancenpunkte: ["Bewertung im Chancenraum",
+    "Ein Wert von 0 bis 100 aus zwei Teilen: Nähe des Kurses zur Zonenbasis (60 %) und Luft bis Ziel 1 (40 %).\n\nDie Nähe wiegt schwerer, weil sie das eigentliche Kriterium ist – ein weit entferntes Ziel kann jeder gefallene Titel vorweisen."],
+  nettomarge: ["Nettomarge",
+    "Was vom Umsatz ganz unten übrig bleibt – nach Kosten, Zinsen und Steuern. 15 % heißt: 15 Cent Gewinn je Euro Umsatz.\n\nEmpfindlicher als die operative Marge, weil Sondereffekte und Steuerthemen durchschlagen. Für den Vergleich über Jahre deshalb beide ansehen."],
+  bruttomarge: ["Bruttomarge",
+    "Umsatz abzüglich der direkten Herstellungskosten, in Prozent vom Umsatz.\n\nZeigt, wie viel Spielraum für Forschung, Vertrieb und Verwaltung bleibt. Softwarehäuser erreichen oft über 70 %, Handel und Industrie deutlich weniger – ein Vergleich lohnt nur innerhalb einer Branche."],
+  umsatzwachstum: ["Umsatzwachstum",
+    "Veränderung des Umsatzes gegenüber dem Vorjahreszeitraum.\n\nWachstum aus eigener Kraft ist mehr wert als zugekauftes – die Kennzahl unterscheidet das nicht. Bei Auslandsumsätzen steckt außerdem der Wechselkurs mit drin."],
+  fcf: ["Freier Cashflow",
+    "Das Geld, das nach laufendem Betrieb und Investitionen tatsächlich übrig bleibt – für Dividenden, Schuldentilgung oder Rückkäufe.\n\nSchwerer zu beschönigen als der Gewinn, weil es um geflossenes Geld geht und nicht um Buchungen. Dauerhaft negativ bei einem reifen Unternehmen ist ein Warnsignal."],
+  marktkap: ["Marktkapitalisierung",
+    "Der Börsenwert des Unternehmens: Kurs mal Anzahl aller Aktien.\n\nNicht mit dem Unternehmenswert verwechseln – der zählt die Schulden hinzu und die Barmittel ab. Bei hoch verschuldeten Firmen klaffen beide weit auseinander."],
+  dcfwert: ["DCF fairer Wert (Näherung)",
+    "Der Barwert der geschätzten künftigen Cashflows, geteilt durch die Anzahl der Aktien – was das Unternehmen wert wäre, wenn die Annahmen zuträfen.\n\nEine Modellrechnung, keine Messung: Diskontsatz und ewiges Wachstum bestimmen das Ergebnis maßgeblich. Ein halber Prozentpunkt mehr Zins verschiebt den Wert erheblich. Als Bandbreite lesen, nie als Zahl."],
+  instbesitz: ["Institutioneller Besitz",
+    "Anteil der Aktien in der Hand von Fonds, Versicherern und Pensionskassen.\n\nHoch heißt: breit analysiert und beobachtet – Überraschungen sind seltener, aber auch der Informationsvorsprung. Bei Verkaufswellen verstärkt ein hoher Anteil die Bewegung."],
+  insiderbesitz: ["Insider-Besitz",
+    "Anteil der Aktien, den Vorstand, Aufsichtsrat und Gründer selbst halten.\n\nEin nennenswerter Eigenanteil gilt als Hinweis auf gleichgerichtete Interessen. Sehr hohe Anteile können umgekehrt bedeuten, dass Minderheitsaktionäre wenig Einfluss haben."],
+  volatilitaet: ["Volatilität (annualisiert)",
+    "Wie stark der Kurs schwankt, hochgerechnet auf ein Jahr. 30 % heißt grob: In zwei von drei Jahren bleibt die Jahresrendite innerhalb von plus/minus 30 Prozentpunkten um ihren Mittelwert.\n\nMisst Schwankung in beide Richtungen – nicht dasselbe wie Verlustrisiko."],
+  empfehlung: ["Analystenempfehlung",
+    "Das zusammengefasste Urteil der beobachtenden Analysten, von „Strong Buy“ bis „Strong Sell“.\n\nMit Abstand zu lesen: Verkaufsempfehlungen sind selten, und das Urteil folgt dem Kurs oft mehr, als es ihm vorausgeht."],
+  vergleichsindex: ["Vergleich mit dem Welt-Index",
+    "Deine Beträge zu deinen Kaufzeitpunkten, angelegt im Welt-Index statt in deinen Titeln – verglichen werden die beiden Endwerte.\n\nDadurch unabhängig davon, wie lange und wie gestaffelt du gekauft hast. Braucht ein „gehalten seit“ bei jeder Position."],
+};
+
+/* Beschriftung -> Glossareintrag. Damit haengt sich das Symbol von selbst an,
+   wo immer eine dieser Kennzahlen ausgegeben wird - statt an dutzenden
+   Aufrufstellen einzeln. Der Abgleich laeuft ueber den auf Kleinschreibung
+   normierten Text ohne Klammerzusaetze. */
+const INFO_LABELS = {
+  "chance/risiko": "crv", "c/r": "crv", "chance/risiko-verhältnis": "crv",
+  "rsi": "rsi", "rsi 14": "rsi",
+  "gd 50 / 200": "gd", "gd 50/200": "gd", "trend gd 50/200": "gd",
+  "rel. stärke 3 m vs. welt": "relstaerke", "relative stärke vs. welt-index": "relstaerke",
+  "relative stärke": "relstaerke",
+  "beta": "beta", "beta 5y": "beta",
+  "sharpe ratio": "sharpe", "sharpe 2 j": "sharpe", "sharpe": "sharpe",
+  "sortino ratio": "sortino", "sortino": "sortino",
+  "value at risk 95% 1 t": "var", "value at risk": "var",
+  "cvar 95% 1 t": "cvar", "cvar": "cvar",
+  "max. drawdown": "drawdown", "maximaler drawdown": "drawdown",
+  "kgv aktuell": "kgv", "kgv": "kgv",
+  "kgv erwartet": "kgve",
+  "peg": "peg", "kbv": "kbv", "kuv": "kuv",
+  "ev/ebitda": "evebitda",
+  "eigenkapitalrendite": "roe", "operative marge": "opmarge",
+  "verschuldung d/e": "de", "verschuldung": "de",
+  "fcf-rendite": "fcfrendite",
+  "altman z-score": "altman", "piotroski f-score": "piotroski",
+  "timing-score": "timing", "timing": "timing",
+  "qualitäts-score": "qualitaet", "qualität": "qualitaet",
+  "atr 14": "atr", "macd": "macd", "bollinger %b": "bollinger",
+  "korrelation z. welt-index": "korrelation",
+  "52-w-position": "pos52", "52-wochen-position": "pos52",
+  "analysten-kursziel ø": "analystenziel",
+  "dividendenrendite": "dividendenrendite",
+  "einstiegszone": "einstiegszone", "stop-idee": "stop", "zonenbasis": "zonenbasis",
+  "nettomarge": "nettomarge", "bruttomarge": "bruttomarge",
+  "umsatzwachstum": "umsatzwachstum", "free cash flow": "fcf",
+  "marktkapitalisierung": "marktkap",
+  "dcf fairer wert näherung": "dcfwert",
+  "institutioneller besitz": "instbesitz", "insider-besitz": "insiderbesitz",
+  "volatilität annual.": "volatilitaet", "volatilität": "volatilitaet",
+  "empfehlung": "empfehlung", "analystenkonsens": "empfehlung",
+};
+
+/* Passenden Eintrag zu einer Beschriftung finden; "" wenn es keinen gibt. */
+function infoFuer(label) {
+  const k = String(label)
+    .replace(/<[^>]*>/g, "")
+    .replace(/[()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim().toLowerCase();
+  return INFO_LABELS[k] ? infoIcon(INFO_LABELS[k]) : "";
+}
+
+/* Das kleine i. Bewusst ein <button>, damit es mit der Tastatur erreichbar ist. */
+function infoIcon(key) {
+  return INFO[key] ? `<button type="button" class="ii" data-info="${key}" aria-label="Erklärung">i</button>` : "";
+}
+
+/* Ein einziges Kaestchen fuer die ganze Seite, statt eines je Kennzahl. */
+const InfoBox = {
+  el: null, fest: false, aktiv: null,
+  hole() {
+    if (!this.el) {
+      this.el = document.createElement("div");
+      this.el.className = "iibox";
+      this.el.hidden = true;
+      document.body.appendChild(this.el);
+    }
+    return this.el;
+  },
+  zeige(knopf, fest) {
+    const eintrag = INFO[knopf.dataset.info];
+    if (!eintrag) return;
+    const b = this.hole();
+    b.innerHTML = `<b>${esc(eintrag[0])}</b>`
+      + eintrag[1].split("\n\n").map(a => `<p>${esc(a)}</p>`).join("");
+    b.hidden = false;
+    this.fest = !!fest;
+    this.aktiv = knopf;
+    knopf.classList.add("on");
+
+    /* Am Symbol ausrichten und im Sichtfenster halten - sonst steht der Text
+       bei Kennzahlen am rechten Rand halb ausserhalb. */
+    b.style.left = "0px"; b.style.top = "0px";
+    const k = knopf.getBoundingClientRect(), m = b.getBoundingClientRect();
+    let x = k.left + k.width / 2 - m.width / 2;
+    x = Math.max(8, Math.min(x, window.innerWidth - m.width - 8));
+    /* Bevorzugt oberhalb des Symbols. Passt es dort nicht, darunter - und wenn
+       es auch dort unten anstoesst, ins Sichtfenster hineingezogen. Sonst
+       stuende die Erklaerung bei Kennzahlen am unteren Rand ausserhalb. */
+    let y = k.top - m.height - 9;
+    if (y < 8) y = k.bottom + 9;
+    y = Math.max(8, Math.min(y, window.innerHeight - m.height - 8));
+    b.style.left = Math.round(x + window.scrollX) + "px";
+    b.style.top = Math.round(y + window.scrollY) + "px";
+  },
+  verstecke(erzwingen) {
+    if (this.fest && !erzwingen) return;
+    if (this.el) this.el.hidden = true;
+    if (this.aktiv) this.aktiv.classList.remove("on");
+    this.aktiv = null; this.fest = false;
+  },
+};
+
+/* Ein Satz Zuhoerer fuer die ganze Seite - die Symbole entstehen laufend neu,
+   einzelne Bindungen muessten dabei jedes Mal erneuert werden. */
+function initInfo() {
+  document.addEventListener("mouseover", e => {
+    const k = e.target.closest(".ii");
+    if (k && !InfoBox.fest) InfoBox.zeige(k, false);
+  });
+  document.addEventListener("mouseout", e => {
+    const k = e.target.closest(".ii");
+    if (k && !InfoBox.fest) InfoBox.verstecke();
+  });
+  /* Klick haelt fest - fuer Finger und Tastatur, wo es kein Ueberfahren gibt. */
+  document.addEventListener("click", e => {
+    const k = e.target.closest(".ii");
+    if (k) {
+      e.preventDefault(); e.stopPropagation();
+      if (InfoBox.fest && InfoBox.aktiv === k) InfoBox.verstecke(true);
+      else InfoBox.zeige(k, true);
+      return;
+    }
+    if (!e.target.closest(".iibox")) InfoBox.verstecke(true);
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") InfoBox.verstecke(true); });
+  window.addEventListener("scroll", () => InfoBox.verstecke(true), { passive: true });
+  window.addEventListener("resize", () => InfoBox.verstecke(true));
+}
+
 /* ---------- Chancenraum -----------------------------------------------------
    Zeigt Titel, deren Kurs nahe an der Zonenbasis steht und die noch Luft bis
    Ziel 1 haben. Die Liste wird taeglich serverseitig gerechnet
@@ -932,16 +1167,16 @@ function renderChancen() {
     const gemerkt = Favs.has(t.sym);
     const w = t.waehrung || "";
     return `<div class="ch-row" data-sym="${esc(t.sym)}">
-      <div class="ch-pkt" title="Bewertung aus Nähe zur Zonenbasis (60 %) und Luft bis Ziel 1 (40 %)">${t.punkte}</div>
+      <div class="ch-pkt">${t.punkte}${infoIcon("chancenpunkte")}</div>
       <div class="ch-titel">
         <b>${esc(chNameFuer(t.sym))}</b>
         <i>${esc(t.sym)} · <span class="ch-lage ch-${t.lage}">${CH_LAGEN[t.lage] || t.lage}</span>${
           t.trend_auf ? "" : ' · <span class="ch-warn">unter GD 200</span>'}</i>
       </div>
       <div class="ch-zahl"><span>Kurs</span><b>${moneyNum(t.kurs, w, t.kurs < 10 ? 2 : 1)}</b></div>
-      <div class="ch-zahl"><span>zur Basis</span><b class="up">+${fmtNum(t.naehe_prozent, "", 1)} %</b></div>
-      <div class="ch-zahl"><span>bis Ziel 1</span><b class="up">+${fmtNum(t.chance_prozent, "", 1)} %</b></div>
-      <div class="ch-zahl"><span>C/R</span><b>${t.crv != null ? fmtNum(t.crv, "", 1) : "–"}</b></div>
+      <div class="ch-zahl"><span>zur Basis${infoIcon("zonenbasis")}</span><b class="up">+${fmtNum(t.naehe_prozent, "", 1)} %</b></div>
+      <div class="ch-zahl"><span>bis Ziel 1${infoIcon("ziel")}</span><b class="up">+${fmtNum(t.chance_prozent, "", 1)} %</b></div>
+      <div class="ch-zahl"><span>C/R${infoIcon("crv")}</span><b>${t.crv != null ? fmtNum(t.crv, "", 1) : "–"}</b></div>
       <div class="ch-akt">
         <button class="ch-btn ch-merk${gemerkt ? " on" : ""}" data-merk="${esc(t.sym)}"
           title="${gemerkt ? "Aus der Merkliste entfernen" : "Zur Merkliste hinzufügen"}">${gemerkt ? "Gemerkt" : "+ Merken"}</button>
@@ -1458,7 +1693,7 @@ function renderDetail(item, chart, fund, a) {
       ${zoneHtml}
       <div class="crv">
         <div class="pill">Stop-Idee<b>${money(z.stop, cur)}</b></div>
-        <div class="pill">Einstiegszone<b>${moneyNum(z.entryLow, cur, z.entryLow < 10 ? 2 : 1)} – ${money(z.entryHigh, cur, z.entryHigh < 10 ? 2 : 1)}</b></div>
+        <div class="pill">Einstiegszone${infoIcon("einstiegszone")}<b>${moneyNum(z.entryLow, cur, z.entryLow < 10 ? 2 : 1)} – ${money(z.entryHigh, cur, z.entryHigh < 10 ? 2 : 1)}</b></div>
         <div class="pill">Ziel 1 (Widerstand)<b>${money(z.t1, cur)}</b></div>
         <div class="pill">Ziel 2<b>${money(z.t2, cur)}</b></div>
         <div class="pill">Chance/Risiko<b>${z.crv ? z.crv.toFixed(1).replace(".", ",") + " : 1" : "–"}</b></div>
@@ -1471,11 +1706,11 @@ function renderDetail(item, chart, fund, a) {
       <h3>Bewertung in zwei Dimensionen</h3>
       <div class="sc-grid">
         <div class="sc-card">
-          <div class="sc-head"><h4>Timing / Momentum</h4><b>${a.timing ?? "–"}</b></div>
+          <div class="sc-head"><h4>Timing / Momentum${infoIcon("timing")}</h4><b>${a.timing ?? "–"}</b></div>
           ${compRows(a.comps)}
         </div>
         <div class="sc-card">
-          <div class="sc-head"><h4>Qualität / Bewertung</h4><b class="${a.quality == null ? "na" : ""}">${a.quality ?? "n. v."}</b></div>
+          <div class="sc-head"><h4>Qualität / Bewertung${infoIcon("qualitaet")}</h4><b class="${a.quality == null ? "na" : ""}">${a.quality ?? "n. v."}</b></div>
           ${a.qcomps ? compRows(a.qcomps) : `<p style="font-size:12.5px;color:var(--muted)">Fundamentaldaten sind für diesen Titel über die freien Datenwege gerade nicht abrufbar. Der Timing-Score bleibt davon unberührt.</p>`}
         </div>
       </div>
@@ -1498,20 +1733,20 @@ function renderDetail(item, chart, fund, a) {
       <h3>Kennzahlen</h3>
       <div class="kv">
         <div class="k"><span>52-Wochen-Spanne</span><b>${moneyNum(a.lo52, cur, 1)} – ${moneyNum(a.hi52, cur, 1)}</b></div>
-        <div class="k"><span>Abstand 52-W-Hoch</span><b class="${chgCls(a.price / a.hi52 - 1)}">${fmtPct(a.price / a.hi52 - 1)}</b></div>
-        <div class="k"><span>RSI (14)</span><b>${a.rsi != null ? Math.round(a.rsi) : "–"}</b></div>
+        <div class="k"><span>Abstand 52-W-Hoch${infoFuer("Abstand 52-W-Hoch")}</span><b class="${chgCls(a.price / a.hi52 - 1)}">${fmtPct(a.price / a.hi52 - 1)}</b></div>
+        <div class="k"><span>RSI (14)${infoFuer("RSI (14)")}</span><b>${a.rsi != null ? Math.round(a.rsi) : "–"}</b></div>
         <div class="k"><span>Rendite 3 Mon.</span><b class="${chgCls(a.r63)}">${fmtPct(a.r63)}</b></div>
         <div class="k"><span>Rendite 6 Mon.</span><b class="${chgCls(a.r126)}">${fmtPct(a.r126)}</b></div>
-        <div class="k"><span>Rel. Stärke 3 M vs. Welt</span><b class="${chgCls(a.rel)}">${fmtPct(a.rel)}</b></div>
+        <div class="k"><span>Rel. Stärke 3 M vs. Welt${infoFuer("Rel. Stärke 3 M vs. Welt")}</span><b class="${chgCls(a.rel)}">${fmtPct(a.rel)}</b></div>
         ${fund ? `
-        <div class="k"><span>Marktkapitalisierung</span><b>${moneyBig(fund.marketCap, cur)}</b></div>
-        <div class="k"><span>KGV (erwartet)</span><b>${fund.forwardPE ? fmtNum(fund.forwardPE, null, 1) : "–"}</b></div>
-        <div class="k"><span>Operative Marge</span><b>${fmtPct(fund.opMargin, false)}</b></div>
-        <div class="k"><span>Umsatzwachstum</span><b class="${chgCls(fund.revGrowth)}">${fmtPct(fund.revGrowth)}</b></div>
-        <div class="k"><span>Eigenkapitalrendite</span><b>${fmtPct(fund.roe, false)}</b></div>
-        <div class="k"><span>Dividendenrendite</span><b>${fmtPct(fund.divYield, false)}</b></div>
-        <div class="k"><span>Analysten-Kursziel Ø</span><b>${fund.targetMean ? money(fund.targetMean, cur) : "–"}</b></div>
-        <div class="k"><span>Beta</span><b>${fund.beta ? fmtNum(fund.beta, null, 2) : "–"}</b></div>` : ""}
+        <div class="k"><span>Marktkapitalisierung${infoFuer("Marktkapitalisierung")}</span><b>${moneyBig(fund.marketCap, cur)}</b></div>
+        <div class="k"><span>KGV (erwartet)${infoFuer("KGV (erwartet)")}</span><b>${fund.forwardPE ? fmtNum(fund.forwardPE, null, 1) : "–"}</b></div>
+        <div class="k"><span>Operative Marge${infoFuer("Operative Marge")}</span><b>${fmtPct(fund.opMargin, false)}</b></div>
+        <div class="k"><span>Umsatzwachstum${infoFuer("Umsatzwachstum")}</span><b class="${chgCls(fund.revGrowth)}">${fmtPct(fund.revGrowth)}</b></div>
+        <div class="k"><span>Eigenkapitalrendite${infoFuer("Eigenkapitalrendite")}</span><b>${fmtPct(fund.roe, false)}</b></div>
+        <div class="k"><span>Dividendenrendite${infoFuer("Dividendenrendite")}</span><b>${fmtPct(fund.divYield, false)}</b></div>
+        <div class="k"><span>Analysten-Kursziel Ø${infoFuer("Analysten-Kursziel Ø")}</span><b>${fund.targetMean ? money(fund.targetMean, cur) : "–"}</b></div>
+        <div class="k"><span>Beta${infoFuer("Beta")}</span><b>${fund.beta ? fmtNum(fund.beta, null, 2) : "–"}</b></div>` : ""}
       </div>
     </div>
 
@@ -1573,8 +1808,8 @@ function buildZoneBand(a, cur) {
   </div>
   <div class="zb-legend">
     <span><i style="background:var(--down);opacity:.55"></i>unter Stop</span>
-    <span><i style="background:var(--accent)"></i>Einstiegszone</span>
-    <span><i style="background:var(--up);opacity:.45"></i>Zielbereich</span>
+    <span><i style="background:var(--accent)"></i>Einstiegszone${infoIcon("einstiegszone")}</span>
+    <span><i style="background:var(--up);opacity:.45"></i>Zielbereich${infoIcon("ziel")}</span>
   </div>`;
 }
 
@@ -1816,7 +2051,7 @@ function dsBadge(kind){
   const map={calc:["GERECHNET","dsb-calc"],fetch:["ABGERUFEN","dsb-fetch"],judge:["DEINE EINSCHÄTZUNG","dsb-judge"],partial:["TEILWEISE · DATEN FEHLEN","dsb-part"]};
   const[t,cls]=map[kind]||map.judge;return `<span class="dsb ${cls}">${t}</span>`;
 }
-function dsRow(label,val,note){return `<div class="dsr"><span>${label}</span><b>${val}</b>${note?`<i>${note}</i>`:""}</div>`;}
+function dsRow(label,val,note){return `<div class="dsr"><span>${label}${infoFuer(label)}</span><b>${val}</b>${note?`<i>${note}</i>`:""}</div>`;}
 function dsInterpret(cond,pos,neg,neutral){return cond==null?(neutral||"–"):cond?pos:neg;}
 
 /* ---------- Dossier zusammenbauen ---------- */
@@ -1897,13 +2132,13 @@ function buildDossier(item,chart,fund,a,deep,news,bench,demo,scores){
     <section class="ds-sec"><h2>1 · Executive Summary ${dsBadge("calc")}</h2>
       <div class="ds-cards">
         <div class="ds-c"><span>Kurs</span><b>${money2(price)}</b></div>
-        <div class="ds-c"><span>Timing-Score</span><b>${a.timing??"–"}</b></div>
-        <div class="ds-c"><span>Qualitäts-Score</span><b>${a.quality??"n. v."}</b></div>
-        <div class="ds-c"><span>Sharpe (2 J)</span><b>${risk&&risk.sharpe!=null?fN(risk.sharpe,2):"–"}</b></div>
-        <div class="ds-c"><span>Max. Drawdown</span><b class="neg">${risk?P(risk.maxDD):"–"}</b></div>
-        <div class="ds-c"><span>Beta</span><b>${risk&&risk.beta!=null?fN(risk.beta,2):(fund&&fund.beta?fN(fund.beta,2):"–")}</b></div>
+        <div class="ds-c"><span>Timing-Score${infoFuer("Timing-Score")}</span><b>${a.timing??"–"}</b></div>
+        <div class="ds-c"><span>Qualitäts-Score${infoFuer("Qualitäts-Score")}</span><b>${a.quality??"n. v."}</b></div>
+        <div class="ds-c"><span>Sharpe (2 J)${infoFuer("Sharpe (2 J)")}</span><b>${risk&&risk.sharpe!=null?fN(risk.sharpe,2):"–"}</b></div>
+        <div class="ds-c"><span>Max. Drawdown${infoFuer("Max. Drawdown")}</span><b class="neg">${risk?P(risk.maxDD):"–"}</b></div>
+        <div class="ds-c"><span>Beta${infoFuer("Beta")}</span><b>${risk&&risk.beta!=null?fN(risk.beta,2):(fund&&fund.beta?fN(fund.beta,2):"–")}</b></div>
         <div class="ds-c"><span>Orientierungs-Score</span><b>${orient??"–"}<small>/100</small></b></div>
-        <div class="ds-c"><span>Analystenkonsens</span><b>${deep&&deep.recKey?esc(deep.recKey):"–"}</b></div>
+        <div class="ds-c"><span>Analystenkonsens${infoFuer("Analystenkonsens")}</span><b>${deep&&deep.recKey?esc(deep.recKey):"–"}</b></div>
       </div>
       <p class="dshint">Der Orientierungs-Score mittelt nur die datengestützten Dimensionen. Er ist ein Ausgangspunkt für dein Urteil – keine Kauf- oder Verkaufsempfehlung.</p>
     </section>
@@ -2127,6 +2362,7 @@ async function openDossier(item){
    Funktionen aus depot.js sicher zur Verfügung stehen. */
 document.addEventListener("DOMContentLoaded", () => {
   Cache.prune();
+  initInfo();
   initDB();
   initFx();
   renderFavs();

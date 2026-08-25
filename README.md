@@ -93,6 +93,21 @@ nicht voneinander abziehen, deshalb steht dort ein Hinweis statt einer
 Vergleichszahl. Mit Kaufdatum werden zwei Endbeträge verglichen: dein Depot
 gegen dieselben Beträge zu denselben Zeitpunkten im Index.
 
+**Kennzahl-Erklärungen.** Neben Größen, die Erklärung vertragen, steht ein
+kleines **i**. Beim Überfahren mit der Maus erscheint ein Kästchen mit einer
+kurzen Erklärung, beim Wegbewegen verschwindet es; ein Klick hält es fest –
+für Fingerbedienung und Tastatur, wo es kein Überfahren gibt. Escape schließt.
+
+Das Glossar umfasst 47 Einträge (C/R, RSI, Sharpe, Sortino, VaR, CVaR, Beta,
+Drawdown, KGV, PEG, KBV, EV/EBITDA, Altman Z, Piotroski, DCF-Wert und weitere).
+Jeder Text sagt, **was** die Zahl misst und **wie** man sie liest – samt der
+üblichen Fallstricke, etwa dass ein hohes ROE auch von hoher Verschuldung
+kommen kann. Selbsterklärendes wie „Sektor" bleibt bewusst ohne i.
+
+Neue Kennzahlen bekommen ihr i automatisch: `INFO` trägt die Texte,
+`INFO_LABELS` ordnet Beschriftungen zu, und `dsRow()` hängt das Symbol selbst
+an – ohne Änderung an den Aufrufstellen.
+
 **Chancenraum.** Ein eigener Abschnitt sammelt Titel, deren Kurs nahe an seine
 Zonenbasis zurückgekommen ist und die noch Luft bis Ziel 1 haben. Er füllt sich
 selbst: `scripts/build_chancen.py` rechnet werktags den Korb aus
