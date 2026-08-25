@@ -1,0 +1,85 @@
+# Korb fuer den Chancenraum - ein Ticker je Zeile.
+# Taeglich prueft die GitHub Action jeden Titel: Steht der Kurs nahe an seiner
+# Zonenbasis und ist noch Luft bis Ziel 1, kommt er in data/chancen.json.
+#
+# Diese Liste ist oeffentlich. Sie liegt bewusst getrennt vom Depot - ein
+# Depot gehoert nie ins Repository.
+#
+# Ergaenzen: Zeile anfuegen, committen. Beim naechsten Lauf ist der Titel dabei.
+# Auslaendische Notierungen mit Yahoo-Kuerzel schreiben (SAP.DE, ASML.AS, 7203.T).
+
+# --- USA, Technologie ---
+AAPL
+MSFT
+GOOGL
+AMZN
+META
+NVDA
+AVGO
+AMD
+CRM
+ADBE
+ORCL
+CSCO
+QCOM
+TXN
+INTC
+
+# --- USA, Gesundheit ---
+JNJ
+UNH
+LLY
+ABBV
+MRK
+PFE
+TMO
+ABT
+
+# --- USA, Finanzen und Konsum ---
+JPM
+V
+MA
+BAC
+COST
+WMT
+PG
+KO
+PEP
+MCD
+HD
+NKE
+
+# --- USA, Industrie und Energie ---
+CAT
+HON  Honeywell International
+GE
+UNP
+XOM
+CVX
+
+# --- Europa ---
+SAP.DE
+SIE.DE
+ALV.DE
+MBG.DE
+BAS.DE
+BAYN.DE
+DTE.DE
+MUV2.DE
+ASML.AS
+MC.PA
+OR.PA
+AIR.PA
+NESN.SW
+NOVN.SW
+RO.SW
+AZN.L
+SHEL.L
+HSBA.L
+ULVR.L
+
+# --- Asien ---
+7203.T
+6758.T
+TSM
+BABA
