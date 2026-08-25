@@ -1007,48 +1007,151 @@ function infoIcon(key) {
   return INFO[key] ? `<button type="button" class="ii" data-info="${key}" aria-label="Erklärung">i</button>` : "";
 }
 
-/* Ein einziges Kaestchen fuer die ganze Seite, statt eines je Kennzahl. */
+/* Ein einziges Kaestchen fuer die ganze Seite, statt eines je Kennzahl.
+
+   Zur Groesse: Sie ist in der Formatvorlage fest gesetzt und haengt bewusst
+   NICHT vom Sichtfenster ab. Der erste Anlauf bemass sie mit
+   calc(100vw - 24px); meldet der Browser waehrend eines Umbruchs
+   voruebergehend 0 als Fensterbreite, ergibt das einen negativen Wert, und der
+   Kasten faellt zu einem senkrechten Streifen zusammen. Eine Untergrenze per
+   clamp haette das nur abgefangen - eine feste Breite laesst es gar nicht erst
+   entstehen. Ins Bild geholt wird ueber die POSITION, nicht ueber die Groesse.
+
+   Zur Verankerung: position:fixed statt absolute. Damit entfaellt das Rechnen
+   mit der Scrollposition, und der Kasten kann beim Scrollen einfach mitwandern,
+   statt zu schliessen. */
+const INFO_ABSTAND = 10;        // Abstand zwischen Symbol und Kasten
+const INFO_RAND = 8;            // Mindestabstand zum Fensterrand
+const INFO_AUF_MS = 120;        // Verzoegerung vor dem Einblenden
+const INFO_ZU_MS = 140;         // Nachlauf, damit man in den Kasten fahren kann
+
 const InfoBox = {
-  el: null, fest: false, aktiv: null,
+  el: null, pfeil: null, fest: false, aktiv: null,
+  aufTimer: null, zuTimer: null, folge: null,
+
   hole() {
     if (!this.el) {
       this.el = document.createElement("div");
       this.el.className = "iibox";
+      this.el.id = "iibox";
+      this.el.setAttribute("role", "tooltip");
       this.el.hidden = true;
+      this.pfeil = document.createElement("i");
+      this.pfeil.className = "iibox-pfeil";
       document.body.appendChild(this.el);
+      /* In den Kasten fahren haelt ihn offen - sonst waeren laengere
+         Erklaerungen weder in Ruhe lesbar noch markierbar. */
+      this.el.addEventListener("mouseenter", () => clearTimeout(this.zuTimer));
+      this.el.addEventListener("mouseleave", () => this.spaeterVerstecken());
     }
     return this.el;
   },
+
+  /* Verzoegert oeffnen: Beim Ueberstreichen einer Reihe von Symbolen soll nicht
+     jedes kurz aufblitzen. */
+  spaeterZeigen(knopf) {
+    clearTimeout(this.zuTimer);
+    if (this.aktiv === knopf && !this.el.hidden) return;
+    clearTimeout(this.aufTimer);
+    this.aufTimer = setTimeout(() => this.zeige(knopf, false), INFO_AUF_MS);
+  },
+  spaeterVerstecken() {
+    if (this.fest) return;
+    clearTimeout(this.aufTimer);
+    clearTimeout(this.zuTimer);
+    this.zuTimer = setTimeout(() => this.verstecke(), INFO_ZU_MS);
+  },
+
   zeige(knopf, fest) {
     const eintrag = INFO[knopf.dataset.info];
     if (!eintrag) return;
+    clearTimeout(this.aufTimer); clearTimeout(this.zuTimer);
+
     const b = this.hole();
     b.innerHTML = `<b>${esc(eintrag[0])}</b>`
       + eintrag[1].split("\n\n").map(a => `<p>${esc(a)}</p>`).join("");
+    b.appendChild(this.pfeil);
     b.hidden = false;
     this.fest = !!fest;
+    if (this.aktiv && this.aktiv !== knopf) {
+      this.aktiv.classList.remove("on");
+      this.aktiv.removeAttribute("aria-describedby");
+    }
     this.aktiv = knopf;
     knopf.classList.add("on");
+    knopf.setAttribute("aria-describedby", "iibox");
 
-    /* Am Symbol ausrichten und im Sichtfenster halten - sonst steht der Text
-       bei Kennzahlen am rechten Rand halb ausserhalb. */
-    b.style.left = "0px"; b.style.top = "0px";
-    const k = knopf.getBoundingClientRect(), m = b.getBoundingClientRect();
-    let x = k.left + k.width / 2 - m.width / 2;
-    x = Math.max(8, Math.min(x, window.innerWidth - m.width - 8));
-    /* Bevorzugt oberhalb des Symbols. Passt es dort nicht, darunter - und wenn
-       es auch dort unten anstoesst, ins Sichtfenster hineingezogen. Sonst
-       stuende die Erklaerung bei Kennzahlen am unteren Rand ausserhalb. */
-    let y = k.top - m.height - 9;
-    if (y < 8) y = k.bottom + 9;
-    y = Math.max(8, Math.min(y, window.innerHeight - m.height - 8));
-    b.style.left = Math.round(x + window.scrollX) + "px";
-    b.style.top = Math.round(y + window.scrollY) + "px";
+    this.platziere();
+    this.folgeStarten();
   },
+
+  /* Ausrichten. Bevorzugt oberhalb des Symbols, sonst darunter; waagerecht
+     mittig, aber in den Fensterrand hineingezogen. Der Pfeil bleibt dabei am
+     Symbol stehen, auch wenn der Kasten verschoben wurde - sonst zeigte er bei
+     Kennzahlen am Rand ins Leere. */
+  platziere() {
+    const b = this.el, k = this.aktiv;
+    if (!b || !k) return;
+    const fb = window.innerWidth, fh = window.innerHeight;
+    /* Bei entarteter Fenstergroesse gar nicht erst rechnen - das Ergebnis waere
+       Unsinn. Kommt beim Umbruch und in eingebetteten Ansichten vor. */
+    if (fb < 60 || fh < 60) { b.hidden = true; return; }
+
+    const a = k.getBoundingClientRect();
+    const m = b.getBoundingClientRect();
+
+    let x = a.left + a.width / 2 - m.width / 2;
+    x = Math.max(INFO_RAND, Math.min(x, fb - m.width - INFO_RAND));
+
+    let oben = true;
+    let y = a.top - m.height - INFO_ABSTAND;
+    if (y < INFO_RAND) { y = a.bottom + INFO_ABSTAND; oben = false; }
+    /* Reicht es auch darunter nicht, ins Bild ziehen. */
+    y = Math.max(INFO_RAND, Math.min(y, fh - m.height - INFO_RAND));
+
+    b.style.left = Math.round(x) + "px";
+    b.style.top = Math.round(y) + "px";
+    b.classList.toggle("unten", !oben);
+
+    const pfeilX = a.left + a.width / 2 - x;
+    this.pfeil.style.left = Math.round(Math.max(12, Math.min(pfeilX, m.width - 12))) + "px";
+  },
+
+  /* Beim Scrollen mitwandern statt schliessen. Verlaesst das Symbol das Bild,
+     wird geschlossen - ein Kasten ohne sichtbaren Bezug hilft niemandem.
+
+     Ueber Ereignisse statt einer Dauerschleife: Eine Schleife mit
+     requestAnimationFrame liefe sechzig Mal je Sekunde, obwohl sich nur beim
+     Scrollen etwas aendert - und sie pausiert, sobald der Tab in den
+     Hintergrund geht. scroll mit capture faengt auch Scrollen in inneren
+     Behaeltern, nicht nur am Fenster. */
+  folgeStarten() {
+    if (this.folge) return;
+    this.folge = () => {
+      if (!this.aktiv || !this.el || this.el.hidden) return;
+      const a = this.aktiv.getBoundingClientRect();
+      if (a.bottom < 0 || a.top > window.innerHeight) { this.verstecke(true); return; }
+      this.platziere();
+    };
+    window.addEventListener("scroll", this.folge, { passive: true, capture: true });
+    window.addEventListener("resize", this.folge);
+  },
+  folgeBeenden() {
+    if (!this.folge) return;
+    window.removeEventListener("scroll", this.folge, { capture: true });
+    window.removeEventListener("resize", this.folge);
+    this.folge = null;
+  },
+
   verstecke(erzwingen) {
     if (this.fest && !erzwingen) return;
+    clearTimeout(this.aufTimer); clearTimeout(this.zuTimer);
+    this.folgeBeenden();
     if (this.el) this.el.hidden = true;
-    if (this.aktiv) this.aktiv.classList.remove("on");
+    if (this.aktiv) {
+      this.aktiv.classList.remove("on");
+      this.aktiv.removeAttribute("aria-describedby");
+    }
     this.aktiv = null; this.fest = false;
   },
 };
@@ -1058,11 +1161,23 @@ const InfoBox = {
 function initInfo() {
   document.addEventListener("mouseover", e => {
     const k = e.target.closest(".ii");
-    if (k && !InfoBox.fest) InfoBox.zeige(k, false);
+    if (k && !InfoBox.fest) InfoBox.spaeterZeigen(k);
   });
   document.addEventListener("mouseout", e => {
     const k = e.target.closest(".ii");
-    if (k && !InfoBox.fest) InfoBox.verstecke();
+    /* Nur schliessen, wenn der Zeiger das Symbol wirklich verlaesst und nicht
+       in den Kasten hinueberwechselt. */
+    if (k && !InfoBox.fest && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".iibox")))
+      InfoBox.spaeterVerstecken();
+  });
+  /* Tastaturbedienung: Beim Anspringen zeigen, beim Verlassen schliessen. */
+  document.addEventListener("focusin", e => {
+    const k = e.target.closest(".ii");
+    if (k) InfoBox.zeige(k, true);
+  });
+  document.addEventListener("focusout", e => {
+    const k = e.target.closest(".ii");
+    if (k && InfoBox.aktiv === k) InfoBox.verstecke(true);
   });
   /* Klick haelt fest - fuer Finger und Tastatur, wo es kein Ueberfahren gibt. */
   document.addEventListener("click", e => {
@@ -1076,8 +1191,9 @@ function initInfo() {
     if (!e.target.closest(".iibox")) InfoBox.verstecke(true);
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape") InfoBox.verstecke(true); });
-  window.addEventListener("scroll", () => InfoBox.verstecke(true), { passive: true });
-  window.addEventListener("resize", () => InfoBox.verstecke(true));
+  /* Kein Schliessen mehr beim Scrollen: folgeStarten() haengt sich waehrend der
+     Anzeige an scroll und resize und schliesst erst, wenn das Symbol das Bild
+     verlaesst. */
 }
 
 /* ---------- Chancenraum -----------------------------------------------------
