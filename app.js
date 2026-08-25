@@ -1423,8 +1423,16 @@ function drawChart(chart, a, days, mode = "candle") {
       return pts;
     };
     chartObj = new Chart(cv, {
+      /* Der Typ MUSS hier stehen, nicht nur am Datensatz. Steht er allein am
+         Datensatz, greift die Zerlegung der Financial-Erweiterung nicht: Chart.js
+         parst dann nur x und setzt y auf null. Die Y-Skala faellt mangels Werten
+         auf 0 bis 1 zurueck, jeder Kurs landet weit ausserhalb - gezeichnet wurde
+         auf Position -32768, also unsichtbar. Die Kerzen waren die ganze Zeit da,
+         nur nicht im Bild. Zusaetzliche Linien-Datensaetze (GD 50/200) vertragen
+         sich damit, sie tragen ihren eigenen Typ. */
+      type: "candlestick",
       data: { datasets: [
-        { type: "candlestick", label: "Kurs", data: ohlc,
+        { label: "Kurs", data: ohlc,
           color: { up: "#4FB8AC", down: "#D66A6A", unchanged: "#93A0B0" },
           borderColor: { up: "#4FB8AC", down: "#D66A6A", unchanged: "#93A0B0" } },
         { type: "line", label: "GD 50", data: smaPoints(50), borderColor: "#E0B45C",
@@ -1436,7 +1444,24 @@ function drawChart(chart, a, days, mode = "candle") {
         responsive: true, maintainAspectRatio: false, animation: false,
         interaction: { mode: "index", intersect: false },
         plugins: { legend: { labels: { color: gd, boxWidth: 18, font: { family: "Inter", size: 11 } } },
-          tooltip },
+          tooltip: { ...tooltip, callbacks: {
+            /* Die Erweiterung liefert "O: 215.53 H: ..." im englischen
+               Zahlenformat. In einer sonst durchgehend deutschen Oberflaeche
+               liest sich das als Tausendertrennung falsch. */
+            title: p => p.length
+              ? new Date(p[0].parsed.x).toLocaleDateString("de-DE",
+                  { day: "2-digit", month: "long", year: "numeric" })
+              : "",
+            label: p => {
+              const d = p.parsed;
+              if (d == null || d.o == null) return "";
+              const w = (chart.meta && chart.meta.currency) || "";
+              const z = v => money(v, w, 2);
+              return [`Eröffnung ${z(d.o)}`, `Hoch ${z(d.h)}`,
+                      `Tief ${z(d.l)}`, `Schluss ${z(d.c)}`];
+            },
+          } },
+        },
         scales: {
           x: { type: "time", time: { unit: days > 300 ? "month" : "week" },
                ticks: { color: axis, maxTicksLimit: 8, font: { family: "IBM Plex Mono", size: 10 } },
