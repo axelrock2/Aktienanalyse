@@ -1750,10 +1750,13 @@ let chartObj = null;
 let currentItem = null;
 ovl.addEventListener("click", closeDetail);
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && panel.classList.contains("open")) closeDetail(); });
-function closeDetail() { panel.classList.remove("open"); ovl.classList.remove("open"); setTimeout(() => { panel.style.display = "none"; }, 220); if (chartObj) { chartObj.destroy(); chartObj = null; } }
+function closeDetail() { if (typeof elReset === "function") elReset(); panel.classList.remove("open"); ovl.classList.remove("open"); setTimeout(() => { panel.style.display = "none"; }, 220); if (chartObj) { chartObj.destroy(); chartObj = null; } }
 
 async function openDetail(item) {
   currentItem = item;
+  /* Ergebnis des vorigen Titels verwerfen - sonst zeichnete das Overlay
+     dessen Wellen in den neuen Chart. */
+  if (typeof elReset === "function") elReset();
   panel.style.display = "block";
   requestAnimationFrame(() => { panel.classList.add("open"); ovl.classList.add("open"); });
   panel.innerHTML = `<div class="p-in">
@@ -1861,6 +1864,8 @@ function renderDetail(item, chart, fund, a) {
       <div class="chartbox"><canvas id="cv"></canvas></div>
     </div>
 
+    ${typeof elAbschnitt === "function" ? elAbschnitt() : ""}
+
     <div class="blk">
       <h3>Kennzahlen</h3>
       <div class="kv">
@@ -1914,6 +1919,9 @@ function renderDetail(item, chart, fund, a) {
     b.classList.add("on"); curMode = b.dataset.m; draw();
   });
   draw();
+  /* Elliott-Abschnitt verdrahten. Die Analyse laeuft ausschliesslich auf Klick;
+     draw() wird uebergeben, damit das Overlay nach dem Rechnen erscheint. */
+  if (typeof elVerdrahte === "function") elVerdrahte(item, chart, draw);
 }
 
 /* Zonen-Band (Signaturelement) */

@@ -131,6 +131,34 @@ sonst das 52-Wochen-Hoch – gibt es keinen, bleibt es leer. Vorher stand dort
 `max(52-Wochen-Hoch, Ziel 1 × 1,06)`: mal das eine, mal das andere, der Abstand
 reichte von 6 bis 120 %.
 
+**Elliott-Wellen.** Ein eigener Abschnitt in der Detailansicht („Elliot Wellen
+bestimmen"). Die Analyse läuft **ausschließlich auf Klick** – nie beim Laden,
+nie beim Tickerwechsel. Beim Wechsel wird ein vorhandenes Ergebnis verworfen und
+der Abschnitt zurückgesetzt.
+
+Ablauf: ZigZag-Pivots über eine Schwelle von 3 % oder, wenn die Tagesspanne
+vorliegt, ATR(14) × 2 – je nachdem was größer ist. Über die letzten 20 Pivots
+wird jedes Fenster aus fünf Wellen gegen die drei harten Regeln geprüft (Welle 2
+holt Welle 1 nicht vollständig zurück; Welle 3 ist nicht die kürzeste; Welle 4
+überlappt Welle 1 nicht). Wer eine Regel verletzt, fliegt raus – Richtlinien wie
+Alternation oder die Nähe zu 0,382/0,5/0,618/0,786 gehen nur in die Konfidenz
+ein. Laufende Impulse mit drei oder vier fertigen Wellen werden mitgezählt.
+
+Aus der besten Zählung entstehen Fibonacci-Projektionen; Level, die näher als
+1 % des Kurses beieinanderliegen, werden zu Zonen gebündelt. Gezeigt werden
+höchstens vier Zonen mit mindestens zwei Leveln, nach Score sortiert, als Bänder
+im Chart und mit Wellenlabels an den Pivots.
+
+**Findet sich keine regelkonforme Zählung, wird das gesagt** – mit Grund, und
+ohne Zonen. Bei NVIDIA etwa verletzen derzeit alle 17 geprüften Kandidaten eine
+harte Regel; dann steht dort die Meldung statt einer erfundenen Zahl.
+
+Auf Wunsch lässt sich eine Zählung speichern (`localStorage`, nur dieser
+Browser). Beim nächsten Aufruf wird sie **angeboten**, nicht automatisch
+angewendet.
+
+Elliott-Wellen sind Auslegung, keine Messung – der Abschnitt sagt das selbst.
+
 **Kennzahl-Erklärungen.** Neben Größen, die Erklärung vertragen, steht ein
 kleines **i**. Beim Überfahren mit der Maus erscheint ein Kästchen mit einer
 kurzen Erklärung, beim Wegbewegen verschwindet es; ein Klick hält es fest –
