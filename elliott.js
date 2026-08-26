@@ -10,48 +10,71 @@
    valuation.js als gewoehnliche Skripte ein und teilt sich einen globalen
    Namensraum. Ein Modul kaeme an loadChart, analyse oder chartObj nicht heran.
 
-   Wichtig zur Einordnung: Elliott-Wellen sind Auslegung, keine Messung. Zwei
-   Betrachter zaehlen dieselbe Bewegung oft verschieden. Dieses Modul legt
-   deshalb offen, WELCHE Regel eine Zaehlung traegt und welche Richtlinie sie
-   verletzt - und liefert lieber kein Ergebnis als ein erfundenes.
+   ---------------------------------------------------------------------
+   Warum dieses Modul anders rechnet als ueblich
+   ---------------------------------------------------------------------
+   Die drei harten Elliott-Regeln sind schwach: Fast jede Zickzackfolge
+   erfuellt sie irgendwo. Wer genug Fenster durchprobiert, findet immer eine
+   "gueltige" Zaehlung - auch in reinem Rauschen. Gemessen an 70 Titeln und
+   Surrogatreihen fand die fruehere Fassung auf Zufallsdaten genauso oft eine
+   Zaehlung wie auf echten Kursen (78 % gegen 80 %) und bewertete sie im
+   Median sogar hoeher.
+
+   Deshalb entscheidet hier nicht die Zaehlung selbst, sondern ihr Vergleich
+   mit dem Zufall: Dieselbe Suche laeuft ueber hunderte Surrogatreihen, die
+   aus den echten Renditen dieses Titels gebaut sind. Erst der Anteil der
+   Surrogate, die mindestens so gut abschneiden, entscheidet - der p-Wert.
+   Weil auf jedem Surrogat dieselbe Bestenauswahl laeuft, ist die
+   Mehrfachauswahl ueber alle Fenster und Ebenen automatisch mitkorrigiert.
+
+   Elliott-Wellen bleiben Auslegung, keine Messung. Dieses Modul macht die
+   Auslegung nur pruefbar - und liefert lieber kein Ergebnis als ein
+   erfundenes.
    ===================================================================== */
 
 /* ---------- Schwellen und Verhaeltnisse ---------- */
 
-/** Mindestbewegung in Prozent, damit ein Umkehrpunkt als Pivot zaehlt. */
-const EL_ZIGZAG_PCT = 0.03;
-/** Alternativ adaptiv: ATR(14) mal diesem Faktor, sofern ATR verfuegbar. */
-const EL_ATR_FACTOR = 2;
+/** Untergrenze der Pivot-Schwelle in Prozent - darunter wird Rauschen gezaehlt. */
+const EL_MIN_PCT = 0.02;
+/** Mehrere Betrachtungsebenen: ATR(14) mal diesen Faktoren. */
+const EL_SKALEN = [1.0, 1.5, 2.25, 3.5];
 const EL_ATR_PERIOD = 14;
-/** Ueber so viele der juengsten Pivots wird nach Zaehlungen gesucht. */
-const EL_MAX_PIVOTS = 20;
+/** Ueber so viele der juengsten Pivots wird je Ebene gesucht. */
+const EL_MAX_PIVOTS = 24;
 /** Unter so vielen Kerzen wird gar nicht erst gerechnet. */
-const EL_MIN_CANDLES = 60;
+const EL_MIN_CANDLES = 120;
+/** Mindestdauer je Welle in Kerzen.
+    Die ZigZag-Schwelle steuert nur die Amplitude, nicht die Dauer. Ohne diese
+    Grenze entstehen Zaehlungen, die amplitudenmaessig sauber sind und dennoch
+    Unsinn: gemessen wurde eine ueber neun Kalendertage, bei der Welle 3 und
+    Welle 4 am selben Tag endeten. Eine Welle, die auf Tagesdaten in ein oder
+    zwei Kerzen entsteht, liegt unterhalb der Aufloesung der Daten. */
+const EL_MIN_WELLE_KERZEN = 3;
 
-/** Uebliche Retracement-Verhaeltnisse. */
-const EL_RETRACE = [0.382, 0.5, 0.618, 0.786];
-/** Welle 3 aus Welle 1. */
-const EL_EXT_W3 = [1.618, 2.618, 4.236];
-/** Welle 5 aus Welle 1. */
-const EL_EXT_W5_VON_W1 = [0.618, 1.0, 1.618];
-/** Welle 5 aus der Strecke Welle 1 bis Welle 3. */
-const EL_EXT_W5_VON_W13 = [0.382, 0.618];
-/** Welle C aus Welle A. */
-const EL_EXT_WC = [1.0, 1.618];
+/** Zielverhaeltnisse je Beziehung. */
+const Z_RET2  = [0.382, 0.5, 0.618, 0.786];
+const Z_RET4  = [0.236, 0.382, 0.5];
+const Z_W3    = [1.618, 2.618, 4.236];
+const Z_W5_1  = [0.618, 1.0, 1.618];
+const Z_W5_13 = [0.382, 0.618];
+const Z_KORR  = [0.382, 0.5, 0.618];
+
+/** Streuung im Log-Verhaeltnisraum - rund 13 % Toleranz. */
+const EL_SIGMA = 0.13;
+/** Ab dieser Differenz der Retracement-Tiefen gilt Alternation als voll erfuellt. */
+const EL_ALTERNATION_VOLL = 0.30;
+
+/** Anzahl Surrogatreihen fuer den Signifikanztest. */
+const EL_N_SURROGATE = 999;
+/** Blocklaenge des Bootstraps in Handelstagen. */
+const EL_BLOCK = 20;
+
+/** Ampelgrenzen nach p-Wert. */
+const EL_P_GRUEN = 0.05;
+const EL_P_GELB  = 0.20;
 
 /** Zwei Level bilden eine Zone, wenn ihr Abstand unter diesem Anteil des Kurses liegt. */
 const EL_CLUSTER_TOL = 0.01;
-const EL_MIN_LEVEL_JE_ZONE = 2;
-const EL_MAX_ZONEN = 4;
-
-/** Gewicht je Verhaeltnis - je verbreiteter, desto schwerer. */
-const EL_GEWICHT = { 1.618: 1.0, 0.618: 1.0, 1.0: 0.8, 0.5: 0.8, 0.382: 0.6, 2.618: 0.6 };
-const EL_GEWICHT_REST = 0.4;
-
-/** Ab welchem Unterschied der Retracement-Tiefen Alternation als erfuellt gilt. */
-const EL_ALTERNATION_MIN = 0.15;
-/** Wie nah ein Retracement an einem Fibonacci-Wert liegen muss, um zu zaehlen. */
-const EL_FIB_NAEHE = 0.05;
 
 const EL_SPEICHER = "ak.elliott";
 
@@ -76,6 +99,9 @@ function elAtr(hochs, tiefs, schluss, n = EL_ATR_PERIOD) {
   const teil = tr.slice(-n);
   return teil.reduce((a, b) => a + b, 0) / teil.length;
 }
+
+function elArgMax(a, von, bis) { let k = von; for (let i = von; i <= bis; i++) if (a[i] > a[k]) k = i; return k; }
+function elArgMin(a, von, bis) { let k = von; for (let i = von; i <= bis; i++) if (a[i] < a[k]) k = i; return k; }
 
 /**
  * ZigZag-Pivots: alternierende Hoch- und Tiefpunkte.
@@ -140,136 +166,252 @@ function elDetectSwings(reihe, schwelle) {
   return pivots;
 }
 
-function elArgMax(a, von, bis) { let k = von; for (let i = von; i <= bis; i++) if (a[i] > a[k]) k = i; return k; }
-function elArgMin(a, von, bis) { let k = von; for (let i = von; i <= bis; i++) if (a[i] < a[k]) k = i; return k; }
+/**
+ * Passgenauigkeit eines Verhaeltnisses zum naechstgelegenen Zielwert.
+ *
+ *   fit = exp( −ln(r / ziel)² / (2σ²) )        ∈ (0, 1]
+ *
+ * Bewusst im Logarithmus: ln(r/ziel) ist symmetrisch, das Doppelte und die
+ * Haelfte eines Zielwerts sind gleich weit entfernt. Der frueher benutzte
+ * absolute Abstand |r − ziel| war das nicht - er war bei 0,382 rund doppelt
+ * so nachsichtig wie bei 0,786 und hat flache Korrekturen bevorzugt.
+ *
+ * @returns {{fit:number, ziel:number|null}}
+ */
+function elFit(r, ziele, sigma = EL_SIGMA) {
+  if (!(r > 0) || !isFinite(r)) return { fit: 0, ziel: null };
+  let best = 0, bestZiel = null;
+  for (const z of ziele) {
+    const d = Math.log(r / z);
+    const f = Math.exp(-(d * d) / (2 * sigma * sigma));
+    if (f > best) { best = f; bestZiel = z; }
+  }
+  return { fit: best, ziel: bestZiel };
+}
 
 /**
- * Prueft ein Fenster aus sechs Pivots (P0…P5, also fuenf Wellen) auf die
- * harten Regeln und bewertet die Richtlinien.
+ * Prueft ein Fenster aus fuenf oder sechs Pivots auf die harten Regeln und
+ * bewertet die Passung stetig.
  *
- * Wellen:  W1 = P0→P1, W2 = P1→P2, W3 = P2→P3, W4 = P3→P4, W5 = P4→P5
+ *   sechs Pivots (P0…P5) = fuenf abgeschlossene Wellen
+ *   fuenf  Pivots (P0…P4) = vier abgeschlossene Wellen, Welle 5 laeuft
+ *
+ * Kuerzere Fenster sind bewusst nicht zugelassen: Bei nur drei Wellen ist
+ * einzig Regel R1 pruefbar, die Zaehlung waere praktisch unwiderlegbar. In
+ * der Messung stammte ein knappes Viertel aller Zufallstreffer aus genau
+ * diesen Drei-Wellen-Faellen.
  *
  * Harte Regeln (Verstoss verwirft den Kandidaten):
  *   R1  |W2| < |W1|            Welle 2 holt Welle 1 nicht vollstaendig zurueck
  *   R2  |W3| ist nicht die kuerzeste von |W1|, |W3|, |W5|
  *   R3  Welle 4 dringt nicht in das Gebiet von Welle 1 ein
  *
- * @returns {object|null} Kandidat oder null bei Regelverstoss
+ * @returns {object|null} Kandidat, Verwurf oder null wenn kein Impulsmuster
  */
-function elPruefeImpuls(p) {
-  if (p.length < 6) return null;
-  const [P0, P1, P2, P3, P4, P5] = p;
-  const auf = P1.price > P0.price;             // Aufwaertsimpuls?
+function elBewerte(p) {
+  const n = p.length;
+  if (n !== 5 && n !== 6) return null;
+  const auf = p[1].price > p[0].price;
 
   // Die Punkte muessen sauber alternieren, sonst ist es kein Impuls.
-  const folge = [P0, P1, P2, P3, P4, P5];
-  for (let i = 1; i < folge.length; i++) {
-    const steigt = folge[i].price > folge[i - 1].price;
+  for (let i = 1; i < n; i++) {
+    const steigt = p[i].price > p[i - 1].price;
     if (steigt !== (auf ? i % 2 === 1 : i % 2 === 0)) return null;
   }
 
-  const w1 = Math.abs(P1.price - P0.price);
-  const w2 = Math.abs(P2.price - P1.price);
-  const w3 = Math.abs(P3.price - P2.price);
-  const w4 = Math.abs(P4.price - P3.price);
-  const w5 = Math.abs(P5.price - P4.price);
-  if (!(w1 > 0 && w3 > 0 && w5 > 0)) return null;
+  // Jede Welle braucht Zeit, nicht nur Ausschlag.
+  for (let i = 1; i < n; i++) {
+    if (p[i].index - p[i - 1].index < EL_MIN_WELLE_KERZEN) return null;
+  }
+
+  const w = [];
+  for (let i = 1; i < n; i++) w.push(Math.abs(p[i].price - p[i - 1].price));
+  const w1 = w[0], w2 = w[1], w3 = w[2], w4 = w[3], w5 = w[4];
+  if (!(w1 > 0 && w2 > 0 && w3 > 0 && w4 > 0)) return null;
 
   const verstoesse = [];
   if (!(w2 < w1)) verstoesse.push("R1: Welle 2 holt Welle 1 vollständig zurück");
-  if (w3 <= Math.min(w1, w5)) verstoesse.push("R2: Welle 3 ist die kürzeste der Antriebswellen");
   // R3: Bei Aufwaerts darf das Tief von Welle 4 nicht unter das Hoch von Welle 1.
-  const ueberlappt = auf ? P4.price <= P1.price : P4.price >= P1.price;
-  if (ueberlappt) verstoesse.push("R3: Welle 4 überlappt das Gebiet von Welle 1");
-  if (verstoesse.length) return { verworfen: true, verstoesse, pivots: folge };
+  if (auf ? p[4].price <= p[1].price : p[4].price >= p[1].price) {
+    verstoesse.push("R3: Welle 4 überlappt das Gebiet von Welle 1");
+  }
+  if (n === 6) {
+    if (!(w5 > 0)) return null;
+    if (w3 <= Math.min(w1, w5)) verstoesse.push("R2: Welle 3 ist die kürzeste der Antriebswellen");
+  }
+  if (verstoesse.length) return { verworfen: true, verstoesse, pivots: p };
 
-  /* --- Richtlinien: sie verwerfen nicht, sie gewichten --- */
-  const ret2 = w2 / w1;
-  const ret4 = w4 / w3;
-  const erfuellt = [], verfehlt = [];
-  let punkte = 0;
-
-  if (w3 >= 1.618 * w1) { punkte += 30; erfuellt.push("Welle 3 erreicht mindestens das 1,618-fache von Welle 1"); }
-  else verfehlt.push("Welle 3 bleibt unter dem 1,618-fachen von Welle 1");
+  /* --- Passung: stetig, kein Punktesystem --- */
+  const rel = [];
+  const nimm = (name, r, ziele) => { const f = elFit(r, ziele); rel.push({ name, r, fit: f.fit, ziel: f.ziel }); };
+  nimm("Welle 2 / Welle 1", w2 / w1, Z_RET2);
+  nimm("Welle 3 / Welle 1", w3 / w1, Z_W3);
+  nimm("Welle 4 / Welle 3", w4 / w3, Z_RET4);
+  if (n === 6) {
+    const w13 = Math.abs(p[3].price - p[0].price);
+    nimm("Welle 5 / Welle 1", w5 / w1, Z_W5_1);
+    if (w13 > 0) nimm("Welle 5 / Welle 1–3", w5 / w13, Z_W5_13);
+  }
+  const passung = rel.reduce((s, x) => s + x.fit, 0) / rel.length;
 
   // Alternation: eine Korrektur flach, die andere scharf.
-  if (Math.abs(ret2 - ret4) >= EL_ALTERNATION_MIN) {
-    punkte += 25;
-    erfuellt.push(`Alternation vorhanden (Welle 2 ${Math.round(ret2 * 100)} %, Welle 4 ${Math.round(ret4 * 100)} %)`);
-  } else verfehlt.push("Welle 2 und Welle 4 korrigieren ähnlich tief – keine Alternation");
-
-  const nah2 = elNaechstesFib(ret2), nah4 = elNaechstesFib(ret4);
-  if (nah2) { punkte += 15; erfuellt.push(`Welle 2 nahe ${nah2.toString().replace(".", ",")}`); }
-  else verfehlt.push("Welle 2 trifft kein übliches Verhältnis");
-  if (nah4) { punkte += 15; erfuellt.push(`Welle 4 nahe ${nah4.toString().replace(".", ",")}`); }
-  else verfehlt.push("Welle 4 trifft kein übliches Verhältnis");
-
-  // Ein Impuls, dessen Wellen zeitlich sehr ungleich sind, ist unwahrscheinlich.
-  const dauern = [P1.index - P0.index, P3.index - P2.index, P5.index - P4.index].filter(x => x > 0);
-  if (dauern.length === 3 && Math.max(...dauern) / Math.min(...dauern) <= 5) {
-    punkte += 15; erfuellt.push("Antriebswellen zeitlich ausgewogen");
-  } else verfehlt.push("Antriebswellen zeitlich stark ungleich");
+  const ret2 = w2 / w1, ret4 = w4 / w3;
+  const altern = Math.min(1, Math.abs(ret2 - ret4) / EL_ALTERNATION_VOLL);
 
   return {
-    verworfen: false, auf, pivots: folge,
+    verworfen: false, auf, pivots: p,
     laengen: { w1, w2, w3, w4, w5 }, ret2, ret4,
-    konfidenz: Math.max(0, Math.min(100, punkte)),
-    erfuellt, verfehlt, vollstaendig: true,
+    relationen: rel, passung, altern,
+    guete: 0.75 * passung + 0.25 * altern,
+    vollstaendig: n === 6,
+    abgeschlosseneWellen: n - 1,
   };
 }
 
 /**
- * Laufender Impuls: nur drei oder vier Wellen sind abgeschlossen.
- * Geprueft werden die Regeln, soweit die vorhandenen Wellen sie beruehren.
+ * Sucht ueber alle Betrachtungsebenen und alle Fenster die beste Zaehlung.
+ *
+ * Mehrere Ebenen, weil Elliott-Wellen fraktal sind: Eine einzige Schwelle
+ * greift willkuerlich eine Ebene heraus. Welche Ebene die Zaehlung traegt,
+ * wird mit ausgewiesen.
+ *
+ * @returns {{ok:boolean, guete:number, beste?:object, ...}}
  */
-function elPruefeLaufend(p) {
-  if (p.length < 4 || p.length > 5) return null;
-  const auf = p[1].price > p[0].price;
-  for (let i = 1; i < p.length; i++) {
-    const steigt = p[i].price > p[i - 1].price;
-    if (steigt !== (auf ? i % 2 === 1 : i % 2 === 0)) return null;
+function elSuche(reihe) {
+  const kurs = reihe.c[reihe.c.length - 1];
+  const atr = elAtr(reihe.h, reihe.l, reihe.c);
+  const alle = [];
+  const proSkala = new Map();
+  let verworfen = 0, gepruefte = 0;
+
+  for (const k of EL_SKALEN) {
+    const schwelle = Math.max(EL_MIN_PCT, atr && kurs > 0 ? (atr * k) / kurs : EL_MIN_PCT);
+    const pivots = elDetectSwings(reihe, schwelle).slice(-EL_MAX_PIVOTS);
+    proSkala.set(k, { schwelle, pivots });
+    if (pivots.length < 5) continue;
+
+    // Abgeschlossene Impulse: jedes Fenster aus sechs aufeinanderfolgenden Pivots
+    for (let i = 0; i + 5 < pivots.length; i++) {
+      gepruefte++;
+      const b = elBewerte(pivots.slice(i, i + 6));
+      if (!b) continue;
+      if (b.verworfen) { verworfen++; continue; }
+      alle.push({ ...b, skala: k, schwelle, letzterDerSkala: i + 5 === pivots.length - 1 });
+    }
+    // Laufender Impuls: die juengsten fuenf Pivots
+    gepruefte++;
+    const b = elBewerte(pivots.slice(-5));
+    if (b && !b.verworfen) alle.push({ ...b, skala: k, schwelle, letzterDerSkala: true });
+    else if (b) verworfen++;
   }
-  const w1 = Math.abs(p[1].price - p[0].price);
-  const w2 = Math.abs(p[2].price - p[1].price);
-  const w3 = Math.abs(p[3].price - p[2].price);
-  if (!(w1 > 0 && w3 > 0)) return null;
 
-  const verstoesse = [];
-  if (!(w2 < w1)) verstoesse.push("R1: Welle 2 holt Welle 1 vollständig zurück");
-  if (p.length === 5) {
-    const ueberlappt = auf ? p[4].price <= p[1].price : p[4].price >= p[1].price;
-    if (ueberlappt) verstoesse.push("R3: Welle 4 überlappt das Gebiet von Welle 1");
+  if (!alle.length) return { ok: false, guete: 0, gepruefte, verworfen, kurs, proSkala };
+  alle.sort((a, b) => b.guete - a.guete);
+  return { ok: true, guete: alle[0].guete, beste: alle[0], kandidaten: alle,
+           gepruefte, verworfen, kurs, atr, proSkala };
+}
+
+/* =====================================================================
+   Signifikanz - schlaegt die Zaehlung den Zufall?
+   ===================================================================== */
+
+/**
+ * Surrogatreihe per Block-Bootstrap der Log-Renditen.
+ *
+ * Bloecke von EL_BLOCK Handelstagen erhalten Volatilitaetscluster und
+ * kurzfristige Autokorrelation - beides gibt es in echten Kursen und beides
+ * erzeugt fuer sich genommen schon Zickzackmuster. Zerstoert wird nur die
+ * uebergeordnete Abfolge, also genau das, was eine Wellenzaehlung behauptet.
+ *
+ * Bewusst nicht i.i.d. gezogen: Das waere ein zu leicht zu schlagender
+ * Gegner und wuerde die Signifikanz schoenrechnen.
+ */
+function elSurrogat(reihe, rnd, L = EL_BLOCK) {
+  const n = reihe.c.length;
+  const ret = [], spanne = [];
+  for (let i = 1; i < n; i++) ret.push(Math.log(reihe.c[i] / reihe.c[i - 1]));
+  for (let i = 0; i < n; i++) {
+    spanne.push([(reihe.h[i] - reihe.c[i]) / reihe.c[i], (reihe.c[i] - reihe.l[i]) / reihe.c[i]]);
   }
-  if (verstoesse.length) return { verworfen: true, verstoesse, pivots: p };
+  const m = ret.length;
+  if (m < L) return null;
+  const neu = [];
+  while (neu.length < m) {
+    const s = Math.floor(rnd() * m);
+    for (let j = 0; j < L && neu.length < m; j++) neu.push(ret[(s + j) % m]);
+  }
+  const c = [reihe.c[0]], h = [reihe.h[0]], l = [reihe.l[0]];
+  for (let i = 1; i < n; i++) {
+    const preis = c[i - 1] * Math.exp(neu[i - 1]);
+    c.push(preis);
+    const sp = spanne[Math.floor(rnd() * spanne.length)];
+    h.push(preis * (1 + Math.abs(sp[0])));
+    l.push(preis * (1 - Math.abs(sp[1])));
+  }
+  return { t: reihe.t, c, h, l };
+}
 
-  const erfuellt = [], verfehlt = [];
-  let punkte = 0;
-  if (w3 >= 1.618 * w1) { punkte += 35; erfuellt.push("Welle 3 erreicht mindestens das 1,618-fache von Welle 1"); }
-  else verfehlt.push("Welle 3 bleibt unter dem 1,618-fachen von Welle 1");
-  const nah2 = elNaechstesFib(w2 / w1);
-  if (nah2) { punkte += 25; erfuellt.push(`Welle 2 nahe ${nah2.toString().replace(".", ",")}`); }
-  else verfehlt.push("Welle 2 trifft kein übliches Verhältnis");
-  // Eine laufende Zaehlung ist per se unsicherer als eine abgeschlossene.
-  punkte += 10;
+/** Einfacher, reproduzierbarer Zufallsgenerator - gleicher Titel, gleiches Ergebnis. */
+function elZufall(saat) {
+  let s = saat >>> 0 || 1;
+  return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+}
 
+/**
+ * Empirischer p-Wert der beobachteten Guete.
+ *
+ *   p = (1 + #{Surrogate mit Guete ≥ beobachtet}) / (N + 1)
+ *
+ * Die Eins im Zaehler ist kein Schoenheitsfehler, sondern korrekt: Sie
+ * verhindert p = 0, das bei endlich vielen Ziehungen nie belegbar waere.
+ *
+ * Weil auf jedem Surrogat dieselbe Suche mit derselben Bestenauswahl laeuft,
+ * ist die Mehrfachauswahl ueber Fenster und Ebenen bereits eingerechnet.
+ */
+function elPWert(reihe, beobachtet, N, rnd) {
+  let mindestensSoGut = 0, gerechnet = 0, mitZaehlung = 0;
+  let summe = 0, max = 0;
+  for (let i = 0; i < N; i++) {
+    const s = elSurrogat(reihe, rnd);
+    if (!s) break;
+    const erg = elSuche(s);
+    gerechnet++;
+    /* Surrogate ohne jede regelkonforme Zaehlung zaehlen mit Guete null in
+       den Test ein - sie schlagen die Beobachtung nicht. In den Mittelwert
+       gehoeren sie aber nicht: Der wuerde sonst "keine Zaehlung gefunden" und
+       "schlechte Zaehlung gefunden" zu einer Zahl verruehren. Beides wird
+       getrennt ausgewiesen. */
+    if (erg.ok) {
+      mitZaehlung++;
+      summe += erg.guete;
+      if (erg.guete > max) max = erg.guete;
+    }
+    if (erg.guete >= beobachtet) mindestensSoGut++;
+  }
+  if (!gerechnet) return null;
   return {
-    verworfen: false, auf, pivots: p,
-    laengen: { w1, w2, w3 },
-    konfidenz: Math.max(0, Math.min(100, punkte)),
-    erfuellt, verfehlt, vollstaendig: false,
-    abgeschlosseneWellen: p.length - 1,
+    p: (1 + mindestensSoGut) / (gerechnet + 1),
+    n: gerechnet,
+    mitZaehlung,
+    soGut: mindestensSoGut,
+    mittelZufall: mitZaehlung ? summe / mitZaehlung : null,
+    maxZufall: mitZaehlung ? max : null,
   };
 }
 
-/** Naechstes uebliches Retracement-Verhaeltnis, falls nah genug - sonst null. */
-function elNaechstesFib(r) {
-  let best = null, dist = Infinity;
-  for (const f of EL_RETRACE) {
-    const d = Math.abs(r - f);
-    if (d < dist) { dist = d; best = f; }
-  }
-  return dist <= EL_FIB_NAEHE ? best : null;
+/** Ampelstufe aus dem p-Wert. */
+function elAmpel(p) {
+  if (p <= EL_P_GRUEN) return { stufe: "gruen", text: "tragfähig",
+    erklaerung: `Nur ${(p * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} % der Zufallsreihen erreichen diese Passung.` };
+  if (p <= EL_P_GELB) return { stufe: "gelb", text: "grenzwertig",
+    erklaerung: `${(p * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} % der Zufallsreihen erreichen diese Passung – die Zählung ist möglich, aber nicht belegt.` };
+  return { stufe: "rot", text: "nicht vom Zufall zu unterscheiden",
+    erklaerung: `${(p * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} % der Zufallsreihen erreichen diese Passung ebenfalls. Aus dieser Zählung lässt sich nichts ableiten.` };
 }
+
+/* =====================================================================
+   Ableitungen - Ziel, Einstieg, Invalidierung
+   ===================================================================== */
 
 /**
  * Retracement-Level einer Welle.
@@ -277,7 +419,7 @@ function elNaechstesFib(r) {
  * Richtungsunabhaengig: Bei einer Abwaertswelle ist (ende − start) negativ,
  * das Level liegt dann oberhalb des Endes.
  */
-function elRetracement(start, ende, ratios = EL_RETRACE) {
+function elRetracement(start, ende, ratios) {
   return ratios.map(r => ({ level: ende - (ende - start) * r, ratio: r }));
 }
 
@@ -290,170 +432,235 @@ function elExtension(basis, laenge, richtung, ratios) {
 }
 
 /**
- * Projektionen aus einer Zaehlung.
+ * Zielzonen, Einstiegsbereich, Invalidierung und Chance-Risiko-Verhaeltnis.
  *
- * Bewusst alle Beziehungen, die die Zaehlung hergibt - nicht nur die der
- * naechsten Welle. Zonen entstehen durch ZUSAMMENFALL mehrerer Level aus
- * verschiedenen Herleitungen; mit nur einer Handvoll Level ueber eine weite
- * Preisspanne trifft nie etwas zusammen, und das Verfahren liefe leer.
+ * Anders als frueher werden NICHT alle denkbaren Beziehungen aufgespannt.
+ * Das erzeugte zwar zuverlaessig Zonen, aber durch die schiere Menge an
+ * Leveln - Zusammenfall aus Ueberfuellung ist kein Beleg. Hier stehen nur
+ * die Projektionen der Welle, die tatsaechlich aussteht.
  *
- * Enthalten sind:
- *   Retracements  der letzten abgeschlossenen Welle, des Gesamtimpulses und
- *                 (sofern vorhanden) von Welle 3
- *   Extensions    Welle 3 aus Welle 1, Welle 5 aus Welle 1 und aus Welle 1–3,
- *                 Welle C aus Welle A
+ * Die Invalidierung ist der eigentliche Gewinn: Elliott definiert je Zaehlung
+ * einen exakten Preis, ab dem sie widerlegt ist. Erst damit wird aus einer
+ * Auslegung eine rechenbare Position.
  *
- * @param {object} kand Kandidat aus elPruefeImpuls oder elPruefeLaufend
- * @param {Array} folgend Pivots NACH dem Kandidaten (fuer A–B–C nach dem Impuls)
+ * @param {object} kand   Kandidat aus elBewerte
+ * @param {number} kurs   aktueller Kurs
+ * @param {boolean} aktuell  reicht die Zaehlung bis an den Rand der Reihe?
+ * @param {number} atr    mittlere Tagesspanne, zur Einordnung des Stop-Abstands
  */
-function elProjektionen(kand, folgend = []) {
+function elAbleitungen(kand, kurs, aktuell, atr) {
   const p = kand.pivots;
   const richtung = kand.auf ? 1 : -1;
-  const raus = [];
-  const nimm = (liste, herkunft) => liste.forEach(x => raus.push({ ...x, herkunft }));
+  const ziele = [];
+  let einstieg = null, invalid = null, erstesZiel = null, lage = "";
 
   if (kand.vollstaendig) {
-    const w1 = Math.abs(p[1].price - p[0].price);
-    const w13 = Math.abs(p[3].price - p[0].price);
-    // Nach fuenf Wellen folgt eine Korrektur - Retracements des Gesamtwegs.
-    nimm(elRetracement(p[0].price, p[5].price), "Korrektur des Gesamtimpulses");
-    // Welle 5 einzeln zurueckgerechnet: haeufige erste Auffanglinie.
-    nimm(elRetracement(p[4].price, p[5].price), "Retracement von Welle 5");
-    // Welle 3 zurueckgerechnet - deren Ende traegt oft als Marke.
-    nimm(elRetracement(p[2].price, p[3].price), "Retracement von Welle 3");
-    // Haette der Impuls weiter getragen: die Welle-5-Ziele bleiben als Marken.
-    nimm(elExtension(p[4].price, w1, richtung, EL_EXT_W5_VON_W1), "Welle 5 aus Welle 1");
-    nimm(elExtension(p[4].price, w13, richtung, EL_EXT_W5_VON_W13), "Welle 5 aus Welle 1–3");
+    /* Fuenf Wellen stehen - es folgt eine Korrektur gegen die Impulsrichtung.
+       Deren Ziel ist zugleich der Bereich, in dem ein Wiedereinstieg IN
+       Impulsrichtung liegt. */
+    const rets = elRetracement(p[0].price, p[5].price, Z_KORR);
+    rets.forEach(x => ziele.push({ ...x, herkunft: "Korrektur des Gesamtimpulses" }));
 
-    /* Welle C, sobald A und B vorliegen. Ohne die beiden Punkte waere die
-       Formel nicht anwendbar - dann wird sie weggelassen, nicht geraten. */
-    if (folgend.length >= 2) {
-      const A = folgend[0], B = folgend[1];
-      const wa = Math.abs(A.price - p[5].price);
-      nimm(elExtension(B.price, wa, -richtung, EL_EXT_WC), "Welle C aus Welle A");
+    // Klassischer Einstiegsbereich: 0,5 bis 0,618 des Gesamtimpulses.
+    const a = p[5].price - (p[5].price - p[0].price) * 0.5;
+    const b = p[5].price - (p[5].price - p[0].price) * 0.618;
+    einstieg = { low: Math.min(a, b), high: Math.max(a, b),
+      herleitung: "0,5 bis 0,618 des Gesamtimpulses (Welle 0 → 5)" };
+    // Haerteste Regel: Eine Korrektur ueber den Startpunkt hinaus verwirft die Zaehlung.
+    invalid = { level: p[0].price, regel: "Korrektur läuft über den Ausgangspunkt von Welle 1 hinaus" };
+    erstesZiel = { level: p[5].price, herleitung: "Rücklauf an das Ende von Welle 5" };
+    lage = "Impuls abgeschlossen – eine Korrektur steht an.";
+  } else {
+    /* Vier Wellen stehen, Welle 5 laeuft. Der Einstieg lag im Gebiet von
+       Welle 4; ob er noch offen ist, sagt der aktuelle Kurs. */
+    const w1 = kand.laengen.w1;
+    const w13 = Math.abs(p[3].price - p[0].price);
+    elExtension(p[4].price, w1, richtung, Z_W5_1)
+      .forEach(x => ziele.push({ ...x, herkunft: "Welle 5 aus Welle 1" }));
+    if (w13 > 0) elExtension(p[4].price, w13, richtung, Z_W5_13)
+      .forEach(x => ziele.push({ ...x, herkunft: "Welle 5 aus Welle 1–3" }));
+
+    /* Einstiegsbereich am BEOBACHTETEN Ende der Welle 4, nicht an einem
+       theoretischen Retracement. Wo Welle 4 haette enden koennen, ist eine
+       Projektion; wo sie geendet hat, ist eine Tatsache - P4 steht fest.
+       Das Band reicht von P4 bis 38,2 % in die Welle 4 zurueck: So weit darf
+       ein Ruecksetzer in Welle 5 laufen und bleibt mit der Zaehlung vereinbar.
+
+       Frueher war das Band an die Invalidierung geklemmt. Dort wird der
+       Abstand zum Stop null und das Chance-Risiko-Verhaeltnis strebt gegen
+       unendlich - eine Zahl, die gross aussieht und nichts bedeutet. */
+    const tiefe = 0.382 * kand.laengen.w4;
+    einstieg = kand.auf
+      ? { low: p[4].price, high: p[4].price + tiefe,
+          herleitung: "Ende von Welle 4 bis 38,2 % zurück in Welle 4" }
+      : { low: p[4].price - tiefe, high: p[4].price,
+          herleitung: "Ende von Welle 4 bis 38,2 % zurück in Welle 4" };
+    invalid = { level: p[1].price, regel: "Welle 4 dringt in das Gebiet von Welle 1 ein (Regel R3)" };
+    const konservativ = ziele.find(z => z.ratio === 0.618 && z.herkunft === "Welle 5 aus Welle 1");
+    erstesZiel = konservativ ? { level: konservativ.level, herleitung: "Welle 5 erreicht 0,618 von Welle 1" } : null;
+    lage = "Vier Wellen abgeschlossen – Welle 5 läuft.";
+  }
+
+  // Liegt der Kurs noch im Einstiegsbereich?
+  if (einstieg) {
+    einstieg.mitte = (einstieg.low + einstieg.high) / 2;
+    einstieg.aktiv = kurs >= einstieg.low && kurs <= einstieg.high;
+    einstieg.verlassen = kand.auf ? kurs > einstieg.high : kurs < einstieg.low;
+  }
+
+  /* Chance-Risiko-Verhaeltnis.
+        CRV = |Ziel − Einstieg| / |Einstieg − Invalidierung|
+
+     Bezugspunkt ist die Mitte des Einstiegsbereichs - ein definierter Punkt.
+     Eine Spanne ueber das ganze Band waere irrefuehrend: Am Rand, der dicht
+     an der Invalidierung liegt, geht das Risiko gegen null und das
+     Verhaeltnis gegen unendlich. Bei einer Zaehlung, die Regel R3 nur knapp
+     erfuellt, entstand so ein CRV von 22 - eine Zahl, die allein die Naehe
+     zweier Linien spiegelt, nicht die Qualitaet des Aufbaus.
+
+     Entscheidend ist deshalb der Stop-Abstand im Verhaeltnis zur mittleren
+     Tagesspanne: Liegt die Invalidierung naeher als eine ATR, wird sie schon
+     vom normalen Tagesrauschen ausgeloest. Das Verhaeltnis waere dann
+     rechnerisch gross und praktisch wertlos. */
+  let crv = null;
+  if (einstieg && invalid && erstesZiel) {
+    const risiko = Math.abs(einstieg.mitte - invalid.level);
+    const chance = Math.abs(erstesZiel.level - einstieg.mitte);
+    if (risiko > 0) {
+      const inAtr = atr > 0 ? risiko / atr : null;
+      crv = {
+        wert: chance / risiko,
+        risiko, chance,
+        stopProzent: (risiko / kurs) * 100,
+        stopInAtr: inAtr,
+        // Unter einer ATR liegt der Stop im Tagesrauschen.
+        imRauschen: inAtr != null && inAtr < 1,
+        /* Beim abgeschlossenen Impuls folgt das Verhaeltnis allein aus den
+           festen Verhaeltnissen 0,5 und 0,618 des Einstiegsbands und ist
+           damit fuer JEDEN Titel gleich (rund 1,27). Es beschreibt die
+           Methode, nicht diesen Titel - das gehoert dazugesagt. */
+        strukturell: kand.vollstaendig,
+      };
     }
-    return raus;
   }
 
-  const fertig = kand.abgeschlosseneWellen;
-  const w1 = Math.abs(p[1].price - p[0].price);
-  if (fertig >= 2) {
-    nimm(elExtension(p[2].price, w1, richtung, EL_EXT_W3), "Welle 3 aus Welle 1");
-  }
-  if (fertig >= 3) {
-    // Welle 4 steht aus oder laeuft: Retracement von Welle 3.
-    nimm(elRetracement(p[2].price, p[3].price), "Ziel Welle 4 (Retracement von Welle 3)");
-    nimm(elRetracement(p[0].price, p[3].price), "Retracement der Strecke Welle 1–3");
-  }
-  if (fertig >= 4) {
-    const w13 = Math.abs(p[3].price - p[0].price);
-    nimm(elExtension(p[4].price, w1, richtung, EL_EXT_W5_VON_W1), "Welle 5 aus Welle 1");
-    nimm(elExtension(p[4].price, w13, richtung, EL_EXT_W5_VON_W13), "Welle 5 aus Welle 1–3");
-  }
-  return raus;
-}
-
-/** Gewicht eines Verhaeltnisses. */
-function elGewicht(r) {
-  const k = Object.keys(EL_GEWICHT).find(x => Math.abs(+x - r) < 1e-9);
-  return k ? EL_GEWICHT[k] : EL_GEWICHT_REST;
+  return { ziele, einstieg: aktuell ? einstieg : null, invalid,
+           erstesZiel, crv: aktuell ? crv : null, lage };
 }
 
 /**
- * Benachbarte Level zu Zonen buendeln.
+ * Level zu Zonen buendeln, wo sie wirklich zusammenfallen.
  * Zwei Level gehoeren zusammen, wenn |lᵢ − lⱼ| / kurs < EL_CLUSTER_TOL.
- * Score = Summe der Gewichte, auf 0–100 normiert.
+ * Einzelne Level werden nicht unterschlagen - sie stehen als Zone mit einem
+ * Level da. Frueher galt eine Mindestzahl von zwei, was Level verschwinden
+ * liess, obwohl sie hergeleitet waren.
  */
-function elClusterZonen(level, kurs) {
+function elZonen(level, kurs) {
   const gueltig = level.filter(x => isFinite(x.level) && x.level > 0)
                        .sort((a, b) => a.level - b.level);
   if (!gueltig.length || !(kurs > 0)) return [];
-
   const gruppen = [];
   let aktuell = [gueltig[0]];
   for (let i = 1; i < gueltig.length; i++) {
-    const vorher = aktuell[aktuell.length - 1].level;
-    if (Math.abs(gueltig[i].level - vorher) / kurs < EL_CLUSTER_TOL) aktuell.push(gueltig[i]);
-    else { gruppen.push(aktuell); aktuell = [gueltig[i]]; }
+    if (Math.abs(gueltig[i].level - aktuell[aktuell.length - 1].level) / kurs < EL_CLUSTER_TOL) {
+      aktuell.push(gueltig[i]);
+    } else { gruppen.push(aktuell); aktuell = [gueltig[i]]; }
   }
   gruppen.push(aktuell);
-
-  const zonen = gruppen
-    .filter(g => g.length >= EL_MIN_LEVEL_JE_ZONE)
-    .map(g => {
-      const werte = g.map(x => x.level);
-      const roh = g.reduce((s, x) => s + elGewicht(x.ratio), 0);
-      return {
-        low: Math.min(...werte), high: Math.max(...werte),
-        mid: werte.reduce((a, b) => a + b, 0) / werte.length,
-        hits: g.map(x => ({ ratio: x.ratio, herkunft: x.herkunft, level: x.level })),
-        roh,
-      };
-    });
-  if (!zonen.length) return [];
-  const maxRoh = Math.max(...zonen.map(z => z.roh));
-  zonen.forEach(z => { z.score = Math.round(z.roh / maxRoh * 100); });
-  return zonen.sort((a, b) => b.score - a.score).slice(0, EL_MAX_ZONEN);
+  return gruppen.map(g => {
+    const werte = g.map(x => x.level);
+    return {
+      low: Math.min(...werte), high: Math.max(...werte),
+      mid: werte.reduce((a, b) => a + b, 0) / werte.length,
+      hits: g.map(x => ({ ratio: x.ratio, herkunft: x.herkunft, level: x.level })),
+    };
+  }).sort((a, b) => Math.abs(a.mid - kurs) - Math.abs(b.mid - kurs));
 }
 
 /**
- * Gesamtanalyse. Gibt immer ein Objekt zurueck - im Zweifel mit grund,
- * nie mit erfundenen Zonen.
+ * Wurde eine Zone seit dem Ende der Zaehlung bereits angelaufen?
+ *
+ * Wichtig bei historischen Zaehlungen: Ein "Ziel", das der Kurs vor Wochen
+ * durchlaufen hat, ist kein Ziel mehr. Statt die Zone nur als "historisch" zu
+ * beschriften, wird nachgesehen, ob eine Kerze seither in ihr gehandelt hat.
  */
-function elAnalysiere(reihe) {
+function elBereitsErreicht(reihe, vonIndex, low, high) {
+  for (let i = Math.max(0, vonIndex); i < reihe.c.length; i++) {
+    if (reihe.l[i] <= high && reihe.h[i] >= low) return true;
+  }
+  return false;
+}
+
+/* =====================================================================
+   Gesamtanalyse
+   ===================================================================== */
+
+/**
+ * Gibt immer ein Objekt zurueck - im Zweifel mit grund, nie mit erfundenen
+ * Zonen. Ziel- und Einstiegszonen entstehen nur, wenn der Signifikanztest
+ * die Zaehlung traegt.
+ */
+function elAnalysiere(reihe, saat = 1) {
   if (!reihe || !Array.isArray(reihe.c) || reihe.c.length < EL_MIN_CANDLES) {
-    return { ok: false, grund: `Zu wenige Kursdaten (${reihe && reihe.c ? reihe.c.length : 0} Kerzen, mindestens ${EL_MIN_CANDLES} nötig).` };
+    return { ok: false, grund: `Zu wenige Kursdaten (${reihe && reihe.c ? reihe.c.length : 0} Kerzen, mindestens ${EL_MIN_CANDLES} nötig – der Signifikanztest braucht genug Renditen für den Bootstrap).` };
   }
   const kurs = reihe.c[reihe.c.length - 1];
-  const spanne = elAtr(reihe.h, reihe.l, reihe.c);
-  // Adaptive Schwelle, wenn die Tagesspanne vorliegt - sonst der feste Wert.
-  const schwelle = spanne && kurs > 0
-    ? Math.max(EL_ZIGZAG_PCT, (spanne * EL_ATR_FACTOR) / kurs)
-    : EL_ZIGZAG_PCT;
+  const suche = elSuche(reihe);
 
-  const alle = elDetectSwings(reihe, schwelle);
-  const pivots = alle.slice(-EL_MAX_PIVOTS);
-  if (pivots.length < 4) {
-    return { ok: false, schwelle, pivots,
-      grund: `Zu wenige Umkehrpunkte gefunden (${pivots.length} bei einer Schwelle von ${(schwelle * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %). Für eine Zählung braucht es mindestens vier.` };
+  if (!suche.ok) {
+    const ebenen = [...suche.proSkala.values()].map(x => x.pivots.length).join(", ");
+    return { ok: false, kurs, verworfen: suche.verworfen, gepruefte: suche.gepruefte,
+      grund: suche.verworfen
+        ? `Auf keiner der ${EL_SKALEN.length} Betrachtungsebenen bildet die Kursbewegung einen regelkonformen Impuls. ${suche.verworfen} von ${suche.gepruefte} geprüften Fenstern verletzen eine harte Regel.`
+        : `Die Umkehrpunkte bilden auf keiner Betrachtungsebene eine impulsähnliche Abfolge (Umkehrpunkte je Ebene: ${ebenen}).` };
   }
 
-  const kandidaten = [], verworfen = [];
-  // Abgeschlossene Impulse: jedes Fenster aus sechs aufeinanderfolgenden Pivots
-  for (let i = 0; i + 5 < pivots.length; i++) {
-    const k = elPruefeImpuls(pivots.slice(i, i + 6));
-    if (!k) continue;
-    if (k.verworfen) verworfen.push(k); else kandidaten.push(k);
-  }
-  // Laufende Impulse: die juengsten vier oder fuenf Pivots
-  for (const laenge of [5, 4]) {
-    if (pivots.length >= laenge) {
-      const k = elPruefeLaufend(pivots.slice(-laenge));
-      if (k && !k.verworfen) kandidaten.push(k);
-      else if (k) verworfen.push(k);
-    }
-  }
+  const beste = suche.beste;
 
-  if (!kandidaten.length) {
-    const gruende = [...new Set(verworfen.flatMap(v => v.verstoesse))];
-    return { ok: false, schwelle, pivots, verworfen: verworfen.length,
-      grund: verworfen.length
-        ? `Alle ${verworfen.length} geprüften Kandidaten verletzen mindestens eine harte Regel: ${gruende.join("; ")}.`
-        : "Die Umkehrpunkte bilden keine impulsähnliche Abfolge." };
-  }
+  /* Reicht die Zaehlung bis an den Rand? Nur dann ist ein Einstiegsbereich
+     ueberhaupt sinnvoll - eine Zaehlung, die vor achtzig Kerzen endete,
+     beschreibt eine Bewegung, die laengst weitergelaufen ist. */
+  const letzterPivot = beste.pivots[beste.pivots.length - 1];
+  const letzterIdx = letzterPivot.index;
+  const abstand = reihe.c.length - 1 - letzterIdx;
+  const aktuell = !!beste.letzterDerSkala;
+  /* Der letzte Punkt kann das laufende Extrem sein - dann ist die Welle, die
+     dort endet, noch nicht bestaetigt abgeschlossen. Das aendert die Aussage
+     erheblich und muss dabeistehen. */
+  const letzterOffen = !!letzterPivot.offen;
 
-  kandidaten.sort((a, b) => b.konfidenz - a.konfidenz);
-  const beste = kandidaten[0];
-  /* Pivots nach dem Kandidaten heraussuchen - aus ihnen entstehen A und B
-     einer folgenden Korrektur und damit die Welle-C-Projektion. */
-  const letzterIdx = beste.pivots[beste.pivots.length - 1].index;
-  const folgend = pivots.filter(x => x.index > letzterIdx);
-  const zonen = elClusterZonen(elProjektionen(beste, folgend), kurs);
+  // Signifikanz gegen Surrogatreihen desselben Titels.
+  const rnd = elZufall(saat);
+  const sig = elPWert(reihe, beste.guete, EL_N_SURROGATE, rnd);
+  if (!sig) {
+    return { ok: false, kurs, grund: "Der Signifikanztest ließ sich nicht rechnen – die Reihe ist für den Bootstrap zu kurz." };
+  }
+  const ampel = elAmpel(sig.p);
+
+  /* Bei Rot werden bewusst keine Ziele und kein Einstieg gezeigt. Die
+     Zaehlung selbst bleibt sichtbar, damit nachvollziehbar ist, was geprueft
+     wurde - aber sie traegt nichts. */
+  const traegt = ampel.stufe !== "rot";
+  const abl = traegt ? elAbleitungen(beste, kurs, aktuell, suche.atr) : null;
+  const zielZonen = abl ? elZonen(abl.ziele, kurs) : [];
+  // Seit dem letzten Punkt der Zaehlung: schon angelaufen oder noch offen?
+  zielZonen.forEach(z => { z.erreicht = elBereitsErreicht(reihe, letzterIdx, z.low, z.high); });
+  if (abl && abl.einstieg) {
+    abl.einstieg.erreicht = elBereitsErreicht(reihe, letzterIdx, abl.einstieg.low, abl.einstieg.high);
+  }
 
   return {
-    ok: true, schwelle, kurs, pivots,
-    beste, alternativen: kandidaten.slice(1, 4), zonen,
-    verworfen: verworfen.length,
+    ok: true, kurs, beste, ampel, sig, aktuell, abstand, traegt, letzterOffen,
+    zielZonen,
+    einstieg: abl ? abl.einstieg : null,
+    invalid: abl ? abl.invalid : null,
+    erstesZiel: abl ? abl.erstesZiel : null,
+    crv: abl ? abl.crv : null,
+    lage: abl ? abl.lage : "",
+    alternativen: suche.kandidaten.slice(1, 4),
+    gepruefte: suche.gepruefte, verworfen: suche.verworfen,
+    skala: beste.skala, schwelle: beste.schwelle,
+    pivots: suche.proSkala.get(beste.skala).pivots,
   };
 }
 
@@ -480,8 +687,31 @@ const ElliottSpeicher = {
 };
 
 /* =====================================================================
-   Chart-Overlay - Zonen als Baender, Wellenlabels an den Pivots
+   Chart-Overlay
+
+   Drei getrennte Darstellungen, weil es drei verschiedene Aussagen sind:
+     Einstiegsbereich  gruen, gefuellt   - wo ein Einstieg zur Zaehlung passt
+     Zielzonen         tuerkis, gestreift - wohin die naechste Welle projiziert
+     Invalidierung     rot, durchgezogen  - ab wo die Zaehlung widerlegt ist
    ===================================================================== */
+
+/**
+ * Beschriftung mit dunklem Plaettchen darunter.
+ *
+ * Ohne Hintergrund verschwindet der Text, sobald er ueber Kerzen oder eine
+ * Wellenmarke faellt - und genau das passiert am rechten Rand regelmaessig,
+ * weil dort sowohl die Invalidierungslinie als auch der juengste Pivot sitzen.
+ */
+function elSchild(c, text, x, y, ausrichtung, farbe) {
+  c.font = '600 9.5px "IBM Plex Mono", monospace';
+  c.textAlign = ausrichtung; c.textBaseline = "bottom";
+  const br = c.measureText(text).width;
+  const links = ausrichtung === "right" ? x - br : x;
+  c.fillStyle = "rgba(21,25,32,.82)";
+  c.fillRect(links - 3, y - 10, br + 6, 12);
+  c.fillStyle = farbe;
+  c.fillText(text, x, y);
+}
 
 /* Zustand des gerade angezeigten Charts. Bewusst modulweit und nicht am
    Chart-Objekt: drawChart() zerstoert den Chart bei jedem Wechsel von
@@ -507,31 +737,61 @@ const elOverlay = {
       const idx = piv.index - von;
       return idx < 0 || idx >= sichtbar ? null : sx.getPixelForValue(idx);
     };
+    const band = (low, high) => {
+      const y1 = sy.getPixelForValue(high), y2 = sy.getPixelForValue(low);
+      if (!isFinite(y1) || !isFinite(y2)) return null;
+      return { oben: Math.min(y1, y2), hoehe: Math.max(2, Math.abs(y2 - y1)) };
+    };
 
     c.save();
     c.beginPath(); c.rect(b.left, b.top, b.width, b.height); c.clip();
 
-    // Zonen als halbtransparente Baender
-    for (const z of elCurrent.zonen || []) {
-      const y1 = sy.getPixelForValue(z.high), y2 = sy.getPixelForValue(z.low);
-      if (!isFinite(y1) || !isFinite(y2)) continue;
-      const oben = Math.min(y1, y2), hoehe = Math.max(2, Math.abs(y2 - y1));
-      const deckung = 0.10 + (z.score / 100) * 0.16;
-      c.fillStyle = `rgba(79,184,172,${deckung.toFixed(3)})`;
-      c.fillRect(b.left, oben, b.width, hoehe);
-      c.strokeStyle = "rgba(79,184,172,.55)";
+    // --- Zielzonen: tuerkis. Bereits angelaufene blasser. ---
+    for (const z of elCurrent.zielZonen || []) {
+      const g = band(z.low, z.high); if (!g) continue;
+      c.fillStyle = z.erreicht ? "rgba(79,184,172,.07)" : "rgba(79,184,172,.20)";
+      c.fillRect(b.left, g.oben, b.width, g.hoehe);
+      c.strokeStyle = z.erreicht ? "rgba(79,184,172,.28)" : "rgba(79,184,172,.65)";
       c.setLineDash([4, 3]); c.lineWidth = 1;
-      c.beginPath(); c.moveTo(b.left, oben); c.lineTo(b.right, oben);
-      c.moveTo(b.left, oben + hoehe); c.lineTo(b.right, oben + hoehe); c.stroke();
+      c.beginPath(); c.moveTo(b.left, g.oben); c.lineTo(b.right, g.oben);
+      c.moveTo(b.left, g.oben + g.hoehe); c.lineTo(b.right, g.oben + g.hoehe); c.stroke();
       c.setLineDash([]);
     }
 
-    // Wellenlabels an den Pivots
+    // --- Einstiegsbereich: gruen, deutlicher als die Ziele ---
+    const e = elCurrent.einstieg;
+    if (e) {
+      const g = band(e.low, e.high);
+      if (g) {
+        c.fillStyle = "rgba(84,177,131,.22)";
+        c.fillRect(b.left, g.oben, b.width, g.hoehe);
+        c.strokeStyle = "rgba(84,177,131,.8)"; c.lineWidth = 1.2;
+        c.strokeRect(b.left + .5, g.oben + .5, b.width - 1, g.hoehe - 1);
+        elSchild(c, "EINSTIEG", b.left + 6, g.oben - 3, "left", "rgba(84,177,131,.95)");
+      }
+    }
+
+    // --- Invalidierung: rote Linie, die Zaehlung endet dort ---
+    const iv = elCurrent.invalid;
+    if (iv) {
+      const y = sy.getPixelForValue(iv.level);
+      if (isFinite(y)) {
+        c.strokeStyle = "rgba(224,106,114,.9)"; c.lineWidth = 1.4;
+        c.setLineDash([7, 4]);
+        c.beginPath(); c.moveTo(b.left, y); c.lineTo(b.right, y); c.stroke();
+        c.setLineDash([]);
+        elSchild(c, "INVALIDIERUNG", b.right - 6, y - 3, "right", "rgba(224,106,114,.95)");
+      }
+    }
+
+    // --- Wellenlabels an den Pivots ---
     c.font = '600 10px "IBM Plex Mono", monospace';
     c.textAlign = "center"; c.textBaseline = "middle";
+    const linien = [];
     for (const m of elCurrent.marken || []) {
       const x = xFuer(m), y = sy.getPixelForValue(m.price);
       if (x == null || !isFinite(x) || !isFinite(y)) continue;
+      linien.push({ x, y });
       const oben = m.type === "high";
       const my = oben ? y - 13 : y + 13;
       c.beginPath(); c.arc(x, my, 8, 0, Math.PI * 2);
@@ -541,6 +801,13 @@ const elOverlay = {
       // Verbindung zum Kurspunkt
       c.beginPath(); c.moveTo(x, oben ? my + 8 : my - 8); c.lineTo(x, y);
       c.strokeStyle = "rgba(79,184,172,.5)"; c.stroke();
+    }
+    // Zickzack zwischen den Punkten - macht die Zaehlung als Linienzug lesbar
+    if (linien.length > 1) {
+      c.beginPath(); c.moveTo(linien[0].x, linien[0].y);
+      for (let i = 1; i < linien.length; i++) c.lineTo(linien[i].x, linien[i].y);
+      c.strokeStyle = "rgba(79,184,172,.45)"; c.lineWidth = 1.2;
+      c.setLineDash([3, 3]); c.stroke(); c.setLineDash([]);
     }
     c.restore();
   },
@@ -567,9 +834,18 @@ function elAbschnitt() {
     <h3>Elliot Wellen bestimmen</h3>
     <button class="el-run" id="el-run">Elliot Waves berechnen</button>
     <div id="el-out"></div>
-    <p class="el-hint">Elliott-Wellen sind Auslegung, keine Messung – zwei Betrachter zählen
-      dieselbe Bewegung oft verschieden. Die Zählung ist keine Kursprognose.</p>
+    <p class="el-hint">Elliott-Wellen sind Auslegung, keine Messung. Jede Zählung wird hier
+      gegen ${EL_N_SURROGATE} Zufallsreihen aus den eigenen Renditen dieses Titels geprüft –
+      angezeigt wird, wie oft der Zufall dieselbe Passung erreicht. Die Zählung ist keine
+      Kursprognose und keine Anlageempfehlung.</p>
   </div>`;
+}
+
+/** Aus dem Tickersymbol eine feste Saat - gleicher Titel, gleiches Ergebnis. */
+function elSaat(sym) {
+  let h = 2166136261;
+  for (let i = 0; i < sym.length; i++) { h ^= sym.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
 }
 
 function elVerdrahte(item, reihe, neuZeichnen) {
@@ -595,7 +871,7 @@ function elVerdrahte(item, reihe, neuZeichnen) {
   btn.onclick = async () => {
     btn.disabled = true;
     const alt = btn.textContent;
-    btn.innerHTML = '<span class="spin"></span> Wellen werden gezählt …';
+    btn.innerHTML = '<span class="spin"></span> Wellen werden gezählt und gegen Zufall geprüft …';
     out.innerHTML = "";
     /* Kurz zuruecktreten, damit der Ladezustand gezeichnet wird, bevor gerechnet
        wird. Bewusst setTimeout statt requestAnimationFrame: rAF pausiert,
@@ -605,7 +881,7 @@ function elVerdrahte(item, reihe, neuZeichnen) {
     try {
       const key = elSchluessel(item.s, reihe);
       let erg = elCache.get(key);
-      if (!erg) { erg = elAnalysiere(reihe); elCache.set(key, erg); }
+      if (!erg) { erg = elAnalysiere(reihe, elSaat(item.s)); elCache.set(key, erg); }
       elZeige(out, erg, reihe, item, neuZeichnen, false);
     } catch (e) {
       out.innerHTML = `<div class="el-leer">Die Zählung ist fehlgeschlagen: ${esc(e.message)}</div>`;
@@ -615,33 +891,63 @@ function elVerdrahte(item, reihe, neuZeichnen) {
   };
 }
 
+/** Wellenlabels je Pivot. */
+function elMarken(k) {
+  const namen = k.vollstaendig ? ["0", "1", "2", "3", "4", "5"] : ["0", "1", "2", "3", "4"];
+  return k.pivots.map((p, i) => ({ ...p, label: namen[i] ?? String(i) }));
+}
+
 function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
   const panel = document.getElementById("panel");
   // Ansicht verbreitern - die Tabellen und das Chart brauchen Platz.
   if (panel) panel.classList.add("weit");
 
-  if (!erg.ok) {
-    elCurrent = null;
-    out.innerHTML = `<div class="el-leer"><b>Keine valide Wellenzählung erkennbar</b>
-      <p>${esc(erg.grund)}</p>
-      ${erg.pivots ? `<p class="el-detail">Gefundene Umkehrpunkte: ${erg.pivots.length} ·
-        verwendete Schwelle: ${(erg.schwelle * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %</p>` : ""}
-      <p class="el-detail">Es werden bewusst keine Zonen gezeigt, wenn keine Zählung trägt.</p></div>`;
-    if (typeof neuZeichnen === "function") neuZeichnen();
-    return;
-  }
-
   const cur = (reihe.meta && reihe.meta.currency) || "";
-  const g = (v, d) => (typeof moneyNum === "function" ? moneyNum(v, cur, d ?? 2) : v.toFixed(2));
+  const g = (v, d) => (typeof moneyNum === "function" ? moneyNum(v, cur, d ?? 2) : Number(v).toFixed(2));
   const dat = ts => new Date(ts).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" });
   /* Deutsche Schreibweise: Komma als Dezimaltrenner, Minuszeichen statt
      Bindestrich. toFixed liefert beides falsch. */
   const pz = (v, d = 1) => (v >= 0 ? "+" : "−") + Math.abs(v).toLocaleString("de-DE",
     { minimumFractionDigits: d, maximumFractionDigits: d }) + " %";
+  const zahl = (v, d = 2) => Number(v).toLocaleString("de-DE",
+    { minimumFractionDigits: d, maximumFractionDigits: d });
 
-  const marken = elMarken(erg.beste);
-  elCurrent = { zonen: erg.zonen, marken, total: reihe.c.length };
+  if (!erg.ok) {
+    elCurrent = null;
+    out.innerHTML = `<div class="el-leer"><b>Keine tragfähige Wellenzählung</b>
+      <p>${esc(erg.grund)}</p>
+      <p class="el-detail">Es werden bewusst keine Zonen gezeigt, wenn keine Zählung trägt.</p></div>`;
+    if (typeof neuZeichnen === "function") neuZeichnen();
+    return;
+  }
 
+  const k = erg.beste;
+  const marken = elMarken(k);
+  // Bei Rot wird nichts ins Chart gezeichnet ausser der Zaehlung selbst.
+  elCurrent = {
+    zielZonen: erg.traegt ? erg.zielZonen : [],
+    einstieg: erg.traegt ? erg.einstieg : null,
+    invalid: erg.traegt ? erg.invalid : null,
+    marken, total: reihe.c.length,
+  };
+
+  /* --- Ampel: das Erste, was zu sehen ist --- */
+  const a = erg.ampel;
+  const ampelHtml = `<div class="el-ampel el-${a.stufe}">
+    <div class="el-ampel-kopf">
+      <span class="el-punkt"></span>
+      <div><b>${esc(a.text)}</b>
+        <span class="el-p">p = ${zahl(erg.sig.p, 3)}</span></div>
+    </div>
+    <p>${esc(a.erklaerung)}</p>
+    <p class="el-detail">Geprüft gegen ${erg.sig.n} Surrogatreihen aus den Renditen dieses Titels
+      (Block-Bootstrap, ${EL_BLOCK} Handelstage). Davon ergaben ${erg.sig.mitZaehlung}
+      überhaupt eine regelkonforme Zählung${erg.sig.mittelZufall != null
+        ? ` – mittlere Güte ${zahl(erg.sig.mittelZufall, 3)}, beste ${zahl(erg.sig.maxZufall, 3)}` : ""}.
+      ${erg.sig.soGut} Surrogate erreichten die Güte dieser Zählung (${zahl(k.guete, 3)}) oder mehr.</p>
+  </div>`;
+
+  /* --- Die Zaehlung selbst --- */
   const zaehlung = `<table class="el-tab">
     <tr><th>Welle</th><th>Datum</th><th>Kurs</th><th>Bewegung</th></tr>
     ${marken.map((m, i) => {
@@ -652,49 +958,129 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
     }).join("")}
   </table>`;
 
-  const zonenHtml = erg.zonen.length ? erg.zonen.map(z => {
+  /* --- Passung je Beziehung, offen ausgewiesen --- */
+  const relHtml = `<table class="el-tab el-rel">
+    <tr><th>Beziehung</th><th>gemessen</th><th>nächstes Ziel</th><th>Passung</th></tr>
+    ${k.relationen.map(r => `<tr>
+      <td>${esc(r.name)}</td><td>${zahl(r.r, 3)}</td>
+      <td>${r.ziel != null ? zahl(r.ziel, 3) : "–"}</td>
+      <td><span class="el-fit"><i style="width:${Math.round(r.fit * 100)}%"></i></span>${zahl(r.fit, 2)}</td>
+    </tr>`).join("")}
+  </table>
+  <p class="el-detail">Passung = exp(−ln(gemessen/Ziel)² / 2σ²) mit σ = ${zahl(EL_SIGMA, 2)}.
+    Im Logarithmus gerechnet, damit das Doppelte und die Hälfte eines Zielwerts gleich weit
+    entfernt sind. Gesamtpassung ${zahl(k.passung, 3)}, Alternation ${zahl(k.altern, 2)},
+    Güte ${zahl(k.guete, 3)} = 0,75 × Passung + 0,25 × Alternation.</p>`;
+
+  /* --- Lage, Einstieg, Invalidierung, CRV --- */
+  let handel = "";
+  if (!erg.traegt) {
+    handel = `<div class="el-leer"><b>Keine Ziel- oder Einstiegszonen</b>
+      <p>Diese Zählung ist statistisch nicht von einer Zufallsbewegung zu unterscheiden.
+      Zonen daraus abzuleiten hieße, Rauschen als Struktur auszugeben.</p></div>`;
+  } else {
+    const iv = erg.invalid;
+    const c = erg.crv;
+    const nichtAktuell = !erg.aktuell;
+    handel = `<div class="el-lage">${esc(erg.lage)}
+      ${nichtAktuell ? `<span class="el-marke el-alt-marke">historisch – letzter Punkt liegt
+        ${erg.abstand} Handelstage zurück</span>` : ""}
+      ${erg.letzterOffen ? `<span class="el-marke el-alt-marke">letzter Punkt noch nicht bestätigt</span>` : ""}</div>
+      ${erg.letzterOffen ? `<p class="el-detail">Der letzte Punkt der Zählung ist das derzeit
+        laufende Extrem, kein abgeschlossener Umkehrpunkt. Die Welle, die dort endet, kann sich
+        noch ausdehnen – dann verschieben sich Einstiegsbereich und Ziele mit.</p>` : ""}`;
+
+    if (erg.einstieg) {
+      const e = erg.einstieg;
+      const zustand = e.aktiv ? `<span class="el-marke el-ok">Kurs liegt im Bereich</span>`
+        : e.verlassen ? `<span class="el-marke el-alt-marke">bereits verlassen</span>`
+        : `<span class="el-marke">noch nicht erreicht</span>`;
+      handel += `<div class="el-box el-einstieg">
+        <div class="el-box-k"><b>Einstiegsbereich</b>${zustand}</div>
+        <div class="el-preis">${g(e.low)} – ${g(e.high)}</div>
+        <div class="el-zone-d">${esc(e.herleitung)}</div>
+      </div>`;
+    } else if (nichtAktuell) {
+      handel += `<div class="el-box"><div class="el-box-k"><b>Kein Einstiegsbereich</b></div>
+        <div class="el-zone-d">Die Zählung endet ${erg.abstand} Handelstage vor dem aktuellen Rand.
+        Die Bewegung ist seither weitergelaufen – ein Einstieg daraus wäre nicht mehr gedeckt.</div></div>`;
+    }
+
+    if (iv) {
+      const abst = (iv.level / erg.kurs - 1) * 100;
+      handel += `<div class="el-box el-invalid">
+        <div class="el-box-k"><b>Invalidierung</b><span class="el-marke el-nein">${pz(abst)} zum Kurs</span></div>
+        <div class="el-preis">${g(iv.level)}</div>
+        <div class="el-zone-d">${esc(iv.regel)}. Jenseits dieses Preises ist die Zählung
+          nicht mehr auslegbar, sondern widerlegt.</div>
+      </div>`;
+    }
+
+    if (c) {
+      handel += `<div class="el-box">
+        <div class="el-box-k"><b>Chance-Risiko-Verhältnis</b>
+          <span class="el-marke ${c.wert >= 2 ? "el-ok" : c.wert >= 1 ? "" : "el-nein"}">${zahl(c.wert, 2)} : 1</span></div>
+        <div class="el-zone-d">
+          Chance ${g(c.chance)} gegen Risiko ${g(c.risiko)}, gemessen von der Mitte des
+          Einstiegsbereichs zum ersten Ziel ${erg.erstesZiel ? g(erg.erstesZiel.level) : "–"}
+          ${erg.erstesZiel ? `(${esc(erg.erstesZiel.herleitung)})` : ""}.<br>
+          Stop-Abstand ${zahl(c.stopProzent, 1)} %${c.stopInAtr != null
+            ? ` = ${zahl(c.stopInAtr, 1)} × mittlere Tagesspanne` : ""}.
+          ${c.imRauschen ? `<b class="el-warnung">Der Stop liegt unter einer Tagesspanne –
+            er würde schon vom normalen Rauschen ausgelöst. Das Verhältnis ist rechnerisch
+            richtig und praktisch wertlos.</b>` : ""}
+          ${c.strukturell ? `<br><i>Bei einem abgeschlossenen Impuls folgt dieser Wert allein
+            aus dem Einstiegsband 0,5–0,618 und ist für jeden Titel gleich. Er beschreibt das
+            Verfahren, nicht diesen Titel.</i>` : ""}
+        </div>
+      </div>`;
+    }
+  }
+
+  /* --- Zielzonen --- */
+  const zonenHtml = !erg.traegt ? "" : (erg.zielZonen.length ? erg.zielZonen.map(z => {
     const abst = (z.mid / erg.kurs - 1) * 100;
-    const ratios = [...new Set(z.hits.map(h => h.ratio))].sort((a, b) => a - b)
-      .map(r => String(r).replace(".", ",")).join(" · ");
+    const ratios = [...new Set(z.hits.map(h => h.ratio))].sort((x, y) => x - y)
+      .map(r => r.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 3 }))
+      .join(" · ");
     const herkunft = [...new Set(z.hits.map(h => h.herkunft))].join(", ");
-    return `<div class="el-zone">
-      <div class="el-zone-k"><b>${g(z.low)} – ${g(z.high)}</b>
+    return `<div class="el-zone${z.erreicht ? " el-erreicht" : ""}">
+      <div class="el-zone-k"><b>${g(z.low)}${z.low !== z.high ? " – " + g(z.high) : ""}</b>
         <span class="${abst >= 0 ? "up" : "down"}">${pz(abst)} zum Kurs</span></div>
-      <div class="el-bar"><i style="width:${z.score}%"></i><span>${z.score}</span></div>
-      <div class="el-zone-d">${z.hits.length} Level · Verhältnisse ${ratios}<br><i>${esc(herkunft)}</i></div>
+      <div class="el-zone-d">${z.hits.length} Level · Verhältnisse ${ratios}
+        ${z.erreicht ? `<span class="el-marke el-alt-marke">seit Ende der Zählung bereits angelaufen</span>`
+                     : `<span class="el-marke el-ok">noch offen</span>`}
+        <br><i>${esc(herkunft)}</i></div>
     </div>`;
-  }).join("") : `<div class="el-detail">Aus dieser Zählung ergeben sich keine Zonen mit mindestens
-      ${EL_MIN_LEVEL_JE_ZONE} zusammenfallenden Leveln.</div>`;
+  }).join("") : `<div class="el-detail">Aus dieser Zählung ergeben sich keine Projektionen.</div>`);
 
-  const k = erg.beste;
-  const begruendung = `<div class="el-konf">
-    <div class="el-konf-k">Konfidenz der Zählung<b>${k.konfidenz}</b></div>
-    <div class="el-bar"><i style="width:${k.konfidenz}%"></i></div>
-    <ul class="el-liste">
-      ${k.erfuellt.map(x => `<li class="ja">${esc(x)}</li>`).join("")}
-      ${k.verfehlt.map(x => `<li class="nein">${esc(x)}</li>`).join("")}
-    </ul>
-    <p class="el-detail">${k.vollstaendig
-      ? "Abgeschlossener Impuls aus fünf Wellen."
-      : `Laufender Impuls – ${k.abgeschlosseneWellen} Wellen abgeschlossen, die nächste steht aus.`}
-      Richtung: ${k.auf ? "aufwärts" : "abwärts"} · Schwelle ${(erg.schwelle * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %
-      · ${erg.pivots.length} Umkehrpunkte${erg.verworfen ? ` · ${erg.verworfen} Kandidaten wegen Regelverstoß verworfen` : ""}.</p>
-  </div>`;
-
+  /* --- Weitere zulaessige Zaehlungen --- */
   const alt = erg.alternativen.length ? `<details class="el-alt">
-    <summary>${erg.alternativen.length} weitere gültige Zählung${erg.alternativen.length > 1 ? "en" : ""}</summary>
-    ${erg.alternativen.map(a => `<div class="el-alt-e">
-      <b>Konfidenz ${a.konfidenz}</b> · ${a.vollstaendig ? "abgeschlossen" : "laufend"} ·
-      ${a.auf ? "aufwärts" : "abwärts"} · ${dat(a.pivots[0].date)} bis ${dat(a.pivots[a.pivots.length - 1].date)}
-      <br><span class="el-detail">${esc(a.erfuellt.join("; ") || "keine Richtlinie erfüllt")}</span>
+    <summary>${erg.alternativen.length} weitere regelkonforme Zählung${erg.alternativen.length > 1 ? "en" : ""}</summary>
+    <p class="el-detail">Ohne eigenen Signifikanztest. Der p-Wert oben gilt für die beste Zählung
+      und schließt die Auswahl unter allen geprüften Fenstern bereits ein – für jede Alternative
+      einzeln wäre er nicht in derselben Weise definiert.</p>
+    ${erg.alternativen.map(x => `<div class="el-alt-e">
+      <b>Güte ${zahl(x.guete, 3)}</b> · ${x.vollstaendig ? "fünf Wellen" : "Welle 5 läuft"} ·
+      ${x.auf ? "aufwärts" : "abwärts"} · Ebene ATR × ${zahl(x.skala, 2)} ·
+      ${dat(x.pivots[0].date)} bis ${dat(x.pivots[x.pivots.length - 1].date)}
     </div>`).join("")}
   </details>` : "";
 
+  const fuss = `<p class="el-detail">Richtung ${k.auf ? "aufwärts" : "abwärts"} ·
+    Betrachtungsebene ATR × ${zahl(erg.skala, 2)} (Schwelle
+    ${zahl(erg.schwelle * 100, 1)} %) · ${erg.pivots.length} Umkehrpunkte auf dieser Ebene ·
+    ${erg.gepruefte} Fenster über ${EL_SKALEN.length} Ebenen geprüft${erg.verworfen
+      ? `, ${erg.verworfen} wegen Regelverstoß verworfen` : ""}.</p>`;
+
   out.innerHTML = `
+    ${ampelHtml}
     <h4 class="el-h">Gefundene Zählung</h4>${zaehlung}
-    ${begruendung}
-    <h4 class="el-h">Zielzonen</h4>${zonenHtml}
+    <h4 class="el-h">Passung der Wellenverhältnisse</h4>${relHtml}
+    <h4 class="el-h">Einordnung</h4>${handel}
+    ${erg.traegt ? `<h4 class="el-h">Zielzonen</h4>${zonenHtml}` : ""}
     ${alt}
+    ${fuss}
     <div class="el-acts">
       ${ausSpeicher
         ? `<button class="el-mini" id="el-drop2">Gespeicherte Zählung verwerfen</button>`
@@ -718,11 +1104,4 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
   };
 
   if (typeof neuZeichnen === "function") neuZeichnen();
-}
-
-/** Wellenlabels je Pivot: 1–5 beim Impuls, A–C bei drei Punkten. */
-function elMarken(k) {
-  const namen = k.vollstaendig ? ["0", "1", "2", "3", "4", "5"]
-    : ["0", "1", "2", "3", "4"].slice(0, k.pivots.length);
-  return k.pivots.map((p, i) => ({ ...p, label: namen[i] ?? String(i) }));
 }
