@@ -546,19 +546,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 .el-zone-k span{font-size:11.5px}
 .el-zone-d{font-size:11px;color:var(--faint);line-height:1.5;margin-top:6px}
 .el-zone-d i{font-style:normal;color:var(--muted)}
-.el-bar{position:relative;height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
-.el-bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
-.el-bar span{position:absolute;right:6px;top:-7px;font:600 10px var(--mono);color:var(--muted)}
-.el-konf{background:var(--surface);border:1px solid var(--line);border-radius:9px;
-  padding:11px 13px;margin:12px 0}
-.el-konf-k{display:flex;justify-content:space-between;align-items:baseline;
-  font:600 12px var(--sans);color:var(--muted);margin-bottom:7px}
-.el-konf-k b{font-family:var(--mono);font-size:17px;color:var(--accent)}
-.el-liste{list-style:none;margin:10px 0 0;padding:0;font-size:11.8px;line-height:1.65}
-.el-liste li{padding-left:17px;position:relative;color:var(--muted)}
-.el-liste li::before{position:absolute;left:0;font-weight:700}
-.el-liste li.ja::before{content:"✓";color:var(--accent)}
-.el-liste li.nein::before{content:"–";color:var(--faint)}
 .el-detail{font-size:11.3px;color:var(--faint);line-height:1.6;margin:8px 0 0}
 .el-leer{background:var(--surface);border:1px solid var(--line);border-radius:9px;
   padding:14px 15px;font-size:12.5px;color:var(--muted);line-height:1.6}
@@ -576,3 +563,49 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
   padding:10px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;
   gap:9px;flex-wrap:wrap}
 .el-hint{font-size:11.3px;color:var(--faint);line-height:1.6;margin-top:12px}
+
+/* ---------- Elliott: Ampel, Passung, Handelsrahmen ----------
+   Die Ampel steht bewusst ganz oben und traegt die Farbe: Sie beantwortet
+   die einzige Frage, die vor allen anderen kommt - traegt diese Zaehlung
+   ueberhaupt, oder ist sie vom Zufall nicht zu unterscheiden? */
+.el-ampel{border:1px solid var(--line);border-left-width:3px;border-radius:9px;
+  padding:12px 14px;margin:12px 0;background:var(--surface);font-size:12.5px;line-height:1.6}
+.el-ampel p{color:var(--muted);margin:0}
+.el-ampel-kopf{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.el-ampel-kopf div{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.el-ampel-kopf b{font:600 14px var(--sans);color:var(--ink)}
+.el-punkt{width:11px;height:11px;border-radius:50%;flex:none}
+.el-p{font:600 12px var(--mono);color:var(--muted)}
+.el-gruen{border-left-color:var(--up)}      .el-gruen .el-punkt{background:var(--up)}
+.el-gelb{border-left-color:var(--warn)}     .el-gelb .el-punkt{background:var(--warn)}
+.el-rot{border-left-color:var(--down)}      .el-rot .el-punkt{background:var(--down)}
+
+/* Passungsbalken je Wellenverhaeltnis - klein, direkt neben der Zahl */
+.el-rel td:first-child{font-family:var(--sans);color:var(--muted)}
+.el-rel td:last-child{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
+.el-fit{display:block;width:52px;height:5px;background:var(--bg2);border-radius:99px;overflow:hidden;flex:none}
+.el-fit i{display:block;height:100%;background:var(--accent);border-radius:99px}
+
+.el-lage{font-size:12.5px;color:var(--ink);margin-bottom:10px;display:flex;
+  align-items:center;gap:9px;flex-wrap:wrap}
+.el-box{background:var(--surface);border:1px solid var(--line);border-radius:9px;
+  padding:11px 13px;margin-bottom:8px}
+.el-box-k{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font:600 12px var(--sans);color:var(--muted);margin-bottom:5px;flex-wrap:wrap}
+.el-box-k b{color:var(--ink);font-weight:600}
+.el-preis{font:600 16px var(--mono);color:var(--ink);margin-bottom:4px}
+/* Einstieg gruen, Invalidierung rot - dieselbe Zuordnung wie im Chart */
+.el-einstieg{border-left:3px solid var(--up)}
+.el-einstieg .el-preis{color:var(--up)}
+.el-invalid{border-left:3px solid var(--down)}
+.el-invalid .el-preis{color:var(--down)}
+
+.el-marke{font:600 10.5px var(--sans);letter-spacing:.03em;padding:2px 7px;border-radius:99px;
+  background:var(--bg2);color:var(--muted);white-space:nowrap}
+.el-marke.el-ok{background:rgba(84,177,131,.16);color:var(--up)}
+.el-marke.el-nein{background:rgba(224,106,114,.16);color:var(--down)}
+.el-marke.el-alt-marke{background:rgba(224,180,92,.16);color:var(--warn)}
+.el-warnung{display:block;margin-top:6px;color:var(--warn);font-weight:600}
+/* Bereits angelaufene Zielzone: sichtbar, aber zurueckgenommen */
+.el-zone.el-erreicht{opacity:.62}
+
