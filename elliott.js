@@ -1309,3 +1309,158 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
 
   if (typeof neuZeichnen === "function") neuZeichnen();
 }
+
+/* =====================================================================
+   Wellen-Laufband auf der Startseite
+
+   Zeigt, welche Titel der Abdeckung derzeit eine tragfaehige Zaehlung
+   haben. Bewusst nur gruen und gelb: Rote und zaehlungslose Titel sind die
+   Mehrheit, sie wuerden das Band fuellen, ohne etwas zu sagen. Ihre Zahl
+   steht stattdessen im Kopf der Sektion - das ist die ehrlichere Angabe.
+
+   Die Daten kommen fertig aus data/elliott.json. Die Zaehlung je Titel
+   braucht 999 Surrogatlaeufe; das im Browser fuer die ganze Abdeckung zu
+   rechnen waere Verschwendung. Erzeugt wird die Datei wie chancen.json
+   naechtlich im Repository.
+   ===================================================================== */
+
+const EL_BAND_QUELLE = "data/elliott.json";
+/** Verschiebung je gescrolltem Pixel. Klein halten - das Band soll
+    begleiten, nicht davonlaufen. */
+const EL_BAND_TEMPO = 0.16;
+
+const ElliottBand = {
+  daten: null,
+  async lade() {
+    if (this.daten) return this.daten;
+    const res = await fetch(EL_BAND_QUELLE + "?v=" + Date.now(), { cache: "no-cache" });
+    if (!res.ok) throw new Error("Abdeckung nicht erreichbar");
+    this.daten = await res.json();
+    return this.daten;
+  },
+};
+
+/** Eine Kachel. Klickbar - sie fuehrt in die Detailansicht des Titels. */
+function elBandKachel(t) {
+  const farbe = { gruen: "var(--up)", gelb: "var(--warn)", rot: "var(--down)" }[t.stufe] || "var(--faint)";
+  const p = t.p.toLocaleString("de-DE", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  return `<button class="wb-kachel" data-sym="${esc(t.sym)}"
+      title="${esc(t.name)} – p = ${p}, ${esc(t.lage)}">
+    <span class="wb-kopf">
+      <span class="wb-punkt" style="background:${farbe}"></span>
+      <b>${esc(t.sym)}</b>
+      <span class="wb-p">p ${p}</span>
+    </span>
+    <span class="wb-name">${esc(t.name)}</span>
+    <span class="wb-lage">${esc(t.lage)}${t.aktuell ? "" : " · historisch"}</span>
+  </button>`;
+}
+
+/**
+ * Baut das Band und haengt es an die Scrollposition.
+ *
+ * Zwei Reihen, gegenlaeufig - dieselbe Bewegung wie beim Vorbild. Jede Reihe
+ * wird verdreifacht, damit an den Raendern nichts ausgeht.
+ */
+async function elBandZeichne() {
+  const kopf = document.getElementById("wellenmeta");
+  const koerper = document.getElementById("wellenbody");
+  const schalter = document.getElementById("wellentoggle");
+  if (!koerper) return;
+
+  /* Ein- und Ausklappen wie bei den anderen Sektionen, mit derselben
+     Merkfaehigkeit im Browser. Steht vor dem Laden, damit der Schalter
+     auch dann funktioniert, wenn die Datei nicht erreichbar ist. */
+  if (schalter) {
+    let offen = true;
+    try { offen = localStorage.getItem("ak.wellen.open") !== "0"; } catch (e) {}
+    const male = () => {
+      koerper.style.display = offen ? "" : "none";
+      schalter.textContent = offen ? "Einklappen" : "Ausklappen";
+    };
+    male();
+    schalter.onclick = () => {
+      offen = !offen;
+      try { localStorage.setItem("ak.wellen.open", offen ? "1" : "0"); } catch (e) {}
+      male();
+    };
+  }
+
+  let d;
+  try { d = await ElliottBand.lade(); }
+  catch (e) {
+    koerper.innerHTML = `<div class="wb-leer">Die Abdeckung ist gerade nicht erreichbar.</div>`;
+    return;
+  }
+  const titel = d.titel || [];
+  if (!titel.length) {
+    koerper.innerHTML = `<div class="wb-leer">Derzeit trägt keine Zählung.</div>`;
+    if (kopf) kopf.textContent = "";
+    return;
+  }
+
+  if (kopf) {
+    const gruen = titel.filter(t => t.stufe === "gruen").length;
+    kopf.innerHTML = `<b>${titel.length}</b> von ${d.geprueft} geprüften Titeln tragen –
+      davon ${gruen} tragfähig (p ≤ 0,05). ${d.ohne_zaehlung + d.rot} ohne belastbare Zählung.
+      Stand ${new Date(d.stand).toLocaleDateString("de-DE")}.`;
+  }
+
+  const mitte = Math.ceil(titel.length / 2);
+  const oben = titel.slice(0, mitte), unten = titel.slice(mitte);
+  const reihe = (liste) => liste.concat(liste, liste).map(elBandKachel).join("");
+  koerper.innerHTML = `<div class="wb-band">
+      <div class="wb-reihe" id="wb-r1">${reihe(oben)}</div>
+      <div class="wb-reihe" id="wb-r2">${reihe(unten)}</div>
+    </div>`;
+
+  koerper.querySelectorAll(".wb-kachel").forEach(b => {
+    b.onclick = () => {
+      const sym = b.dataset.sym;
+      const t = titel.find(x => x.sym === sym);
+      const r = (typeof DB !== "undefined" && DB.rows && DB.rows.length)
+        ? DB.rows.find(x => x[0] === sym) : null;
+      openDetail(r ? { s: sym, n: r[1], c: r[2] || "", e: r[3] || "", sec: r[4] || "" }
+                   : { s: sym, n: (t && t.name) || sym, c: "", e: "", sec: "" });
+    };
+  });
+
+  elBandBewegung();
+}
+
+/** Verschiebt die beiden Reihen gegenlaeufig mit der Scrollposition. */
+function elBandBewegung() {
+  const r1 = document.getElementById("wb-r1"), r2 = document.getElementById("wb-r2");
+  const band = document.getElementById("wellenbody");
+  if (!r1 || !r2 || !band) return;
+  // Wer Bewegung abbestellt hat, bekommt ein ruhiges Band.
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  /* Umlauf = Abstand von der ersten zur ersten wiederholten Kachel. Bewusst
+     gemessen und nicht als scrollWidth/3 gerechnet: scrollWidth laesst den
+     letzten Zwischenraum weg, der Umlauf waere drei Pixel zu kurz und die
+     Reihe wuerde bei jeder Runde ein Stueck verspringen. */
+  const umlaufVon = (reihe) => {
+    const k = reihe.children;
+    const n = k.length / 3;
+    return (n >= 1 && k[n]) ? k[n].offsetLeft - k[0].offsetLeft : reihe.scrollWidth / 3 || 1;
+  };
+  let laeuft = false;
+  const schieben = () => {
+    laeuft = false;
+    const oben = band.getBoundingClientRect().top + window.scrollY;
+    const versatz = (window.scrollY - oben + window.innerHeight) * EL_BAND_TEMPO;
+    const umlauf = umlaufVon(r1);
+    /* Rest immer in [0, umlauf) bringen. Der einfache Modulo liefert bei
+       negativem Versatz ein negatives Ergebnis - und negativ wird die erste
+       Reihe nach RECHTS geschoben, wodurch links eine Luecke aufreisst.
+       Genau das passiert, solange das Band noch unter dem Falz liegt. */
+    const rest = ((versatz % umlauf) + umlauf) % umlauf;
+    r1.style.transform = `translateX(${-rest}px)`;
+    r2.style.transform = `translateX(${rest - umlauf}px)`;
+  };
+  const anstossen = () => { if (!laeuft) { laeuft = true; requestAnimationFrame(schieben); } };
+  window.addEventListener("scroll", anstossen, { passive: true });
+  window.addEventListener("resize", anstossen);
+  schieben();
+}
