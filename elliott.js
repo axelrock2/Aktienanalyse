@@ -57,7 +57,12 @@ const Z_RET4  = [0.236, 0.382, 0.5];
 const Z_W3    = [1.618, 2.618, 4.236];
 const Z_W5_1  = [0.618, 1.0, 1.618];
 const Z_W5_13 = [0.382, 0.618];
-const Z_KORR  = [0.382, 0.5, 0.618];
+/** Vollstaendige Retracement-Leiter, wie sie beim Einzeichnen ueblich ist.
+    0 liegt am Ende der Bewegung, 1 an ihrem Anfang - dieselbe Ausrichtung wie
+    beim Fibonacci-Werkzeug gaengiger Chartprogramme. */
+const EL_FIB_LEITER = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+/** Die beiden Stufen, zwischen denen die meisten Korrekturen enden. */
+const EL_GOLD_VON = 0.382, EL_GOLD_BIS = 0.618;
 
 /** Streuung im Log-Verhaeltnisraum - rund 13 % Toleranz. */
 const EL_SIGMA = 0.13;
@@ -458,8 +463,11 @@ function elAbleitungen(kand, kurs, aktuell, atr) {
     /* Fuenf Wellen stehen - es folgt eine Korrektur gegen die Impulsrichtung.
        Deren Ziel ist zugleich der Bereich, in dem ein Wiedereinstieg IN
        Impulsrichtung liegt. */
-    const rets = elRetracement(p[0].price, p[5].price, Z_KORR);
-    rets.forEach(x => ziele.push({ ...x, herkunft: "Korrektur des Gesamtimpulses" }));
+    /* Die Korrektur-Level 0,382 / 0,5 / 0,618 des Gesamtimpulses stehen hier
+       bewusst NICHT mehr als eigene Zielzonen: Die Fibonacci-Leiter zeigt
+       genau diese Verhaeltnisse, nur vollstaendig und im Zusammenhang.
+       Zweimal dasselbe unter zwei Ueberschriften waere keine zusaetzliche
+       Information, sondern doppelte Buchfuehrung. */
 
     // Klassischer Einstiegsbereich: 0,5 bis 0,618 des Gesamtimpulses.
     const a = p[5].price - (p[5].price - p[0].price) * 0.5;
@@ -546,6 +554,78 @@ function elAbleitungen(kand, kurs, aktuell, atr) {
 
   return { ziele, einstieg: aktuell ? einstieg : null, invalid,
            erstesZiel, crv: aktuell ? crv : null, lage };
+}
+
+/**
+ * Fibonacci-Retracement-Leiter zwischen zwei Punkten.
+ *
+ *   level(r) = bis − (bis − von) × r
+ *
+ * Bei r = 0 steht das Ende der Bewegung, bei r = 1 ihr Anfang. Richtungs-
+ * unabhaengig: Bei einer Abwaertsbewegung ist (bis − von) negativ, die Leiter
+ * laeuft dann nach oben.
+ *
+ * @param {number} von  Anfang der Bewegung
+ * @param {number} bis  Ende der Bewegung
+ * @param {number} kurs aktueller Kurs, um das Band darunter zu markieren
+ */
+function elFibLeiter(von, bis, kurs) {
+  const stufen = EL_FIB_LEITER.map(r => ({
+    ratio: r,
+    level: bis - (bis - von) * r,
+    // Die Zone, in der Korrekturen erfahrungsgemaess am haeufigsten enden.
+    gold: r >= EL_GOLD_VON && r <= EL_GOLD_BIS,
+  }));
+  /* Baender zwischen benachbarten Stufen - sie tragen die Uebersicht, nicht
+     die einzelnen Linien. Nach Preis sortiert, damit low immer unter high
+     liegt, gleich in welche Richtung die Bewegung lief. */
+  const sortiert = [...stufen].sort((a, b) => a.level - b.level);
+  const baender = [];
+  for (let i = 0; i + 1 < sortiert.length; i++) {
+    const u = sortiert[i], o = sortiert[i + 1];
+    baender.push({
+      low: u.level, high: o.level,
+      /* Nach Preis sortiert liegt bei einer Aufwaertsbewegung das groessere
+         Verhaeltnis unten. Fuer die Beschriftung aufsteigend drehen - "0,382
+         bis 0,5" liest sich, "0,5 bis 0,382" stolpert. */
+      von: Math.min(u.ratio, o.ratio), bis: Math.max(u.ratio, o.ratio),
+      // Goldenes Band nur, wenn BEIDE Raender dazugehoeren.
+      gold: u.gold && o.gold,
+      enthaeltKurs: kurs >= u.level && kurs <= o.level,
+    });
+  }
+  return { stufen, baender, spanne: Math.abs(bis - von) };
+}
+
+/**
+ * Welche Strecken der Zaehlung lassen sich sinnvoll als Anker verwenden?
+ *
+ * Bewusst nur abgeschlossene Wellen: Eine Leiter an eine noch laufende
+ * Bewegung zu haengen hiesse, ihren Endpunkt zu erfinden. Der erste Eintrag
+ * ist die Vorauswahl.
+ */
+function elFibAnker(kand) {
+  const p = kand.pivots;
+  const anker = [];
+  if (kand.vollstaendig) {
+    // Nach fuenf Wellen ist die Korrektur des Gesamtimpulses die Frage.
+    anker.push({ id: "gesamt", name: "Gesamtimpuls 0 → 5", von: p[0].price, bis: p[5].price,
+      hinweis: "Wohin eine Korrektur des gesamten Impulses laufen kann." });
+    anker.push({ id: "w3", name: "Welle 3", von: p[2].price, bis: p[3].price,
+      hinweis: "Zeigt, wie tief Welle 4 die stärkste Antriebswelle zurückgeholt hat." });
+    anker.push({ id: "w5", name: "Welle 5", von: p[4].price, bis: p[5].price,
+      hinweis: "Die letzte Antriebswelle – oft die erste Auffanglinie." });
+  } else {
+    /* Welle 5 laeuft, ihr Ende steht nicht fest. Anker deshalb auf die
+       abgeschlossenen Strecken. */
+    anker.push({ id: "w3", name: "Welle 3", von: p[2].price, bis: p[3].price,
+      hinweis: "Welle 4 ist bereits gelaufen – hier steht, auf welcher Stufe sie endete." });
+    anker.push({ id: "impuls13", name: "Welle 1 bis 3", von: p[0].price, bis: p[3].price,
+      hinweis: "Die gesamte bisher abgeschlossene Impulsstrecke." });
+    anker.push({ id: "w1", name: "Welle 1", von: p[0].price, bis: p[1].price,
+      hinweis: "Die erste Antriebswelle als Massstab." });
+  }
+  return anker.filter(a => isFinite(a.von) && isFinite(a.bis) && a.von !== a.bis);
 }
 
 /**
@@ -643,6 +723,13 @@ function elAnalysiere(reihe, saat = 1) {
   const traegt = ampel.stufe !== "rot";
   const abl = traegt ? elAbleitungen(beste, kurs, aktuell, suche.atr) : null;
   const zielZonen = abl ? elZonen(abl.ziele, kurs) : [];
+  /* Fibonacci-Leiter. Alle Anker werden mitgegeben, damit die Oberflaeche
+     ohne Neurechnung umschalten kann - die Leiter ist eine reine Funktion
+     zweier Preise. */
+  const fibAnker = traegt ? elFibAnker(beste) : [];
+  const fib = fibAnker.length
+    ? { ...fibAnker[0], leiter: elFibLeiter(fibAnker[0].von, fibAnker[0].bis, kurs) }
+    : null;
   // Seit dem letzten Punkt der Zaehlung: schon angelaufen oder noch offen?
   zielZonen.forEach(z => { z.erreicht = elBereitsErreicht(reihe, letzterIdx, z.low, z.high); });
   if (abl && abl.einstieg) {
@@ -651,7 +738,7 @@ function elAnalysiere(reihe, saat = 1) {
 
   return {
     ok: true, kurs, beste, ampel, sig, aktuell, abstand, traegt, letzterOffen,
-    zielZonen,
+    zielZonen, fibAnker, fib,
     einstieg: abl ? abl.einstieg : null,
     invalid: abl ? abl.invalid : null,
     erstesZiel: abl ? abl.erstesZiel : null,
@@ -694,6 +781,13 @@ const ElliottSpeicher = {
      Zielzonen         tuerkis, gestreift - wohin die naechste Welle projiziert
      Invalidierung     rot, durchgezogen  - ab wo die Zaehlung widerlegt ist
    ===================================================================== */
+
+/** Kurze Preisangabe fuer Beschriftungen im Chart - dort zaehlt Platz. */
+function elKurz(v) {
+  const a = Math.abs(v);
+  const stellen = a >= 1000 ? 0 : a >= 100 ? 1 : 2;
+  return v.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
+}
 
 /**
  * Beschriftung mit dunklem Plaettchen darunter.
@@ -746,6 +840,49 @@ const elOverlay = {
     c.save();
     c.beginPath(); c.rect(b.left, b.top, b.width, b.height); c.clip();
 
+    /* --- Fibonacci-Leiter, ganz nach hinten ---
+       Die Baender tragen die Uebersicht, nicht die Linien. Bewusst
+       zurueckhaltend eingefaerbt statt in sieben bunten Toenen: Der Blick
+       soll auf der goldenen Zone landen, nicht auf einem Farbverlauf. */
+    const fib = elCurrent.fibAn === false ? null : elCurrent.fib;
+    if (fib && fib.leiter) {
+      for (const bd of fib.leiter.baender) {
+        const g = band(bd.low, bd.high); if (!g) continue;
+        c.fillStyle = bd.gold ? "rgba(79,184,172,.09)" : "rgba(147,160,176,.05)";
+        c.fillRect(b.left, g.oben, b.width, g.hoehe);
+        // Das Band, in dem der Kurs gerade steht, bekommt eine feine Kante.
+        if (bd.enthaeltKurs) {
+          c.strokeStyle = "rgba(233,237,243,.16)"; c.lineWidth = 1;
+          c.strokeRect(b.left + .5, g.oben + .5, b.width - 1, g.hoehe - 1);
+        }
+      }
+      /* Linien und Beschriftungen. Von oben nach unten, damit die
+         Kollisionspruefung eine feste Reihenfolge hat - sonst haengt das
+         Ergebnis davon ab, in welcher Reihenfolge die Stufen ankommen. */
+      const stufen = [...fib.leiter.stufen]
+        .map(st => ({ ...st, y: sy.getPixelForValue(st.level) }))
+        .filter(st => isFinite(st.y))
+        .sort((x, y) => x.y - y.y);
+      let letztesY = -Infinity;
+      for (const st of stufen) {
+        const rand = st.ratio === 0 || st.ratio === 1;
+        c.strokeStyle = rand ? "rgba(147,160,176,.55)"
+                      : st.gold ? "rgba(79,184,172,.5)" : "rgba(147,160,176,.28)";
+        c.lineWidth = rand ? 1.2 : 1;
+        c.setLineDash(rand ? [] : [2, 4]);
+        c.beginPath(); c.moveTo(b.left, st.y); c.lineTo(b.right, st.y); c.stroke();
+        c.setLineDash([]);
+        // Beschriftung nur, wenn genug Platz zur vorigen ist.
+        if (st.y - letztesY >= 13) {
+          const txt = st.ratio.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 3 })
+            + "  " + elKurz(st.level);
+          elSchild(c, txt, b.right - 6, st.y - 2, "right",
+            st.gold ? "rgba(79,184,172,.95)" : "rgba(147,160,176,.9)");
+          letztesY = st.y;
+        }
+      }
+    }
+
     // --- Zielzonen: tuerkis. Bereits angelaufene blasser. ---
     for (const z of elCurrent.zielZonen || []) {
       const g = band(z.low, z.high); if (!g) continue;
@@ -780,7 +917,10 @@ const elOverlay = {
         c.setLineDash([7, 4]);
         c.beginPath(); c.moveTo(b.left, y); c.lineTo(b.right, y); c.stroke();
         c.setLineDash([]);
-        elSchild(c, "INVALIDIERUNG", b.right - 6, y - 3, "right", "rgba(224,106,114,.95)");
+        /* Nach links: Die rechte Kante traegt jetzt die Stufenpreise der
+           Fibonacci-Leiter, dort waere die Beschriftung eingeklemmt. */
+        elSchild(c, "INVALIDIERUNG " + elKurz(iv.level), b.left + 6, y - 3, "left",
+                 "rgba(224,106,114,.95)");
       }
     }
 
@@ -925,6 +1065,8 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
   const marken = elMarken(k);
   // Bei Rot wird nichts ins Chart gezeichnet ausser der Zaehlung selbst.
   elCurrent = {
+    fib: erg.traegt ? erg.fib : null,
+    fibAn: true,
     zielZonen: erg.traegt ? erg.zielZonen : [],
     einstieg: erg.traegt ? erg.einstieg : null,
     invalid: erg.traegt ? erg.invalid : null,
@@ -1054,6 +1196,64 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
     </div>`;
   }).join("") : `<div class="el-detail">Aus dieser Zählung ergeben sich keine Projektionen.</div>`);
 
+  /* --- Fibonacci-Retracement ---
+     Der Anker laesst sich umschalten, ohne neu zu rechnen: Die Leiter ist
+     eine reine Funktion zweier Preise, und alle in Frage kommenden Strecken
+     der Zaehlung liegen dem Ergebnis bereits bei. */
+  /* Verhaeltnisse ueberall gleich schreiben: 0,5 statt 0,500, aber 0,236 mit
+     allen Stellen. Dieselbe Regel benutzt die Beschriftung im Chart. */
+  const verh = r => r.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 3 });
+  const fibHtml = () => {
+    if (!erg.traegt || !erg.fib) return "";
+    const f = erg.fib, L = f.leiter;
+    const wahl = erg.fibAnker.map(a => `<button class="el-fibbtn${a.id === f.id ? " on" : ""}"
+      data-anker="${a.id}">${esc(a.name)}</button>`).join("")
+      + `<button class="el-fibbtn el-fibtoggle${elCurrent && elCurrent.fibAn === false ? "" : " on"}"
+           id="el-fibtoggle">${elCurrent && elCurrent.fibAn === false
+             ? "im Chart einblenden" : "im Chart ausblenden"}</button>`;
+    const drin = L.baender.find(x => x.enthaeltKurs);
+    const stufen = L.stufen.map(st => {
+      const abst = (st.level / erg.kurs - 1) * 100;
+      return `<tr class="${st.gold ? "gold" : ""}">
+        <td><b>${verh(st.ratio)}</b></td>
+        <td>${g(st.level)}</td>
+        <td class="${abst >= 0 ? "up" : "down"}">${pz(abst)}</td>
+        <td>${st.ratio === 0 ? "Ende der Bewegung" : st.ratio === 1 ? "Anfang der Bewegung"
+              : st.gold ? "goldene Zone" : ""}</td>
+      </tr>`;
+    }).join("");
+    return `<div class="el-fibwahl">${wahl}</div>
+      <p class="el-detail">${esc(f.hinweis)} Spanne ${g(L.spanne)}.</p>
+      <table class="el-tab el-fibtab">
+        <tr><th>Stufe</th><th>Preis</th><th>Abstand</th><th></th></tr>${stufen}
+      </table>
+      <p class="el-detail">Stufe = Ende − (Ende − Anfang) × Verhältnis. 0 liegt am Ende der
+        Bewegung, 1 an ihrem Anfang.
+        ${drin ? `Der Kurs steht zwischen ${verh(drin.von)} und ${verh(drin.bis)}${
+          drin.gold ? " – also in der goldenen Zone" : ""}.`
+        : "Der Kurs liegt außerhalb der Leiter."}</p>`;
+  };
+  const fibVerdrahten = () => {
+    const schalter = document.getElementById("el-fibtoggle");
+    if (schalter) schalter.onclick = () => {
+      if (elCurrent) elCurrent.fibAn = elCurrent.fibAn === false;
+      const box = document.getElementById("el-fib");
+      if (box) { box.innerHTML = fibHtml(); fibVerdrahten(); }
+      if (typeof neuZeichnen === "function") neuZeichnen();
+    };
+    document.querySelectorAll(".el-fibbtn[data-anker]").forEach(btn => {
+      btn.onclick = () => {
+        const a = erg.fibAnker.find(x => x.id === btn.dataset.anker);
+        if (!a) return;
+        erg.fib = { ...a, leiter: elFibLeiter(a.von, a.bis, erg.kurs) };
+        if (elCurrent) elCurrent.fib = erg.fib;
+        const box = document.getElementById("el-fib");
+        if (box) { box.innerHTML = fibHtml(); fibVerdrahten(); }
+        if (typeof neuZeichnen === "function") neuZeichnen();
+      };
+    });
+  };
+
   /* --- Weitere zulaessige Zaehlungen --- */
   const alt = erg.alternativen.length ? `<details class="el-alt">
     <summary>${erg.alternativen.length} weitere regelkonforme Zählung${erg.alternativen.length > 1 ? "en" : ""}</summary>
@@ -1078,7 +1278,9 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
     <h4 class="el-h">Gefundene Zählung</h4>${zaehlung}
     <h4 class="el-h">Passung der Wellenverhältnisse</h4>${relHtml}
     <h4 class="el-h">Einordnung</h4>${handel}
-    ${erg.traegt ? `<h4 class="el-h">Zielzonen</h4>${zonenHtml}` : ""}
+    ${erg.traegt && erg.fib ? `<h4 class="el-h">Fibonacci-Retracement</h4>
+      <div id="el-fib">${fibHtml()}</div>` : ""}
+    ${erg.traegt && erg.zielZonen.length ? `<h4 class="el-h">Projektionen der laufenden Welle</h4>${zonenHtml}` : ""}
     ${alt}
     ${fuss}
     <div class="el-acts">
@@ -1087,6 +1289,8 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
         : `<button class="el-mini" id="el-save">Diese Zählung speichern</button>`}
       <span class="el-detail" id="el-savemsg"></span>
     </div>`;
+
+  fibVerdrahten();
 
   const save = document.getElementById("el-save");
   if (save) save.onclick = () => {

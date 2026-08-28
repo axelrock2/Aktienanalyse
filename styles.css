@@ -609,3 +609,23 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 /* Bereits angelaufene Zielzone: sichtbar, aber zurueckgenommen */
 .el-zone.el-erreicht{opacity:.62}
 
+/* ---------- Fibonacci-Leiter ----------
+   Ankerwahl als Reiter, darunter die Stufen. Die goldene Zone ist die
+   einzige farblich hervorgehobene Zeile - sie ist die Aussage, alles andere
+   ist Skala. */
+.el-fibwahl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.el-fibbtn{background:var(--surface);border:1px solid var(--line);color:var(--muted);
+  border-radius:7px;padding:5px 11px;font:500 11.5px var(--sans);cursor:pointer;
+  transition:border-color .12s,color .12s}
+.el-fibbtn:hover{border-color:var(--accent);color:var(--ink)}
+.el-fibbtn.on{background:rgba(79,184,172,.14);border-color:var(--accent);color:var(--accent);font-weight:600}
+/* Der Sichtbarkeitsschalter steht rechts und ist kein Anker - abgesetzt. */
+.el-fibtoggle{margin-left:auto;font-size:11px}
+.el-fibtoggle.on{background:none;border-color:var(--line);color:var(--faint);font-weight:500}
+.el-fibtoggle.on:hover{border-color:var(--accent);color:var(--ink)}
+.el-fibtab td:first-child{font-family:var(--mono);color:var(--muted)}
+.el-fibtab td:last-child{font-family:var(--sans);font-size:11px;color:var(--faint)}
+.el-fibtab tr.gold td{background:rgba(79,184,172,.09)}
+.el-fibtab tr.gold td:first-child{color:var(--accent)}
+.el-fibtab tr.gold td:last-child{color:var(--accent)}
+
