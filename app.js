@@ -2514,6 +2514,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFavs();
   initNews();
   initChancen();
+  /* Wellen-Abdeckung. Liegt in elliott.js, weil es Elliott-Inhalt ist -
+     der Aufruf steht hier, damit die Startreihenfolge an einer Stelle bleibt. */
+  if (typeof elBandZeichne === "function") elBandZeichne();
   if (typeof initDepot === "function") initDepot();
   initRefresh();
 });

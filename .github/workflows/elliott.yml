@@ -1,0 +1,42 @@
+name: Wellen-Abdeckung aktualisieren
+
+on:
+  schedule:
+    # Werktags 06:15 UTC - eine halbe Stunde nach dem Chancenraum, damit sich
+    # die beiden Laeufe nicht beim Push in die Quere kommen.
+    - cron: "15 6 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: elliott
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node statt Python: Der Rechenkern steht in elliott.js, weil die Seite
+      # ihn beim Klick selbst ausfuehrt. Der Lauf laedt genau diese Datei -
+      # eine Implementierung, die nicht auseinanderlaufen kann.
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Wellen-Abdeckung rechnen
+        run: node scripts/build_elliott.js
+
+      - name: Aenderungen committen
+        run: |
+          git config user.name "elliott-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/elliott.json
+          git diff --cached --quiet && echo "Keine Aenderungen." && exit 0
+          git commit -m "Wellen-Abdeckung aktualisiert ($(date -u +%F))"
+          git pull --rebase --autostash || true
+          git push
