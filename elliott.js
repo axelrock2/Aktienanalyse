@@ -1325,9 +1325,10 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
    ===================================================================== */
 
 const EL_BAND_QUELLE = "data/elliott.json";
-/** Verschiebung je gescrolltem Pixel. Klein halten - das Band soll
-    begleiten, nicht davonlaufen. */
-const EL_BAND_TEMPO = 0.16;
+/** Verschiebung je gescrolltem Pixel. Der Abschnitt steht ganz oben und ist
+    beim Scrollen nur kurz im Blick - bei zu kleinem Wert bewegt sich in
+    dieser Zeit sichtbar nichts. */
+const EL_BAND_TEMPO = 0.30;
 
 const ElliottBand = {
   daten: null,
