@@ -1442,8 +1442,11 @@ function renderMover() {
       Schlusskurse vom ${new Date(d.stand).toLocaleDateString("de-DE")}`;
   }
 
-  // Jede Reihe verdreifacht, damit an den Raendern nichts ausgeht.
-  const reihe = (liste) => liste.concat(liste, liste)
+  /* Jede Reihe verdoppelt. Verdreifacht war eine Kopie zu viel: Die
+     Verschiebung bleibt immer innerhalb einer Umlaufbreite, eine Umlaufbreite
+     plus Sichtbereich deckt das ab. Das spart ein Drittel der Kacheln - bei
+     zwei Reihen 24 Elemente weniger, die der Browser zeichnen muss. */
+  const reihe = (liste) => liste.concat(liste)
     .map(t => moverKachel(t, d.stand)).join("");
   /* Das Fenster steht fest und schneidet ab, die Reihe darin wandert. Beides
      in ein Element zu legen geht nicht: Verschiebt man das Element, das auch
@@ -1469,38 +1472,80 @@ function renderMover() {
   moverBewegung();
 }
 
-/** Verschiebt die beiden Reihen gegenlaeufig mit der Scrollposition. */
+/* Zustand der Bewegung. Modulweit, weil die Listener nur EINMAL haengen
+   duerfen: renderMover() laeuft auch beim Waehrungswechsel und beim
+   Aktualisieren erneut, und jeder Aufruf haette sonst einen weiteren
+   Scroll-Listener angehaengt - jeder mit eigener Rechenarbeit. */
+const MoverLauf = { r1: null, r2: null, band: null, umlauf1: 0, umlauf2: 0,
+                    oben: 0, sichtbar: true, laeuft: false, verdrahtet: false };
+
+/** Umlaufbreite: Abstand von der ersten zur ersten wiederholten Kachel. */
+function moverUmlauf(reihe) {
+  const k = reihe.children, n = Math.floor(k.length / 2);
+  return (n >= 1 && k[n]) ? k[n].offsetLeft - k[0].offsetLeft : reihe.scrollWidth / 2 || 1;
+}
+
+/* Alle Layout-Messungen an einer Stelle - und nur hier. Sie in der
+   Scroll-Schleife zu lesen war der Fehler: Ein offsetLeft NACH einem
+   geschriebenen transform zwingt den Browser mitten im Bild zu einem
+   vollstaendigen Layout. */
+function moverVermessen() {
+  const L = MoverLauf;
+  if (!L.r1 || !L.r2 || !L.band) return;
+  L.umlauf1 = moverUmlauf(L.r1);
+  L.umlauf2 = moverUmlauf(L.r2);
+  L.oben = L.band.getBoundingClientRect().top + window.scrollY;
+}
+
+/** Verschiebt die beiden Reihen gegenlaeufig - reines Schreiben, kein Lesen. */
+function moverSchieben() {
+  const L = MoverLauf;
+  L.laeuft = false;
+  if (!L.r1 || !L.umlauf1 || !L.umlauf2) return;
+  const versatz = (window.scrollY - L.oben + window.innerHeight) * MOVER_TEMPO;
+  /* Rest immer in [0, umlauf) bringen. Der einfache Modulo liefert bei
+     negativem Versatz ein negatives Ergebnis - und negativ wird die Reihe
+     nach RECHTS geschoben, wodurch an der Kante eine Luecke aufreisst. */
+  const rest1 = ((versatz % L.umlauf1) + L.umlauf1) % L.umlauf1;
+  const rest2 = ((versatz % L.umlauf2) + L.umlauf2) % L.umlauf2;
+  /* translate3d statt translateX und auf ganze Pixel gerundet: Das erste
+     haelt die Reihe auf einer eigenen Ebene der Grafikkarte, das zweite
+     erspart das Neuzeichnen mit Zwischenpixeln. */
+  L.r1.style.transform = `translate3d(${-Math.round(rest1)}px,0,0)`;
+  L.r2.style.transform = `translate3d(${Math.round(rest2 - L.umlauf2)}px,0,0)`;
+}
+
+function moverAnstossen() {
+  const L = MoverLauf;
+  if (L.sichtbar && !L.laeuft) { L.laeuft = true; requestAnimationFrame(moverSchieben); }
+}
+
+/** Haengt die Bewegung an die Scrollposition. Mehrfach aufrufbar. */
 function moverBewegung() {
-  const r1 = $("#tm-r1"), r2 = $("#tm-r2"), band = $("#moverbody");
-  if (!r1 || !r2 || !band) return;
+  const L = MoverLauf;
+  L.r1 = $("#tm-r1"); L.r2 = $("#tm-r2"); L.band = $("#moverbody");
+  if (!L.r1 || !L.r2 || !L.band) return;
   // Wer Bewegung abbestellt hat, bekommt ein ruhiges Band.
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  /* Umlauf = Abstand von der ersten zur ersten wiederholten Kachel. Bewusst
-     gemessen und nicht als scrollWidth/3 gerechnet: scrollWidth laesst den
-     letzten Zwischenraum weg, der Umlauf waere zu kurz und die Reihe wuerde
-     bei jeder Runde ein Stueck verspringen. */
-  const umlaufVon = (reihe) => {
-    const k = reihe.children, n = k.length / 3;
-    return (n >= 1 && k[n]) ? k[n].offsetLeft - k[0].offsetLeft : reihe.scrollWidth / 3 || 1;
-  };
-  let laeuft = false;
-  const schieben = () => {
-    laeuft = false;
-    const oben = band.getBoundingClientRect().top + window.scrollY;
-    const versatz = (window.scrollY - oben + window.innerHeight) * MOVER_TEMPO;
-    const umlauf = umlaufVon(r1);
-    /* Rest immer in [0, umlauf) bringen. Der einfache Modulo liefert bei
-       negativem Versatz ein negatives Ergebnis - und negativ wird die erste
-       Reihe nach RECHTS geschoben, wodurch links eine Luecke aufreisst. */
-    const rest = ((versatz % umlauf) + umlauf) % umlauf;
-    r1.style.transform = `translateX(${-rest}px)`;
-    r2.style.transform = `translateX(${rest - umlaufVon(r2)}px)`;
-  };
-  const anstossen = () => { if (!laeuft) { laeuft = true; requestAnimationFrame(schieben); } };
-  window.addEventListener("scroll", anstossen, { passive: true });
-  window.addEventListener("resize", anstossen);
-  schieben();
+  moverVermessen();
+  moverSchieben();
+  if (L.verdrahtet) return;
+  L.verdrahtet = true;
+
+  window.addEventListener("scroll", moverAnstossen, { passive: true });
+  window.addEventListener("resize", () => { moverVermessen(); moverAnstossen(); }, { passive: true });
+
+  /* Ist das Band aus dem Bild gescrollt, gibt es nichts zu verschieben. Ohne
+     das rechnet die Seite bei jedem Scrollen weiter an einem Element, das
+     niemand sieht - und das Band steht ganz oben, ist also die meiste Zeit
+     ausser Sicht. */
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => {
+      L.sichtbar = e.isIntersecting;
+      if (L.sichtbar) { moverVermessen(); moverAnstossen(); }
+    }, { rootMargin: "120px" }).observe(L.band);
+  }
 }
 
 async function initMover() {
