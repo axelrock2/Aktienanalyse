@@ -700,6 +700,12 @@ async function doRefresh(full) {
     Fresh.reset();
     freshText();
     renderFavs();
+    /* Die Kursbewegungen mitnehmen: Sie koennen seit dem Seitenaufbau neu
+       gebaut worden sein. Nur neu zu zeichnen brachte nichts - die Daten
+       lagen ja schon im Speicher. */
+    Mover.daten = null;
+    try { await Mover.load(); } catch (e) {}
+    renderMover();
     if (typeof renderDepot === "function") renderDepot();
     await loadNews();
     Refresh.lastRun = Date.now();
@@ -1359,6 +1365,156 @@ async function initChancen() {
   renderChancen();
 }
 
+/* =====================================================================
+   Top Mover - das Laufband ganz oben
+
+   Zwei gegenlaeufige Reihen: oben der letzte abgeschlossene Handelstag,
+   darunter die letzten fuenf. Beide zeigen Gewinner UND Verlierer, sortiert
+   nach dem Betrag der Bewegung - "Top Mover" meint den groessten Ausschlag,
+   nicht nur den nach oben. Die Richtung traegt die Farbe.
+
+   Die Daten kommen fertig aus data/mover.json; 108 Titel im Browser
+   abzurufen waere beim Seitenaufbau nicht vertretbar. Erzeugt wird die
+   Datei wie chancen.json im Repository.
+   ===================================================================== */
+
+const MOVER_QUELLE = "data/mover.json";
+/** Verschiebung je gescrolltem Pixel. Das Band steht ganz oben und ist nur
+    kurz im Blick - zu klein, und es passiert sichtbar nichts. */
+const MOVER_TEMPO = 0.30;
+
+const Mover = {
+  daten: null,
+  async load() {
+    if (this.daten) return this.daten;
+    const res = await fetch(MOVER_QUELLE + "?v=" + Date.now(), { cache: "no-cache" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    this.daten = await res.json();
+    return this.daten;
+  },
+};
+
+/** Prozentwert in deutscher Schreibweise - echtes Minuszeichen, kein Bindestrich. */
+function moverProz(v) {
+  return (v >= 0 ? "+" : "−")
+    + Math.abs(v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    + " %";
+}
+
+/** Eine Kachel. Klickbar - sie fuehrt in die Detailansicht des Titels. */
+function moverKachel(t, stand) {
+  const hoch = t.wert >= 0;
+  /* Boersenplaetze schliessen nicht am selben Tag. Weicht der Stichtag vom
+     Stand der Liste ab, steht er dabei - sonst waere die Zahl auf einen
+     Handelstag bezogen, den es fuer diesen Titel gar nicht gab. */
+  const abweichend = t.stichtag && stand && t.stichtag !== stand;
+  const datum = t.stichtag ? new Date(t.stichtag).toLocaleDateString("de-DE",
+    { day: "2-digit", month: "2-digit" }) : "";
+  return `<button class="tm-kachel" data-sym="${esc(t.sym)}"
+      title="${esc(t.name)} · ${moverProz(t.wert)}${abweichend ? " · Schluss " + datum : ""}">
+    <span class="tm-kopf">
+      <b>${esc(t.sym)}</b>
+      <span class="tm-wert ${hoch ? "up" : "down"}">${moverProz(t.wert)}</span>
+    </span>
+    <span class="tm-name">${esc(t.name)}</span>
+    <span class="tm-fuss">
+      <span class="tm-kurs">${moneyNum(t.kurs, t.cur)}</span>
+      ${abweichend ? `<span class="tm-datum">Schluss ${datum}</span>` : ""}
+    </span>
+  </button>`;
+}
+
+function renderMover() {
+  const koerper = $("#moverbody"), kopf = $("#movermeta");
+  const d = Mover.daten;
+  if (!koerper) return;
+  if (!d) {
+    koerper.innerHTML = `<div class="tm-leer">Die Kursbewegungen sind gerade nicht erreichbar.</div>`;
+    return;
+  }
+  const tag = d.tag || [], woche = d.woche || [];
+  if (!tag.length && !woche.length) {
+    koerper.innerHTML = `<div class="tm-leer">Für den letzten Handelstag liegen keine Bewegungen vor.</div>`;
+    return;
+  }
+  if (kopf) {
+    kopf.innerHTML = `Stärkste Bewegungen aus <b>${d.grundmenge}</b> Titeln ·
+      Schlusskurse vom ${new Date(d.stand).toLocaleDateString("de-DE")}`;
+  }
+
+  // Jede Reihe verdreifacht, damit an den Raendern nichts ausgeht.
+  const reihe = (liste) => liste.concat(liste, liste)
+    .map(t => moverKachel(t, d.stand)).join("");
+  /* Das Fenster steht fest und schneidet ab, die Reihe darin wandert. Beides
+     in ein Element zu legen geht nicht: Verschiebt man das Element, das auch
+     abschneiden soll, wandert der Ausschnitt mit - die Reihe schiebt sich
+     dann ueber ihr Etikett und die zweite ganz aus dem Bild. */
+  koerper.innerHTML = `<div class="tm-band">
+      <div class="tm-zeile"><span class="tm-etikett">Handelstag</span>
+        <div class="tm-fenster"><div class="tm-reihe" id="tm-r1">${reihe(tag)}</div></div></div>
+      <div class="tm-zeile"><span class="tm-etikett">Woche · ${d.woche_tage} Handelstage</span>
+        <div class="tm-fenster"><div class="tm-reihe" id="tm-r2">${reihe(woche)}</div></div></div>
+    </div>`;
+
+  koerper.querySelectorAll(".tm-kachel").forEach(b => {
+    b.onclick = () => {
+      const sym = b.dataset.sym;
+      const t = [...tag, ...woche].find(x => x.sym === sym);
+      const r = DB.rows && DB.rows.length ? DB.rows.find(x => x[0] === sym) : null;
+      openDetail(r ? { s: sym, n: r[1], c: r[2] || "", e: r[3] || "", sec: r[4] || "" }
+                   : { s: sym, n: (t && t.name) || sym, c: "", e: "", sec: "" });
+    };
+  });
+
+  moverBewegung();
+}
+
+/** Verschiebt die beiden Reihen gegenlaeufig mit der Scrollposition. */
+function moverBewegung() {
+  const r1 = $("#tm-r1"), r2 = $("#tm-r2"), band = $("#moverbody");
+  if (!r1 || !r2 || !band) return;
+  // Wer Bewegung abbestellt hat, bekommt ein ruhiges Band.
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  /* Umlauf = Abstand von der ersten zur ersten wiederholten Kachel. Bewusst
+     gemessen und nicht als scrollWidth/3 gerechnet: scrollWidth laesst den
+     letzten Zwischenraum weg, der Umlauf waere zu kurz und die Reihe wuerde
+     bei jeder Runde ein Stueck verspringen. */
+  const umlaufVon = (reihe) => {
+    const k = reihe.children, n = k.length / 3;
+    return (n >= 1 && k[n]) ? k[n].offsetLeft - k[0].offsetLeft : reihe.scrollWidth / 3 || 1;
+  };
+  let laeuft = false;
+  const schieben = () => {
+    laeuft = false;
+    const oben = band.getBoundingClientRect().top + window.scrollY;
+    const versatz = (window.scrollY - oben + window.innerHeight) * MOVER_TEMPO;
+    const umlauf = umlaufVon(r1);
+    /* Rest immer in [0, umlauf) bringen. Der einfache Modulo liefert bei
+       negativem Versatz ein negatives Ergebnis - und negativ wird die erste
+       Reihe nach RECHTS geschoben, wodurch links eine Luecke aufreisst. */
+    const rest = ((versatz % umlauf) + umlauf) % umlauf;
+    r1.style.transform = `translateX(${-rest}px)`;
+    r2.style.transform = `translateX(${rest - umlaufVon(r2)}px)`;
+  };
+  const anstossen = () => { if (!laeuft) { laeuft = true; requestAnimationFrame(schieben); } };
+  window.addEventListener("scroll", anstossen, { passive: true });
+  window.addEventListener("resize", anstossen);
+  schieben();
+}
+
+async function initMover() {
+  const body = $("#moverbody"), tgl = $("#movertoggle");
+  if (!body || !tgl) return;
+  let offen = true;
+  try { offen = localStorage.getItem("ak.mover.open") !== "0"; } catch (e) {}
+  const male = () => { body.style.display = offen ? "" : "none"; tgl.textContent = offen ? "Einklappen" : "Ausklappen"; };
+  male();
+  tgl.onclick = () => { offen = !offen; try { localStorage.setItem("ak.mover.open", offen ? "1" : "0"); } catch (e) {} male(); };
+  try { await Mover.load(); } catch (e) {}
+  renderMover();
+}
+
 /* ---------- Anzeigewährung (reine Darstellungs-Umrechnung) -----------------
    WICHTIG: Sämtliche Analysen (Renditen, RSI, Momentum, Scores, Risikomaße,
    Zonen) rechnen ausschließlich mit den Originalkursen. Hier wird nur die
@@ -1455,6 +1611,8 @@ function initFx() {
     try { localStorage.setItem("ak.fx", FX.mode); } catch (e) {}
     paint();
     renderFavs();
+    // Die Kachelpreise folgen der Anzeigewaehrung wie alles andere auch.
+    if (Mover.daten) renderMover();
     if (typeof renderDepot === "function") renderDepot();
     if (panel.classList.contains("open") && currentItem) openDetail(currentItem);
   });
@@ -2513,10 +2671,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initFx();
   renderFavs();
   initNews();
+  initMover();
   initChancen();
-  /* Wellen-Abdeckung. Liegt in elliott.js, weil es Elliott-Inhalt ist -
-     der Aufruf steht hier, damit die Startreihenfolge an einer Stelle bleibt. */
-  if (typeof elBandZeichne === "function") elBandZeichne();
   if (typeof initDepot === "function") initDepot();
   initRefresh();
 });
