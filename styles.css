@@ -564,34 +564,51 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
   gap:9px;flex-wrap:wrap}
 .el-hint{font-size:11.3px;color:var(--faint);line-height:1.6;margin-top:12px}
 
-/* ---------- Wellen-Abdeckung (Laufband auf der Startseite) ----------
+/* ---------- Top Mover (Laufband ganz oben) ----------
    Zwei gegenlaeufige Reihen, die mit der Scrollposition wandern. Die
    Kacheln tragen dieselbe Sprache wie der Rest der Seite: Flaeche
-   var(--surface), Linie var(--line), Ampelpunkt in der Bedeutungsfarbe.
+   var(--surface), Linie var(--line), Bewegung in var(--up)/var(--down).
    Der Rahmen schneidet ab - die Reihen sind absichtlich breiter als er. */
-.wellenbox{margin-bottom:30px}
-.wb-band{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
-  mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
-.wb-reihe{display:flex;gap:9px;will-change:transform}
-.wb-reihe + .wb-reihe{margin-top:9px}
-.wb-kachel{flex:none;width:186px;text-align:left;cursor:pointer;
+.moverbox{margin-bottom:30px}
+.tm-band{display:flex;flex-direction:column;gap:10px}
+.tm-zeile{display:flex;align-items:center;gap:10px;min-width:0}
+/* Das Etikett steht fest am linken Rand, waehrend die Reihe darunter
+   durchlaeuft - ohne es waere nicht erkennbar, welche Reihe welchen
+   Zeitraum zeigt. */
+.tm-etikett{flex:none;width:104px;font:600 10px var(--sans);letter-spacing:.07em;
+  text-transform:uppercase;color:var(--faint);line-height:1.3}
+/* Das Fenster schneidet ab und blendet die Raender aus; die Reihe darin
+   wandert. Getrennte Elemente, weil ein verschobener Ausschnitt mitwandert. */
+.tm-fenster{flex:1;min-width:0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.tm-reihe{display:flex;gap:9px;will-change:transform}
+.tm-kachel{flex:none;width:178px;text-align:left;cursor:pointer;
   background:var(--surface);border:1px solid var(--line);border-radius:10px;
-  padding:9px 11px;display:flex;flex-direction:column;gap:3px;
+  padding:9px 11px;display:flex;flex-direction:column;gap:2px;
   font-family:var(--sans);transition:border-color .14s,background .14s}
-.wb-kachel:hover{border-color:var(--accent);background:var(--surface2)}
-.wb-kopf{display:flex;align-items:center;gap:7px}
-.wb-punkt{width:8px;height:8px;border-radius:50%;flex:none}
-.wb-kopf b{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.01em}
-.wb-p{margin-left:auto;font:500 11px var(--mono);color:var(--muted);
-  font-variant-numeric:tabular-nums}
-.wb-name{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis}
-.wb-lage{font-size:10.5px;color:var(--faint);letter-spacing:.03em;
+.tm-kachel:hover{border-color:var(--accent);background:var(--surface2)}
+.tm-kopf{display:flex;align-items:baseline;gap:8px}
+.tm-kopf b{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.01em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wb-leer{background:var(--surface);border:1px solid var(--line);border-radius:9px;
+.tm-wert{margin-left:auto;font:600 13px var(--mono);font-variant-numeric:tabular-nums;
+  white-space:nowrap}
+.tm-wert.up{color:var(--up)} .tm-wert.down{color:var(--down)}
+.tm-name{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.tm-fuss{display:flex;align-items:baseline;gap:7px}
+.tm-kurs{font:500 11px var(--mono);color:var(--faint);font-variant-numeric:tabular-nums}
+.tm-datum{font-size:10px;color:var(--faint);opacity:.75;white-space:nowrap}
+.tm-leer{background:var(--surface);border:1px solid var(--line);border-radius:9px;
   padding:12px 14px;font-size:12.5px;color:var(--muted)}
-@media(max-width:640px){.wb-kachel{width:164px}}
-@media print{.wellenbox{display:none}}
+@media(max-width:640px){
+  .tm-kachel{width:158px}
+  /* Auf schmalen Schirmen kostet das Etikett zu viel Breite - es rutscht
+     ueber die Reihe statt daneben. */
+  .tm-zeile{flex-direction:column;align-items:stretch;gap:4px}
+  .tm-etikett{width:auto}
+}
+@media print{.moverbox{display:none}}
 
 /* ---------- Elliott: Ampel, Passung, Handelsrahmen ----------
    Die Ampel steht bewusst ganz oben und traegt die Farbe: Sie beantwortet

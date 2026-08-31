@@ -1,0 +1,202 @@
+{
+  "stand": "2026-08-28",
+  "erzeugt": "2026-08-31T06:19:23.750Z",
+  "grundmenge": 108,
+  "woche_tage": 5,
+  "tag": [
+    {
+      "sym": "BNTX",
+      "name": "BioNTech SE",
+      "kurs": 102.07,
+      "cur": "USD",
+      "wert": -8.37,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "1199.HK",
+      "name": "COSCO SHIPPING Ports Limited",
+      "kurs": 5.53,
+      "cur": "HKD",
+      "wert": 6.75,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 135.57,
+      "cur": "USD",
+      "wert": -6.38,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "SAP.DE",
+      "name": "SAP SE",
+      "kurs": 189.88,
+      "cur": "EUR",
+      "wert": 5.48,
+      "stichtag": "2026-08-27"
+    },
+    {
+      "sym": "1686.HK",
+      "name": "SUNeVision Holdings Ltd.",
+      "kurs": 4.92,
+      "cur": "HKD",
+      "wert": -5.29,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 105.84,
+      "cur": "USD",
+      "wert": -5.11,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 217.55,
+      "cur": "USD",
+      "wert": -4.57,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "kurs": 266.43,
+      "cur": "USD",
+      "wert": 3.97,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "BMW.DE",
+      "name": "Bayerische Motoren Werke Aktiengesellschaft",
+      "kurs": 59.94,
+      "cur": "EUR",
+      "wert": 3.92,
+      "stichtag": "2026-08-27"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 166,
+      "cur": "USD",
+      "wert": -3.92,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 15.93,
+      "cur": "HKD",
+      "wert": -3.45,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 39.6,
+      "cur": "USD",
+      "wert": 3.02,
+      "stichtag": "2026-08-28"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 256,
+      "cur": "USD",
+      "wert": 22.39,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "BNTX",
+      "name": "BioNTech SE",
+      "kurs": 102.07,
+      "cur": "USD",
+      "wert": -12.43,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "2005.HK",
+      "name": "SSY Group Limited",
+      "kurs": 2.68,
+      "cur": "HKD",
+      "wert": 8.92,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 166,
+      "cur": "USD",
+      "wert": 8.14,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 135.57,
+      "cur": "USD",
+      "wert": -7.66,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 147.69,
+      "cur": "USD",
+      "wert": 7.61,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "DB",
+      "name": "Deutsche Bank Aktiengesellschaft",
+      "kurs": 40.36,
+      "cur": "USD",
+      "wert": 6.72,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "LLY",
+      "name": "Eli Lilly and Company",
+      "kurs": 1174.61,
+      "cur": "USD",
+      "wert": -6.44,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "MSFT",
+      "name": "Microsoft Corporation",
+      "kurs": 513.53,
+      "cur": "USD",
+      "wert": 6.27,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "CW",
+      "name": "Curtiss-Wright Corporation",
+      "kurs": 596.37,
+      "cur": "USD",
+      "wert": -6.08,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 46.59,
+      "cur": "USD",
+      "wert": 6.08,
+      "stichtag": "2026-08-28"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 291.52,
+      "cur": "USD",
+      "wert": 5.89,
+      "stichtag": "2026-08-28"
+    }
+  ]
+}
