@@ -577,11 +577,17 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
    Zeitraum zeigt. */
 .tm-etikett{flex:none;width:104px;font:600 10px var(--sans);letter-spacing:.07em;
   text-transform:uppercase;color:var(--faint);line-height:1.3}
-/* Das Fenster schneidet ab und blendet die Raender aus; die Reihe darin
-   wandert. Getrennte Elemente, weil ein verschobener Ausschnitt mitwandert. */
-.tm-fenster{flex:1;min-width:0;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
-  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+/* Das Fenster schneidet ab, die Reihe darin wandert. Getrennte Elemente,
+   weil ein verschobener Ausschnitt mitwandert. */
+.tm-fenster{position:relative;flex:1;min-width:0;overflow:hidden}
+/* Die weichen Kanten liegen als feste Verlaeufe DARUEBER, nicht als Maske
+   darunter. Eine mask-image zwingt den Browser, die bewegte Reihe in jedem
+   einzelnen Bild neu zu rastern - genau daher kam das Ruckeln. Diese beiden
+   Streifen stehen still und kosten nach dem ersten Zeichnen nichts. */
+.tm-fenster::before,.tm-fenster::after{content:"";position:absolute;top:0;bottom:0;
+  width:36px;pointer-events:none;z-index:1}
+.tm-fenster::before{left:0;background:linear-gradient(90deg,var(--bg),rgba(21,25,32,0))}
+.tm-fenster::after{right:0;background:linear-gradient(270deg,var(--bg),rgba(21,25,32,0))}
 .tm-reihe{display:flex;gap:9px;will-change:transform}
 .tm-kachel{flex:none;width:178px;text-align:left;cursor:pointer;
   background:var(--surface);border:1px solid var(--line);border-radius:10px;
