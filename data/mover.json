@@ -1,202 +1,202 @@
 {
-  "stand": "2026-08-28",
-  "erzeugt": "2026-08-31T06:19:23.750Z",
+  "stand": "2026-08-31",
+  "erzeugt": "2026-09-01T11:35:34.346Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "BNTX",
-      "name": "BioNTech SE",
-      "kurs": 102.07,
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 244.95,
       "cur": "USD",
-      "wert": -8.37,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 5.53,
-      "cur": "HKD",
-      "wert": 6.75,
+      "wert": -8.48,
       "stichtag": "2026-08-31"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 135.57,
+      "kurs": 134,
       "cur": "USD",
-      "wert": -6.38,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "SAP.DE",
-      "name": "SAP SE",
-      "kurs": 189.88,
-      "cur": "EUR",
-      "wert": 5.48,
-      "stichtag": "2026-08-27"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.92,
-      "cur": "HKD",
-      "wert": -5.29,
+      "wert": -7.46,
       "stichtag": "2026-08-31"
     },
     {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 105.84,
-      "cur": "USD",
-      "wert": -5.11,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 217.55,
-      "cur": "USD",
-      "wert": -4.57,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "AMZN",
-      "name": "Amazon.com, Inc.",
-      "kurs": 266.43,
-      "cur": "USD",
-      "wert": 3.97,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "BMW.DE",
-      "name": "Bayerische Motoren Werke Aktiengesellschaft",
-      "kurs": 59.94,
-      "cur": "EUR",
-      "wert": 3.92,
-      "stichtag": "2026-08-27"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 166,
-      "cur": "USD",
-      "wert": -3.92,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 15.93,
-      "cur": "HKD",
-      "wert": -3.45,
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 62.16,
+      "cur": "CAD",
+      "wert": -5.23,
       "stichtag": "2026-08-31"
     },
     {
-      "sym": "NKE",
-      "name": "NIKE, Inc.",
-      "kurs": 39.6,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 36.95,
       "cur": "USD",
-      "wert": 3.02,
-      "stichtag": "2026-08-28"
+      "wert": -5.01,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 31.85,
+      "cur": "USD",
+      "wert": -4.95,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "NOVN.SW",
+      "name": "Novartis AG",
+      "kurs": 129.18,
+      "cur": "CHF",
+      "wert": 4.8,
+      "stichtag": "2026-09-01"
+    },
+    {
+      "sym": "0388.HK",
+      "name": "Hong Kong Exchanges and Clearing Limited",
+      "kurs": 405.6,
+      "cur": "HKD",
+      "wert": -4.61,
+      "stichtag": "2026-09-01"
+    },
+    {
+      "sym": "ATHM",
+      "name": "Autohome Inc.",
+      "kurs": 21.94,
+      "cur": "USD",
+      "wert": -3.9,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "EGLN.L",
+      "name": "iShares Physical Gold ETC",
+      "kurs": 73.25,
+      "cur": "EUR",
+      "wert": -3.85,
+      "stichtag": "2026-09-01"
+    },
+    {
+      "sym": "CW",
+      "name": "Curtiss-Wright Corporation",
+      "kurs": 582.53,
+      "cur": "USD",
+      "wert": -3.79,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 170.48,
+      "cur": "USD",
+      "wert": 3.46,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "CDP",
+      "name": "COPT Defense Properties",
+      "kurs": 36,
+      "cur": "USD",
+      "wert": -3.43,
+      "stichtag": "2026-08-31"
     }
   ],
   "woche": [
     {
       "sym": "CRM",
       "name": "Salesforce, Inc.",
-      "kurs": 256,
+      "kurs": 257.54,
       "cur": "USD",
-      "wert": 22.39,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "BNTX",
-      "name": "BioNTech SE",
-      "kurs": 102.07,
-      "cur": "USD",
-      "wert": -12.43,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "2005.HK",
-      "name": "SSY Group Limited",
-      "kurs": 2.68,
-      "cur": "HKD",
-      "wert": 8.92,
+      "wert": 23.19,
       "stichtag": "2026-08-31"
     },
     {
       "sym": "FTNT",
       "name": "Fortinet, Inc.",
-      "kurs": 166,
+      "kurs": 170.93,
       "cur": "USD",
-      "wert": 8.14,
-      "stichtag": "2026-08-28"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 135.57,
-      "cur": "USD",
-      "wert": -7.66,
-      "stichtag": "2026-08-28"
+      "wert": 11.35,
+      "stichtag": "2026-08-31"
     },
     {
       "sym": "CDW",
       "name": "CDW Corporation",
-      "kurs": 147.69,
+      "kurs": 151.58,
       "cur": "USD",
-      "wert": 7.61,
-      "stichtag": "2026-08-28"
+      "wert": 10.44,
+      "stichtag": "2026-08-31"
     },
     {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 40.36,
+      "sym": "BNTX",
+      "name": "BioNTech SE",
+      "kurs": 101.61,
       "cur": "USD",
-      "wert": 6.72,
-      "stichtag": "2026-08-28"
+      "wert": -9.94,
+      "stichtag": "2026-08-31"
     },
     {
-      "sym": "LLY",
-      "name": "Eli Lilly and Company",
-      "kurs": 1174.61,
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 244.95,
       "cur": "USD",
-      "wert": -6.44,
-      "stichtag": "2026-08-28"
+      "wert": -9.84,
+      "stichtag": "2026-08-31"
     },
     {
-      "sym": "MSFT",
-      "name": "Microsoft Corporation",
-      "kurs": 513.53,
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 134,
       "cur": "USD",
-      "wert": 6.27,
-      "stichtag": "2026-08-28"
+      "wert": -8.73,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "2005.HK",
+      "name": "SSY Group Limited",
+      "kurs": 2.73,
+      "cur": "HKD",
+      "wert": 8.55,
+      "stichtag": "2026-09-01"
     },
     {
       "sym": "CW",
       "name": "Curtiss-Wright Corporation",
-      "kurs": 596.37,
+      "kurs": 582.53,
       "cur": "USD",
-      "wert": -6.08,
-      "stichtag": "2026-08-28"
+      "wert": -8.26,
+      "stichtag": "2026-08-31"
     },
     {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 46.59,
+      "sym": "LLY",
+      "name": "Eli Lilly and Company",
+      "kurs": 1156.73,
       "cur": "USD",
-      "wert": 6.08,
-      "stichtag": "2026-08-28"
+      "wert": -7.86,
+      "stichtag": "2026-08-31"
+    },
+    {
+      "sym": "0151.HK",
+      "name": "Want Want China Holdings Limited",
+      "kurs": 3.05,
+      "cur": "HKD",
+      "wert": -7.31,
+      "stichtag": "2026-09-01"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 16.11,
+      "cur": "HKD",
+      "wert": -6.93,
+      "stichtag": "2026-09-01"
     },
     {
       "sym": "ADBE",
       "name": "Adobe Inc.",
-      "kurs": 291.52,
+      "kurs": 292.79,
       "cur": "USD",
-      "wert": 5.89,
-      "stichtag": "2026-08-28"
+      "wert": 6.35,
+      "stichtag": "2026-08-31"
     }
   ]
 }
