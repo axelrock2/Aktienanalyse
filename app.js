@@ -1442,21 +1442,37 @@ function renderMover() {
       Schlusskurse vom ${new Date(d.stand).toLocaleDateString("de-DE")}`;
   }
 
-  /* Jede Reihe verdoppelt. Verdreifacht war eine Kopie zu viel: Die
-     Verschiebung bleibt immer innerhalb einer Umlaufbreite, eine Umlaufbreite
-     plus Sichtbereich deckt das ab. Das spart ein Drittel der Kacheln - bei
-     zwei Reihen 24 Elemente weniger, die der Browser zeichnen muss. */
-  const reihe = (liste) => liste.concat(liste)
-    .map(t => moverKachel(t, d.stand)).join("");
-  /* Das Fenster steht fest und schneidet ab, die Reihe darin wandert. Beides
-     in ein Element zu legen geht nicht: Verschiebt man das Element, das auch
-     abschneiden soll, wandert der Ausschnitt mit - die Reihe schiebt sich
-     dann ueber ihr Etikett und die zweite ganz aus dem Bild. */
+  /* Keine Doppelung mehr. Solange das Band nur von selbst lief, brauchte es
+     eine zweite Kopie fuer den nahtlosen Umlauf. Jetzt kann man selbst
+     scrollen - und derselbe Ticker zweimal in einer Bestenliste wuerde nur
+     verwirren. Zwoelf eindeutige Kacheln je Reihe. */
+  const reihe = (liste) => liste.map(t => moverKachel(t, d.stand)).join("");
+
+  const pfeil = (ziel, richtung) => `<button class="tm-pfeil tm-${richtung}"
+      data-ziel="${ziel}" data-richtung="${richtung === "links" ? -1 : 1}"
+      aria-label="${richtung === "links" ? "Weiter nach links" : "Weiter nach rechts"}">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="${richtung === "links" ? "15 5 8 12 15 19" : "9 5 16 12 9 19"}"/>
+      </svg></button>`;
+
+  /* Das Fenster scrollt selbst (overflow-x). Damit funktionieren Wischen,
+     Zweifingergeste und Umschalt+Rad ohne eigenen Code; die Pfeile sind nur
+     die sichtbare Zugabe fuer Maus ohne waagerechtes Rad. */
+  const zeile = (id, etikett, inhalt) => `<div class="tm-zeile">
+      <span class="tm-etikett">${etikett}</span>
+      <div class="tm-lauf">
+        <div class="tm-fenster" id="tm-f${id}" tabindex="0" role="group"
+          aria-label="${etikett} – waagerecht scrollbar">
+          <div class="tm-reihe" id="tm-r${id}">${inhalt}</div>
+        </div>
+        ${pfeil("tm-f" + id, "links")}${pfeil("tm-f" + id, "rechts")}
+      </div>
+    </div>`;
+
   koerper.innerHTML = `<div class="tm-band">
-      <div class="tm-zeile"><span class="tm-etikett">Handelstag</span>
-        <div class="tm-fenster"><div class="tm-reihe" id="tm-r1">${reihe(tag)}</div></div></div>
-      <div class="tm-zeile"><span class="tm-etikett">Woche · ${d.woche_tage} Handelstage</span>
-        <div class="tm-fenster"><div class="tm-reihe" id="tm-r2">${reihe(woche)}</div></div></div>
+      ${zeile(1, "Handelstag", reihe(tag))}
+      ${zeile(2, `Woche · ${d.woche_tage} Handelstage`, reihe(woche))}
     </div>`;
 
   koerper.querySelectorAll(".tm-kachel").forEach(b => {
@@ -1476,43 +1492,54 @@ function renderMover() {
    duerfen: renderMover() laeuft auch beim Waehrungswechsel und beim
    Aktualisieren erneut, und jeder Aufruf haette sonst einen weiteren
    Scroll-Listener angehaengt - jeder mit eigener Rechenarbeit. */
-const MoverLauf = { r1: null, r2: null, band: null, umlauf1: 0, umlauf2: 0,
-                    oben: 0, sichtbar: true, laeuft: false, verdrahtet: false };
+const MoverLauf = { reihen: [], sichtbar: true, laeuft: false, verdrahtet: false };
 
-/** Umlaufbreite: Abstand von der ersten zur ersten wiederholten Kachel. */
-function moverUmlauf(reihe) {
-  const k = reihe.children, n = Math.floor(k.length / 2);
-  return (n >= 1 && k[n]) ? k[n].offsetLeft - k[0].offsetLeft : reihe.scrollWidth / 2 || 1;
+/* Ueber wie viele Bildschirmhoehen Scrollweg eine Reihe einmal ganz
+   durchlaeuft. Die zweite braucht laenger, damit nicht beide starr im
+   Gleichschritt gehen.
+
+   Was diese Bewegung NICHT leistet: alle Kacheln zeigen. Das Band steht ganz
+   oben und ist nur die ersten rund 250 Scrollpixel im Bild - in dieser Zeit
+   wandert eine Reihe knapp ein Fuenftel ihrer Breite. Sie ist ein Hinweis
+   darauf, dass rechts mehr steht, keine Anzeige des Bestands. Vollstaendig
+   erreichbar sind die Kacheln ueber die Pfeile, Wischen und die Tastatur. */
+const MOVER_WEG = [1.4, 2.2];
+
+/** Pfeilschritt: knapp eine Fensterbreite, damit der Anschluss sichtbar bleibt. */
+const moverSchritt = (f) => Math.max(160, f.clientWidth * 0.8);
+
+/** Was die Pfeile anbieten - am Ende gibt es nichts mehr zu holen. */
+function moverPfeileStand() {
+  for (const r of MoverLauf.reihen) {
+    const rest = r.fenster.scrollWidth - r.fenster.clientWidth;
+    const x = r.fenster.scrollLeft;
+    if (r.links) r.links.disabled = x <= 1;
+    if (r.rechts) r.rechts.disabled = x >= rest - 1;
+  }
 }
 
-/* Alle Layout-Messungen an einer Stelle - und nur hier. Sie in der
-   Scroll-Schleife zu lesen war der Fehler: Ein offsetLeft NACH einem
-   geschriebenen transform zwingt den Browser mitten im Bild zu einem
-   vollstaendigen Layout. */
-function moverVermessen() {
-  const L = MoverLauf;
-  if (!L.r1 || !L.r2 || !L.band) return;
-  L.umlauf1 = moverUmlauf(L.r1);
-  L.umlauf2 = moverUmlauf(L.r2);
-  L.oben = L.band.getBoundingClientRect().top + window.scrollY;
-}
-
-/** Verschiebt die beiden Reihen gegenlaeufig - reines Schreiben, kein Lesen. */
+/**
+ * Treibt die Reihen mit der Seitenposition.
+ *
+ * Anders als frueher wird nicht mehr im Kreis verschoben, sondern der
+ * vorhandene Scrollbereich abgefahren. Der Umbau war noetig, weil ein Umlauf
+ * bei 2244 Pixeln lag und das Tempo bei 0,30: Fuer eine volle Runde haette
+ * man 7480 Pixel scrollen muessen, mehr als die Seite hoch ist. Ein Teil der
+ * Kacheln war so ueberhaupt nicht erreichbar - jetzt fuehren Pfeile und
+ * Wischen zuverlaessig hin.
+ */
 function moverSchieben() {
   const L = MoverLauf;
   L.laeuft = false;
-  if (!L.r1 || !L.umlauf1 || !L.umlauf2) return;
-  const versatz = (window.scrollY - L.oben + window.innerHeight) * MOVER_TEMPO;
-  /* Rest immer in [0, umlauf) bringen. Der einfache Modulo liefert bei
-     negativem Versatz ein negatives Ergebnis - und negativ wird die Reihe
-     nach RECHTS geschoben, wodurch an der Kante eine Luecke aufreisst. */
-  const rest1 = ((versatz % L.umlauf1) + L.umlauf1) % L.umlauf1;
-  const rest2 = ((versatz % L.umlauf2) + L.umlauf2) % L.umlauf2;
-  /* translate3d statt translateX und auf ganze Pixel gerundet: Das erste
-     haelt die Reihe auf einer eigenen Ebene der Grafikkarte, das zweite
-     erspart das Neuzeichnen mit Zwischenpixeln. */
-  L.r1.style.transform = `translate3d(${-Math.round(rest1)}px,0,0)`;
-  L.r2.style.transform = `translate3d(${Math.round(rest2 - L.umlauf2)}px,0,0)`;
+  L.reihen.forEach((r, i) => {
+    if (r.uebernommen) return;              // Wer selbst gescrollt hat, behaelt die Reihe
+    const rest = r.fenster.scrollWidth - r.fenster.clientWidth;
+    if (rest <= 0) return;
+    const weg = window.innerHeight * (MOVER_WEG[i] || 1.4);
+    const fortschritt = Math.min(1, Math.max(0, window.scrollY / weg));
+    r.fenster.scrollLeft = fortschritt * rest;
+  });
+  moverPfeileStand();
 }
 
 function moverAnstossen() {
@@ -1520,21 +1547,49 @@ function moverAnstossen() {
   if (L.sichtbar && !L.laeuft) { L.laeuft = true; requestAnimationFrame(moverSchieben); }
 }
 
-/** Haengt die Bewegung an die Scrollposition. Mehrfach aufrufbar. */
+/** Haengt Bedienung und Bewegung an. Mehrfach aufrufbar. */
 function moverBewegung() {
   const L = MoverLauf;
-  L.r1 = $("#tm-r1"); L.r2 = $("#tm-r2"); L.band = $("#moverbody");
-  if (!L.r1 || !L.r2 || !L.band) return;
-  // Wer Bewegung abbestellt hat, bekommt ein ruhiges Band.
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const band = $("#moverbody");
+  if (!band) return;
 
-  moverVermessen();
+  L.reihen = [1, 2].map(n => {
+    const fenster = $("#tm-f" + n);
+    if (!fenster) return null;
+    const lauf = fenster.parentElement;
+    return { fenster,
+             links: lauf.querySelector(".tm-links"),
+             rechts: lauf.querySelector(".tm-rechts"),
+             uebernommen: false };
+  }).filter(Boolean);
+  if (!L.reihen.length) return;
+
+  for (const r of L.reihen) {
+    // Pfeile: eine Fensterbreite weiter, weich.
+    for (const b of [r.links, r.rechts]) {
+      if (!b) continue;
+      b.onclick = () => {
+        r.uebernommen = true;
+        r.fenster.scrollBy({ left: (+b.dataset.richtung) * moverSchritt(r.fenster), behavior: "smooth" });
+      };
+    }
+    /* Sobald jemand die Reihe selbst bewegt, gehoert sie ihm - die
+       Seitenbewegung tritt zurueck. Ohne das wuerde die eigene Position beim
+       naechsten Scrollen der Seite ueberschrieben. Bewusst an den Gesten und
+       nicht am scroll-Ereignis festgemacht: Letzteres loest auch die eigene
+       Bewegung aus und liesse sich davon nicht unterscheiden. */
+    ["pointerdown", "touchstart", "wheel", "keydown"].forEach(art =>
+      r.fenster.addEventListener(art, () => { r.uebernommen = true; }, { passive: true }));
+    r.fenster.addEventListener("scroll", moverPfeileStand, { passive: true });
+  }
+
   moverSchieben();
+  moverPfeileStand();
   if (L.verdrahtet) return;
   L.verdrahtet = true;
 
   window.addEventListener("scroll", moverAnstossen, { passive: true });
-  window.addEventListener("resize", () => { moverVermessen(); moverAnstossen(); }, { passive: true });
+  window.addEventListener("resize", () => { moverPfeileStand(); moverAnstossen(); }, { passive: true });
 
   /* Ist das Band aus dem Bild gescrollt, gibt es nichts zu verschieben. Ohne
      das rechnet die Seite bei jedem Scrollen weiter an einem Element, das
@@ -1543,8 +1598,8 @@ function moverBewegung() {
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(([e]) => {
       L.sichtbar = e.isIntersecting;
-      if (L.sichtbar) { moverVermessen(); moverAnstossen(); }
-    }, { rootMargin: "120px" }).observe(L.band);
+      if (L.sichtbar) moverAnstossen();
+    }, { rootMargin: "120px" }).observe(band);
   }
 }
 
