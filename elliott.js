@@ -11,73 +11,126 @@
    Namensraum. Ein Modul kaeme an loadChart, analyse oder chartObj nicht heran.
 
    ---------------------------------------------------------------------
-   Warum dieses Modul anders rechnet als ueblich
+   Was hier gemessen wurde, und was daraus folgt
    ---------------------------------------------------------------------
-   Die drei harten Elliott-Regeln sind schwach: Fast jede Zickzackfolge
-   erfuellt sie irgendwo. Wer genug Fenster durchprobiert, findet immer eine
-   "gueltige" Zaehlung - auch in reinem Rauschen. Gemessen an 70 Titeln und
-   Surrogatreihen fand die fruehere Fassung auf Zufallsdaten genauso oft eine
-   Zaehlung wie auf echten Kursen (78 % gegen 80 %) und bewertete sie im
-   Median sogar hoeher.
+   Die fruehere Fassung hat jede Zaehlung gegen Zufallsreihen geprueft und das
+   Ergebnis als Ampel gezeigt. Der Gedanke war richtig, die Kennzahl nicht:
+   Geprueft wurde die Passung der Wellenverhaeltnisse zu den Fibonacci-Werten.
+   Genau die traegt nichts. Gemessen an 107 Titeln ueber zehn Jahre:
 
-   Deshalb entscheidet hier nicht die Zaehlung selbst, sondern ihr Vergleich
-   mit dem Zufall: Dieselbe Suche laeuft ueber hunderte Surrogatreihen, die
-   aus den echten Renditen dieses Titels gebaut sind. Erst der Anteil der
-   Surrogate, die mindestens so gut abschneiden, entscheidet - der p-Wert.
-   Weil auf jedem Surrogat dieselbe Bestenauswahl laeuft, ist die
-   Mehrfachauswahl ueber alle Fenster und Ebenen automatisch mitkorrigiert.
+   - Die Verteilung der Wellenverhaeltnisse auf echten Kursen ist von der auf
+     Surrogatreihen nicht zu unterscheiden. Kolmogorov-Smirnov ueber alle
+     fuenf Beziehungen: hoechstens 1,19 gegen einen kritischen Wert von 1,36.
+   - Der Grund ist strukturell: Wer Abwechslung, R1, R2 und R3 verlangt,
+     erzwingt Verhaeltnisse nahe der Fibonacci-Werte - im Rauschen genauso.
+     Der Median von Welle 2 / Welle 1 liegt auf Zufallsreihen bei 0,60, der
+     von Welle 3 / Welle 1 bei 1,72. Ein "perfektes" Retracement ist der
+     Normalfall des Zufalls, kein Befund.
+   - Keine Formkennzahl trennt echt von Zufall: Passung, Alternation,
+     Regelabstaende, Wellendauern, Wegwirkungsgrad - alle bei AUC 0,5, auf
+     beiden Haelften der Titel getrennt geprueft. Ein Klassifikator ueber alle
+     Verhaeltnisse gemeinsam erreicht 0,64 auf den Lerndaten und 0,50 auf den
+     Pruefdaten - der Unterschied ist reine Anpassung.
+   - Auf Wochenkerzen dasselbe Bild (AUC 0,52).
 
-   Elliott-Wellen bleiben Auslegung, keine Messung. Dieses Modul macht die
-   Auslegung nur pruefbar - und liefert lieber kein Ergebnis als ein
-   erfundenes.
+   Eine Ampel, die auf einer Kennzahl ohne Trennschaerfe beruht, zeigt in
+   fuenf Prozent der Faelle "gruen" - allein weil der p-Wert dann gleich-
+   verteilt ist. Ein Test ohne Trennschaerfe, der trotzdem Urteile faellt, ist
+   schaedlicher als kein Test. Deshalb ist er entfernt.
+
+   Was geblieben ist, ist das, was ohne Statistik gilt: Die Zaehlung ist eine
+   nachvollziehbare Konstruktion aus Wendepunkten und drei harten Regeln, und
+   sie definiert einen Preis, ab dem sie widerlegt ist. Bewertet wird nur noch,
+   wie EINDEUTIG die Lesart ist - nicht, wie wahrscheinlich sie zutrifft.
    ===================================================================== */
 
-/* ---------- Schwellen und Verhaeltnisse ---------- */
+/* =====================================================================
+   Der gemessene Befund - wird in der Oberflaeche gezeigt
+   Nachrechenbar mit scripts/elliott_befund.js
+   ===================================================================== */
+const EL_BEFUND = {
+  /* Stand 07.09.2026, gerechnet mit scripts/elliott_befund.js auf demselben
+     Korb, den der Chancenraum benutzt. */
+  titel: 107, jahre: 10, kerzen: 500, zeitpunkte: 41874,
+  /* Groesster Kolmogorov-Smirnov-Wert ueber die fuenf Wellenbeziehungen,
+     echte Kurse gegen Surrogatreihen. Ab 1,36 waere ein Unterschied belegt. */
+  ksMax: 1.17, ksKritisch: 1.36,
+  /* Logistische Regression ueber alle Verhaeltnisse, an der einen Haelfte der
+     Titel gelernt, an der anderen geprueft. Der Abstand zwischen beiden ist
+     reine Anpassung. */
+  aucInnen: 0.588, aucAussen: 0.466,
+  /* Anteil der Handelstage, an denen ein Titel ueberhaupt eine aktuelle
+     Zaehlung hat. */
+  anteilAktuell: 0.262,
+  /* Rendite der folgenden 20 Handelstage, in Standardabweichungen, verglichen
+     nur mit Zeitpunkten GLEICHER Vorbewegung (60 Tage, zehn Klassen). Ohne
+     diese Kontrolle sieht man den Rueckschlag auf den Anstieg und haelt ihn
+     fuer Wellenwissen. */
+  vw: {
+    tage: 20, n: 10980,
+    lagen: [
+      { name: "Impuls aufwärts vollendet",  n: 3637, d: -0.092, lo: -0.153, hi: -0.034 },
+      { name: "Impuls abwärts vollendet",   n: 1297, d: -0.041, lo: -0.130, hi:  0.051 },
+      { name: "Welle 5 läuft aufwärts",     n: 4628, d: -0.009, lo: -0.053, hi:  0.029 },
+      { name: "Welle 5 läuft abwärts",      n: 1418, d: -0.004, lo: -0.089, hi:  0.085 },
+    ],
+    /* Ohne die Kontrolle sahen dieselben vier Lagen so aus: −0,123 / +0,039 /
+       −0,044 / +0,106 - ein sauberes Richtungsmuster (auf, ab, auf, ab), das
+       verschwindet, sobald man mit vergleichbaren Zeitpunkten vergleicht. */
+    ohneKontrolle: [-0.123, 0.039, -0.044, 0.106],
+  },
+};
+/* =====================================================================
+   Schwellen und Ebenen
+   ===================================================================== */
 
-/** Untergrenze der Pivot-Schwelle in Prozent - darunter wird Rauschen gezaehlt. */
-const EL_MIN_PCT = 0.02;
-/** Mehrere Betrachtungsebenen: ATR(14) mal diesen Faktoren. */
-const EL_SKALEN = [1.0, 1.5, 2.25, 3.5];
-const EL_ATR_PERIOD = 14;
-/** Ueber so viele der juengsten Pivots wird je Ebene gesucht. */
+/**
+ * Bezugshorizonte in Handelstagen: Monat, zwei Monate, Quartal, Halbjahr.
+ *
+ * Eine Schwingung zaehlt auf Ebene h, wenn ihre Amplitude im Logarithmus
+ * sigma * sqrt(h) uebersteigt - also so gross ist wie eine Standardabweichung
+ * der Zufallsbewegung ueber h Tage. Damit hat jede Ebene eine Bedeutung
+ * ("Bewegungen von Monatsgroesse") statt nur eine Zahl zu sein, und die
+ * Schwelle passt sich von selbst an ruhige wie an wilde Titel an.
+ *
+ * Keine groesseren Ebenen: Die Seite laedt zwei Jahre Tagesdaten. Auf Ebene
+ * 126 braucht ein vollstaendiger Impuls schon rund 250 Handelstage; ein
+ * Jahresgrad passte nicht mehr ins Fenster. Lo, Mamaysky und Wang (2000)
+ * machen denselben Schnitt: In einem festen Fenster sind nur Muster
+ * auffindbar, die darin auch abgeschlossen werden.
+ */
+const EL_EBENEN = [21, 42, 63, 126];
+/** Unter so vielen Kerzen wird gar nicht gerechnet. */
+const EL_MIN_KERZEN = 250;
+/** Ueber so viele der juengsten Umkehrpunkte wird je Ebene gesucht. */
 const EL_MAX_PIVOTS = 24;
-/** Unter so vielen Kerzen wird gar nicht erst gerechnet. */
-const EL_MIN_CANDLES = 120;
-/** Mindestdauer je Welle in Kerzen.
-    Die ZigZag-Schwelle steuert nur die Amplitude, nicht die Dauer. Ohne diese
-    Grenze entstehen Zaehlungen, die amplitudenmaessig sauber sind und dennoch
-    Unsinn: gemessen wurde eine ueber neun Kalendertage, bei der Welle 3 und
-    Welle 4 am selben Tag endeten. Eine Welle, die auf Tagesdaten in ein oder
-    zwei Kerzen entsteht, liegt unterhalb der Aufloesung der Daten. */
-const EL_MIN_WELLE_KERZEN = 3;
+/**
+ * Ab wann eine Zaehlung nicht mehr aktuell ist - gemessen am Grad, nicht in
+ * absoluten Tagen. Auf Ebene 21 ist eine Bewegung nach zehn Tagen eine andere
+ * Lage; auf Ebene 126 nicht. Eine feste Frist waere fuer die kleine Ebene zu
+ * lasch und fuer die grosse zu streng.
+ *
+ *   Frist(h) = max(5, h / 2)
+ *
+ * Die Haelfte des Bezugshorizonts, weil eine Welle dieses Grades typisch
+ * mehrere Wochen braucht: Wer laenger als eine halbe Horizontlaenge nichts
+ * mehr gesehen hat, sieht eine Bewegung, die inzwischen weitergelaufen ist.
+ */
+const elFrist = h => Math.max(5, Math.round(h / 2));
+const EL_ATR_PERIOD = 14;
 
-/** Zielverhaeltnisse je Beziehung. */
+/** Zielverhaeltnisse je Beziehung - das ist die Theorie, unveraendert. */
 const Z_RET2  = [0.382, 0.5, 0.618, 0.786];
 const Z_RET4  = [0.236, 0.382, 0.5];
 const Z_W3    = [1.618, 2.618, 4.236];
 const Z_W5_1  = [0.618, 1.0, 1.618];
 const Z_W5_13 = [0.382, 0.618];
-/** Vollstaendige Retracement-Leiter, wie sie beim Einzeichnen ueblich ist.
+/** Vollstaendige Retracement-Leiter, wie beim Einzeichnen ueblich.
     0 liegt am Ende der Bewegung, 1 an ihrem Anfang - dieselbe Ausrichtung wie
     beim Fibonacci-Werkzeug gaengiger Chartprogramme. */
 const EL_FIB_LEITER = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
 /** Die beiden Stufen, zwischen denen die meisten Korrekturen enden. */
 const EL_GOLD_VON = 0.382, EL_GOLD_BIS = 0.618;
-
-/** Streuung im Log-Verhaeltnisraum - rund 13 % Toleranz. */
-const EL_SIGMA = 0.13;
-/** Ab dieser Differenz der Retracement-Tiefen gilt Alternation als voll erfuellt. */
-const EL_ALTERNATION_VOLL = 0.30;
-
-/** Anzahl Surrogatreihen fuer den Signifikanztest. */
-const EL_N_SURROGATE = 999;
-/** Blocklaenge des Bootstraps in Handelstagen. */
-const EL_BLOCK = 20;
-
-/** Ampelgrenzen nach p-Wert. */
-const EL_P_GRUEN = 0.05;
-const EL_P_GELB  = 0.20;
-
 /** Zwei Level bilden eine Zone, wenn ihr Abstand unter diesem Anteil des Kurses liegt. */
 const EL_CLUSTER_TOL = 0.01;
 
@@ -90,8 +143,8 @@ const EL_SPEICHER = "ak.elliott";
 /**
  * Mittlere Tagesspanne (Average True Range).
  * TR = max(hoch − tief, |hoch − schluss₋₁|, |tief − schluss₋₁|)
- * ATR = Mittel der letzten n TR
- * @returns {number|null}
+ * Nur noch fuer die Einordnung des Stop-Abstands gebraucht, nicht mehr fuer
+ * die Schwellen - die stehen jetzt in Einheiten der Zufallsbewegung.
  */
 function elAtr(hochs, tiefs, schluss, n = EL_ATR_PERIOD) {
   if (!hochs || schluss.length < n + 1) return null;
@@ -105,138 +158,207 @@ function elAtr(hochs, tiefs, schluss, n = EL_ATR_PERIOD) {
   return teil.reduce((a, b) => a + b, 0) / teil.length;
 }
 
-function elArgMax(a, von, bis) { let k = von; for (let i = von; i <= bis; i++) if (a[i] > a[k]) k = i; return k; }
-function elArgMin(a, von, bis) { let k = von; for (let i = von; i <= bis; i++) if (a[i] < a[k]) k = i; return k; }
+/** Tagesstreuung der Log-Renditen - der Massstab aller Schwellen. */
+function elSigma(c) {
+  if (!c || c.length < 30) return null;
+  const r = [];
+  for (let i = 1; i < c.length; i++) r.push(Math.log(c[i] / c[i - 1]));
+  const m = r.reduce((a, b) => a + b, 0) / r.length;
+  const v = r.reduce((a, b) => a + (b - m) * (b - m), 0) / (r.length - 1);
+  return v > 0 ? Math.sqrt(v) : null;
+}
+
+/** Erzwingt abwechselnde Hoch- und Tiefpunkte: Von zwei gleichartigen
+    Punkten in Folge bleibt der extremere. */
+function elAbwechselnd(liste) {
+  const out = [];
+  for (const x of liste) {
+    const letzte = out[out.length - 1];
+    if (!letzte || letzte.type !== x.type) { out.push(x); continue; }
+    const behalten = x.type === "high" ? x.price > letzte.price : x.price < letzte.price;
+    if (behalten) out[out.length - 1] = x;
+  }
+  return out;
+}
 
 /**
- * ZigZag-Pivots: alternierende Hoch- und Tiefpunkte.
+ * Umkehrpunkte nach Bry & Boschan (1971) in der Fassung von Pagan &
+ * Sossounov (2003), auf Tagesdaten uebertragen.
  *
- * Ein neuer Pivot entsteht, sobald der Kurs vom laufenden Extrem um mehr als
- * die Schwelle zurueckkommt:  |extrem − gegenwert| / extrem ≥ schwelle
+ *   1. Kandidaten: Punkt ist Hoechst- bzw. Tiefstwert im Fenster ±w
+ *   2. Abwechslung erzwingen
+ *   3. Phasen unter minPhase Tagen streichen - ausser die Amplitude ist
+ *      aussergewoehnlich gross (Ausnahmeregel von Pagan/Sossounov, damit ein
+ *      Absturz nicht wegzensiert wird, nur weil er schnell ging)
+ *   4. Amplituden unter der Schwelle streichen
+ *   5. Zyklen unter minZyklus Tagen streichen
  *
- * Die Schwelle ist relativ, nicht absolut - sonst waere sie fuer einen Titel
- * bei 15 Euro und einen bei 1500 voellig verschieden streng.
+ * Der Unterschied zum bisherigen ZigZag: Der kannte nur Amplitude. Dauer und
+ * Zykluslaenge sind eigene Bedingungen. Ohne sie entstehen Zaehlungen, die in
+ * der Amplitude sauber sind und in der Zeit Unsinn - gemessen wurde eine ueber
+ * neun Kalendertage, bei der Welle 3 und Welle 4 am selben Tag endeten. Die
+ * fruehere Fassung hat das mit einer Mindestkerzenzahl je Welle nachtraeglich
+ * geflickt; hier faellt es strukturell weg, weil der Punkt gar nicht erst
+ * entsteht.
  *
- * @param {{t:number[],c:number[],h:number[],l:number[]}} reihe
- * @param {number} schwelle Anteil, z. B. 0.03 fuer drei Prozent
- * @returns {{index:number,date:number,price:number,type:string}[]}
+ * Gestrichen wird immer der Punkt mit der geringeren Auspraegung - dem
+ * kleineren der beiden Abstaende zu seinen Nachbarn. Das ist symmetrisch und
+ * bevorzugt weder frueh noch spaet.
+ *
+ * @param {{t:number[],h:number[],l:number[]}} reihe
+ * @param {number} h Bezugshorizont in Handelstagen
+ * @param {number} sigma Tagesstreuung der Log-Renditen
  */
-function elDetectSwings(reihe, schwelle) {
-  const { t, h, l } = reihe;
+function elWendepunkte(reihe, h, sigma) {
+  const { t, h: hoch, l: tief } = reihe;
   const n = t.length;
-  if (n < 3 || !(schwelle > 0)) return [];
+  const schwelle = sigma * Math.sqrt(h);
+  const w = Math.max(2, Math.round(h / 6));
+  const minPhase = Math.max(3, Math.round(h / 5));
+  const minZyklus = Math.max(8, Math.round(h * 0.8));
+  const AUSNAHME = 3;
+  if (n < 3 * w + 6) return [];
 
-  const pivots = [];
-  // Startrichtung offen: erst der erste Ausschlag entscheidet.
-  let richtung = 0;
-  let extIdx = 0;
-  let extHoch = h[0], extTief = l[0];
+  /* 1. Kandidaten */
+  let p = [];
+  for (let i = w; i < n - w; i++) {
+    let maxi = true, mini = true;
+    for (let j = i - w; j <= i + w; j++) {
+      if (j === i) continue;
+      if (hoch[j] >= hoch[i]) maxi = false;
+      if (tief[j] <= tief[i]) mini = false;
+      if (!maxi && !mini) break;
+    }
+    if (maxi) p.push({ index: i, price: hoch[i], type: "high" });
+    else if (mini) p.push({ index: i, price: tief[i], type: "low" });
+  }
+  if (p.length < 2) return [];
+  p = elAbwechselnd(p);
 
-  for (let i = 1; i < n; i++) {
-    if (richtung >= 0 && h[i] >= extHoch) { extHoch = h[i]; if (richtung > 0) extIdx = i; }
-    if (richtung <= 0 && l[i] <= extTief) { extTief = l[i]; if (richtung < 0) extIdx = i; }
+  /* 3.-5. Zensur nach Dauer, Amplitude und Zykluslaenge.
+     In EINER Schleife bis zum Stillstand, nicht in getrennten Durchlaeufen mit
+     fester Rundenzahl: Jede Streichung kann zwei gleichartige Punkte benachbart
+     machen und dadurch neue Verstoesse erzeugen - eine gestrichene Phase kann
+     einen zu kurzen Zyklus schaffen und umgekehrt. Mit festen Runden blieben
+     gemessen 491 Amplitudenverstoesse stehen; die Punkte erfuellten die Regeln
+     dann gar nicht, die hier beschrieben sind.
 
-    if (richtung === 0) {
-      // Noch unentschieden - welche Seite reisst zuerst die Schwelle?
-      if (extHoch > 0 && (extHoch - l[i]) / extHoch >= schwelle) {
-        const idx = elArgMax(h, 0, i);
-        pivots.push({ index: idx, date: t[idx], price: h[idx], type: "high" });
-        richtung = -1; extTief = l[i]; extIdx = i;
-      } else if (extTief > 0 && (h[i] - extTief) / extTief >= schwelle) {
-        const idx = elArgMin(l, 0, i);
-        pivots.push({ index: idx, date: t[idx], price: l[idx], type: "low" });
-        richtung = 1; extHoch = h[i]; extIdx = i;
-      }
+     Die Schranke ist reine Vorsicht: Jeder Durchlauf entfernt genau einen
+     Punkt, mehr als p.length Durchlaeufe kann es nicht geben. */
+  const auspraegung = (arr, i) => {
+    const a = i > 0 ? Math.abs(Math.log(arr[i].price / arr[i - 1].price)) : Infinity;
+    const b = i < arr.length - 1 ? Math.abs(Math.log(arr[i + 1].price / arr[i].price)) : Infinity;
+    return Math.min(a, b);
+  };
+  for (let schutz = p.length + 2; schutz > 0 && p.length >= 3; schutz--) {
+    /* Zuerst die schwaechste Phase: zu kurz (und nicht aussergewoehnlich gross)
+       oder unter der Amplitudenschwelle. Von ihren beiden Punkten faellt der
+       mit der geringeren Auspraegung - dem kleineren der beiden Abstaende zu
+       seinen Nachbarn. Symmetrisch, bevorzugt weder frueh noch spaet. */
+    let schwaechste = -1, kleinste = Infinity;
+    for (let i = 1; i < p.length; i++) {
+      const dauer = p[i].index - p[i - 1].index;
+      const amp = Math.abs(Math.log(p[i].price / p[i - 1].price));
+      const zuKurz = dauer < minPhase && amp < AUSNAHME * schwelle;
+      if (!zuKurz && amp >= schwelle) continue;
+      if (amp < kleinste) { kleinste = amp; schwaechste = i; }
+    }
+    if (schwaechste >= 0) {
+      const raus = auspraegung(p, schwaechste) <= auspraegung(p, schwaechste - 1)
+        ? schwaechste : schwaechste - 1;
+      p.splice(raus, 1);
+      p = elAbwechselnd(p);
       continue;
     }
+    /* Dann zu kurze Zyklen. Gestrichen wird der mittlere Punkt; die beiden
+       gleichartigen Aussenpunkte werden danach benachbart, und die Abwechslung
+       behaelt den extremeren - genau die Regel von Bry & Boschan. */
+    let mitte = -1;
+    for (let i = 2; i < p.length; i++) {
+      if (p[i].index - p[i - 2].index < minZyklus) { mitte = i - 1; break; }
+    }
+    if (mitte < 0) break;
+    p.splice(mitte, 1);
+    p = elAbwechselnd(p);
+  }
 
-    if (richtung > 0) {
-      if (h[i] > extHoch) { extHoch = h[i]; extIdx = i; }
-      else if (extHoch > 0 && (extHoch - l[i]) / extHoch >= schwelle) {
-        pivots.push({ index: extIdx, date: t[extIdx], price: extHoch, type: "high" });
-        richtung = -1; extTief = l[i]; extIdx = i;
-      }
-    } else {
-      if (l[i] < extTief) { extTief = l[i]; extIdx = i; }
-      else if (extTief > 0 && (h[i] - extTief) / extTief >= schwelle) {
-        pivots.push({ index: extIdx, date: t[extIdx], price: extTief, type: "low" });
-        richtung = 1; extHoch = h[i]; extIdx = i;
-      }
+  /* Das laufende Extrem als vorlaeufigen letzten Punkt: Die aktuelle Bewegung
+     gehoert zur Zaehlung, ist aber nicht bestaetigt - dafuer fehlen rechts die
+     w Tage, die ein Kandidat braucht. Das wird mitgegeben, nicht verschwiegen. */
+  const letzte = p[p.length - 1];
+  if (letzte && letzte.index < n - 1) {
+    let idx = letzte.index + 1, best = letzte.type === "high" ? Infinity : -Infinity;
+    for (let i = letzte.index + 1; i < n; i++) {
+      if (letzte.type === "high") { if (tief[i] < best) { best = tief[i]; idx = i; } }
+      else if (hoch[i] > best) { best = hoch[i]; idx = i; }
+    }
+    if (Math.abs(Math.log(best / letzte.price)) >= schwelle * 0.5) {
+      p.push({ index: idx, price: best, type: letzte.type === "high" ? "low" : "high", offen: true });
     }
   }
-  // Das laufende Extrem als vorlaeufigen letzten Pivot mitgeben - die aktuelle
-  // Bewegung ist noch nicht abgeschlossen, gehoert aber zur Zaehlung.
-  if (richtung > 0) pivots.push({ index: extIdx, date: t[extIdx], price: extHoch, type: "high", offen: true });
-  if (richtung < 0) pivots.push({ index: extIdx, date: t[extIdx], price: extTief, type: "low", offen: true });
-  return pivots;
+  return p.map(x => ({ ...x, date: t[x.index] })).slice(-EL_MAX_PIVOTS);
 }
 
 /**
- * Passgenauigkeit eines Verhaeltnisses zum naechstgelegenen Zielwert.
+ * Naechstgelegener Zielwert und die Abweichung dorthin.
  *
- *   fit = exp( −ln(r / ziel)² / (2σ²) )        ∈ (0, 1]
+ * Bewusst KEIN Punktesystem mehr. Die frueher berechnete "Passung"
+ * exp(−ln(r/ziel)²/2σ²) war eine Zahl zwischen null und eins, die aussah wie
+ * eine Wahrscheinlichkeit und keine war: Auf Zufallsreihen faellt sie
+ * genauso hoch aus. Sie steht hier nur noch als Beschreibung - gemessenes
+ * Verhaeltnis, naechster Fibonacci-Wert, Abstand in Prozent.
  *
- * Bewusst im Logarithmus: ln(r/ziel) ist symmetrisch, das Doppelte und die
- * Haelfte eines Zielwerts sind gleich weit entfernt. Der frueher benutzte
- * absolute Abstand |r − ziel| war das nicht - er war bei 0,382 rund doppelt
- * so nachsichtig wie bei 0,786 und hat flache Korrekturen bevorzugt.
- *
- * @returns {{fit:number, ziel:number|null}}
+ * Im Logarithmus gemessen, damit das Doppelte und die Haelfte eines
+ * Zielwerts gleich weit entfernt sind.
  */
-function elFit(r, ziele, sigma = EL_SIGMA) {
-  if (!(r > 0) || !isFinite(r)) return { fit: 0, ziel: null };
-  let best = 0, bestZiel = null;
+function elNaechstes(r, ziele) {
+  if (!(r > 0) || !isFinite(r)) return { ziel: null, abweichung: null };
+  let bestZiel = null, bestAbst = Infinity;
   for (const z of ziele) {
-    const d = Math.log(r / z);
-    const f = Math.exp(-(d * d) / (2 * sigma * sigma));
-    if (f > best) { best = f; bestZiel = z; }
+    const d = Math.abs(Math.log(r / z));
+    if (d < bestAbst) { bestAbst = d; bestZiel = z; }
   }
-  return { fit: best, ziel: bestZiel };
+  return { ziel: bestZiel, abweichung: r / bestZiel - 1 };
 }
 
 /**
- * Prueft ein Fenster aus fuenf oder sechs Pivots auf die harten Regeln und
- * bewertet die Passung stetig.
+ * Prueft ein Fenster aus fuenf oder sechs Punkten auf die harten Regeln.
  *
- *   sechs Pivots (P0…P5) = fuenf abgeschlossene Wellen
- *   fuenf  Pivots (P0…P4) = vier abgeschlossene Wellen, Welle 5 laeuft
+ *   sechs Punkte (P0…P5) = fuenf abgeschlossene Wellen
+ *   fuenf  Punkte (P0…P4) = vier abgeschlossene Wellen, Welle 5 laeuft
  *
- * Kuerzere Fenster sind bewusst nicht zugelassen: Bei nur drei Wellen ist
- * einzig Regel R1 pruefbar, die Zaehlung waere praktisch unwiderlegbar. In
- * der Messung stammte ein knappes Viertel aller Zufallstreffer aus genau
- * diesen Drei-Wellen-Faellen.
+ * Kuerzere Fenster sind nicht zugelassen: Bei drei Wellen waere nur R1
+ * pruefbar, die Zaehlung praktisch unwiderlegbar.
  *
- * Harte Regeln (Verstoss verwirft den Kandidaten):
+ * Harte Regeln (ein Verstoss verwirft):
  *   R1  |W2| < |W1|            Welle 2 holt Welle 1 nicht vollstaendig zurueck
  *   R2  |W3| ist nicht die kuerzeste von |W1|, |W3|, |W5|
  *   R3  Welle 4 dringt nicht in das Gebiet von Welle 1 ein
  *
- * @returns {object|null} Kandidat, Verwurf oder null wenn kein Impulsmuster
+ * Neu ist der SPIELRAUM: Wie deutlich haelt jede Regel? Eine Zaehlung, die R3
+ * um ein halbes Prozent erfuellt, ist etwas anderes als eine, die sie um
+ * dreissig Prozent erfuellt - auch wenn beide "regelkonform" heissen. Der
+ * Spielraum ist keine Wahrscheinlichkeit, sondern ein Abstand, und er wird
+ * auch so beschriftet.
  */
-function elBewerte(p) {
+function elBewerte(p, minWelle) {
   const n = p.length;
   if (n !== 5 && n !== 6) return null;
   const auf = p[1].price > p[0].price;
 
-  // Die Punkte muessen sauber alternieren, sonst ist es kein Impuls.
   for (let i = 1; i < n; i++) {
     const steigt = p[i].price > p[i - 1].price;
     if (steigt !== (auf ? i % 2 === 1 : i % 2 === 0)) return null;
-  }
-
-  // Jede Welle braucht Zeit, nicht nur Ausschlag.
-  for (let i = 1; i < n; i++) {
-    if (p[i].index - p[i - 1].index < EL_MIN_WELLE_KERZEN) return null;
+    if (p[i].index - p[i - 1].index < minWelle) return null;
   }
 
   const w = [];
   for (let i = 1; i < n; i++) w.push(Math.abs(p[i].price - p[i - 1].price));
-  const w1 = w[0], w2 = w[1], w3 = w[2], w4 = w[3], w5 = w[4];
+  const [w1, w2, w3, w4, w5] = w;
   if (!(w1 > 0 && w2 > 0 && w3 > 0 && w4 > 0)) return null;
 
   const verstoesse = [];
   if (!(w2 < w1)) verstoesse.push("R1: Welle 2 holt Welle 1 vollständig zurück");
-  // R3: Bei Aufwaerts darf das Tief von Welle 4 nicht unter das Hoch von Welle 1.
   if (auf ? p[4].price <= p[1].price : p[4].price >= p[1].price) {
     verstoesse.push("R3: Welle 4 überlappt das Gebiet von Welle 1");
   }
@@ -246,9 +368,20 @@ function elBewerte(p) {
   }
   if (verstoesse.length) return { verworfen: true, verstoesse, pivots: p };
 
-  /* --- Passung: stetig, kein Punktesystem --- */
+  /* Spielraum je Regel, jeweils als Anteil der Bezugsstrecke. */
+  const spielraum = {
+    r1: 1 - w2 / w1,
+    r3: Math.abs(p[4].price - p[1].price) / w1,
+    r2: n === 6 ? w3 / Math.min(w1, w5) - 1 : null,
+  };
+  spielraum.knapp = Math.min(spielraum.r1, spielraum.r3,
+                             spielraum.r2 == null ? Infinity : spielraum.r2);
+
   const rel = [];
-  const nimm = (name, r, ziele) => { const f = elFit(r, ziele); rel.push({ name, r, fit: f.fit, ziel: f.ziel }); };
+  const nimm = (name, r, ziele) => {
+    const z = elNaechstes(r, ziele);
+    if (z.ziel != null) rel.push({ name, r, ziel: z.ziel, abweichung: z.abweichung });
+  };
   nimm("Welle 2 / Welle 1", w2 / w1, Z_RET2);
   nimm("Welle 3 / Welle 1", w3 / w1, Z_W3);
   nimm("Welle 4 / Welle 3", w4 / w3, Z_RET4);
@@ -257,176 +390,115 @@ function elBewerte(p) {
     nimm("Welle 5 / Welle 1", w5 / w1, Z_W5_1);
     if (w13 > 0) nimm("Welle 5 / Welle 1–3", w5 / w13, Z_W5_13);
   }
-  const passung = rel.reduce((s, x) => s + x.fit, 0) / rel.length;
-
-  // Alternation: eine Korrektur flach, die andere scharf.
-  const ret2 = w2 / w1, ret4 = w4 / w3;
-  const altern = Math.min(1, Math.abs(ret2 - ret4) / EL_ALTERNATION_VOLL);
 
   return {
     verworfen: false, auf, pivots: p,
-    laengen: { w1, w2, w3, w4, w5 }, ret2, ret4,
-    relationen: rel, passung, altern,
-    guete: 0.75 * passung + 0.25 * altern,
+    laengen: { w1, w2, w3, w4, w5 },
+    ret2: w2 / w1, ret4: w4 / w3,
+    relationen: rel, spielraum,
+    dauer: p[n - 1].index - p[0].index,
     vollstaendig: n === 6,
     abgeschlosseneWellen: n - 1,
   };
 }
 
 /**
- * Sucht ueber alle Betrachtungsebenen und alle Fenster die beste Zaehlung.
+ * Sucht ueber alle Ebenen und Fenster.
  *
- * Mehrere Ebenen, weil Elliott-Wellen fraktal sind: Eine einzige Schwelle
- * greift willkuerlich eine Ebene heraus. Welche Ebene die Zaehlung traegt,
- * wird mit ausgewiesen.
+ * Sortiert wird NICHT nach Passung. Genau das hat die fruehere Fassung getan,
+ * und weil die Passung nichts misst, war die Auswahl beliebig - im Median
+ * gewann eine Zaehlung, deren letzter Punkt 775 Handelstage zurueck lag. Sie
+ * beschrieb Vergangenes und bekam trotzdem Einstiegsbereich und Ziele.
  *
- * @returns {{ok:boolean, guete:number, beste?:object, ...}}
+ * Die Reihenfolge hier ist eine Darstellungsentscheidung und wird auch so
+ * benannt:
+ *   1. aktuelle Zaehlungen vor historischen - nur eine Zaehlung am rechten
+ *      Rand kann ueber die Gegenwart etwas sagen
+ *   2. groesserer Grad vor kleinerem - Elliott ist ausdruecklich
+ *      hierarchisch, die groesste sichtbare Ebene ist die Hauptlesart
+ *   3. laengere Zaehlung vor kuerzerer
  */
 function elSuche(reihe) {
-  const kurs = reihe.c[reihe.c.length - 1];
-  const atr = elAtr(reihe.h, reihe.l, reihe.c);
+  const c = reihe.c;
+  const kurs = c[c.length - 1];
+  const sigma = elSigma(c);
+  const atr = elAtr(reihe.h, reihe.l, c);
+  if (!sigma) return { ok: false, kurs, proEbene: new Map(), gepruefte: 0, verworfen: 0 };
+
   const alle = [];
-  const proSkala = new Map();
+  const proEbene = new Map();
   let verworfen = 0, gepruefte = 0;
+  const rand = c.length - 1;
 
-  for (const k of EL_SKALEN) {
-    const schwelle = Math.max(EL_MIN_PCT, atr && kurs > 0 ? (atr * k) / kurs : EL_MIN_PCT);
-    const pivots = elDetectSwings(reihe, schwelle).slice(-EL_MAX_PIVOTS);
-    proSkala.set(k, { schwelle, pivots });
-    if (pivots.length < 5) continue;
-
-    // Abgeschlossene Impulse: jedes Fenster aus sechs aufeinanderfolgenden Pivots
-    for (let i = 0; i + 5 < pivots.length; i++) {
-      gepruefte++;
-      const b = elBewerte(pivots.slice(i, i + 6));
-      if (!b) continue;
-      if (b.verworfen) { verworfen++; continue; }
-      alle.push({ ...b, skala: k, schwelle, letzterDerSkala: i + 5 === pivots.length - 1 });
-    }
-    // Laufender Impuls: die juengsten fuenf Pivots
-    gepruefte++;
-    const b = elBewerte(pivots.slice(-5));
-    if (b && !b.verworfen) alle.push({ ...b, skala: k, schwelle, letzterDerSkala: true });
-    else if (b) verworfen++;
+  for (const h of EL_EBENEN) {
+    const p = elWendepunkte(reihe, h, sigma);
+    proEbene.set(h, p);
+    if (p.length < 5) continue;
+    const minWelle = Math.max(3, Math.round(h / 5));
+    const nimm = (b, letzter) => {
+      if (!b) return;
+      if (b.verworfen) { verworfen++; return; }
+      const alter = rand - b.pivots[b.pivots.length - 1].index;
+      alle.push({ ...b, ebene: h, schwelle: sigma * Math.sqrt(h), alter,
+                  frist: elFrist(h), aktuell: alter <= elFrist(h), letzterDerEbene: letzter,
+                  letzterOffen: !!b.pivots[b.pivots.length - 1].offen });
+    };
+    for (let i = 0; i + 5 < p.length; i++) { gepruefte++; nimm(elBewerte(p.slice(i, i + 6), minWelle), i + 5 === p.length - 1); }
+    gepruefte++; nimm(elBewerte(p.slice(-5), minWelle), true);
   }
 
-  if (!alle.length) return { ok: false, guete: 0, gepruefte, verworfen, kurs, proSkala };
-  alle.sort((a, b) => b.guete - a.guete);
-  return { ok: true, guete: alle[0].guete, beste: alle[0], kandidaten: alle,
-           gepruefte, verworfen, kurs, atr, proSkala };
-}
-
-/* =====================================================================
-   Signifikanz - schlaegt die Zaehlung den Zufall?
-   ===================================================================== */
-
-/**
- * Surrogatreihe per Block-Bootstrap der Log-Renditen.
- *
- * Bloecke von EL_BLOCK Handelstagen erhalten Volatilitaetscluster und
- * kurzfristige Autokorrelation - beides gibt es in echten Kursen und beides
- * erzeugt fuer sich genommen schon Zickzackmuster. Zerstoert wird nur die
- * uebergeordnete Abfolge, also genau das, was eine Wellenzaehlung behauptet.
- *
- * Bewusst nicht i.i.d. gezogen: Das waere ein zu leicht zu schlagender
- * Gegner und wuerde die Signifikanz schoenrechnen.
- */
-function elSurrogat(reihe, rnd, L = EL_BLOCK) {
-  const n = reihe.c.length;
-  const ret = [], spanne = [];
-  for (let i = 1; i < n; i++) ret.push(Math.log(reihe.c[i] / reihe.c[i - 1]));
-  for (let i = 0; i < n; i++) {
-    spanne.push([(reihe.h[i] - reihe.c[i]) / reihe.c[i], (reihe.c[i] - reihe.l[i]) / reihe.c[i]]);
-  }
-  const m = ret.length;
-  if (m < L) return null;
-  const neu = [];
-  while (neu.length < m) {
-    const s = Math.floor(rnd() * m);
-    for (let j = 0; j < L && neu.length < m; j++) neu.push(ret[(s + j) % m]);
-  }
-  const c = [reihe.c[0]], h = [reihe.h[0]], l = [reihe.l[0]];
-  for (let i = 1; i < n; i++) {
-    const preis = c[i - 1] * Math.exp(neu[i - 1]);
-    c.push(preis);
-    const sp = spanne[Math.floor(rnd() * spanne.length)];
-    h.push(preis * (1 + Math.abs(sp[0])));
-    l.push(preis * (1 - Math.abs(sp[1])));
-  }
-  return { t: reihe.t, c, h, l };
-}
-
-/** Einfacher, reproduzierbarer Zufallsgenerator - gleicher Titel, gleiches Ergebnis. */
-function elZufall(saat) {
-  let s = saat >>> 0 || 1;
-  return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+  if (!alle.length) return { ok: false, kurs, sigma, atr, gepruefte, verworfen, proEbene };
+  alle.sort((a, b) => (b.aktuell - a.aktuell) || (b.ebene - a.ebene) || (b.dauer - a.dauer));
+  const aktuelle = alle.filter(x => x.aktuell);
+  return { ok: true, kurs, sigma, atr, beste: alle[0], kandidaten: alle,
+           aktuelle, gepruefte, verworfen, proEbene };
 }
 
 /**
- * Empirischer p-Wert der beobachteten Guete.
+ * Eindeutigkeit der Lesart - die Ampel.
  *
- *   p = (1 + #{Surrogate mit Guete ≥ beobachtet}) / (N + 1)
+ * Sie bewertet ausdruecklich NICHT, ob die Zaehlung zutrifft. Das ist nicht
+ * messbar, und so zu tun als waere es messbar war der Fehler der frueheren
+ * Fassung. Bewertet wird, wie eindeutig die Daten diese Lesart hergeben:
  *
- * Die Eins im Zaehler ist kein Schoenheitsfehler, sondern korrekt: Sie
- * verhindert p = 0, das bei endlich vielen Ziehungen nie belegbar waere.
+ *   rot   keine aktuelle Zaehlung - es gibt nichts ueber die Gegenwart zu sagen
+ *   gelb  eine aktuelle Zaehlung, aber mehrdeutig: mehrere gleichrangige
+ *         Lesarten, oder der letzte Punkt ist noch nicht bestaetigt, oder eine
+ *         Regel haelt nur knapp
+ *   gruen eine aktuelle Zaehlung, hoechstens eine Nebenlesart, letzter Punkt
+ *         bestaetigt, alle Regeln mit Abstand erfuellt
  *
- * Weil auf jedem Surrogat dieselbe Suche mit derselben Bestenauswahl laeuft,
- * ist die Mehrfachauswahl ueber Fenster und Ebenen bereits eingerechnet.
+ * Widersprechen sich zwei aktuelle Zaehlungen in der Richtung, ist das der
+ * schwerste Fall von Mehrdeutigkeit und wird eigens genannt.
  */
-function elPWert(reihe, beobachtet, N, rnd) {
-  let mindestensSoGut = 0, gerechnet = 0, mitZaehlung = 0;
-  let summe = 0, max = 0;
-  for (let i = 0; i < N; i++) {
-    const s = elSurrogat(reihe, rnd);
-    if (!s) break;
-    const erg = elSuche(s);
-    gerechnet++;
-    /* Surrogate ohne jede regelkonforme Zaehlung zaehlen mit Guete null in
-       den Test ein - sie schlagen die Beobachtung nicht. In den Mittelwert
-       gehoeren sie aber nicht: Der wuerde sonst "keine Zaehlung gefunden" und
-       "schlechte Zaehlung gefunden" zu einer Zahl verruehren. Beides wird
-       getrennt ausgewiesen. */
-    if (erg.ok) {
-      mitZaehlung++;
-      summe += erg.guete;
-      if (erg.guete > max) max = erg.guete;
-    }
-    if (erg.guete >= beobachtet) mindestensSoGut++;
+function elEindeutigkeit(suche) {
+  const akt = suche.aktuelle || [];
+  if (!akt.length) {
+    const alter = suche.beste ? suche.beste.alter : null;
+    return { stufe: "rot", text: "keine aktuelle Lesart", gruende: [],
+      erklaerung: alter != null
+        ? `Die einzigen regelkonformen Zählungen enden ${alter} Handelstage vor dem rechten Rand – zu lange für ihren Grad. Sie beschreiben eine abgeschlossene Vergangenheit, aus der sich für heute nichts ableiten lässt.`
+        : "Die Umkehrpunkte bilden auf keiner Ebene eine impulsähnliche Abfolge." };
   }
-  if (!gerechnet) return null;
-  return {
-    p: (1 + mindestensSoGut) / (gerechnet + 1),
-    n: gerechnet,
-    mitZaehlung,
-    soGut: mindestensSoGut,
-    mittelZufall: mitZaehlung ? summe / mitZaehlung : null,
-    maxZufall: mitZaehlung ? max : null,
-  };
-}
+  const beste = akt[0];
+  const gruende = [];
+  const richtungen = new Set(akt.map(x => x.auf));
+  if (richtungen.size > 1) gruende.push("Zwei aktuelle Zählungen widersprechen sich in der Richtung");
+  if (akt.length > 2) gruende.push(`${akt.length} aktuelle Zählungen auf verschiedenen Ebenen`);
+  if (beste.letzterOffen) gruende.push("Der letzte Punkt ist das laufende Extrem, kein bestätigter Umkehrpunkt");
+  if (beste.spielraum.knapp < 0.05) gruende.push("Eine harte Regel hält nur knapp");
 
-/** Ampelstufe aus dem p-Wert. */
-function elAmpel(p) {
-  if (p <= EL_P_GRUEN) return { stufe: "gruen", text: "tragfähig",
-    erklaerung: `Nur ${(p * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} % der Zufallsreihen erreichen diese Passung.` };
-  if (p <= EL_P_GELB) return { stufe: "gelb", text: "grenzwertig",
-    erklaerung: `${(p * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} % der Zufallsreihen erreichen diese Passung – die Zählung ist möglich, aber nicht belegt.` };
-  return { stufe: "rot", text: "nicht vom Zufall zu unterscheiden",
-    erklaerung: `${(p * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} % der Zufallsreihen erreichen diese Passung ebenfalls. Aus dieser Zählung lässt sich nichts ableiten.` };
+  if (!gruende.length) {
+    return { stufe: "gruen", text: "eindeutige Lesart", gruende,
+      erklaerung: "Genau eine aktuelle Zählung, ihr letzter Punkt ist bestätigt und alle drei harten Regeln halten mit Abstand. Das sagt nichts darüber, ob die Zählung zutrifft – nur, dass die Daten sie eindeutig hergeben." };
+  }
+  return { stufe: "gelb", text: "mehrdeutige Lesart", gruende,
+    erklaerung: "Es gibt eine aktuelle Zählung, aber sie ist nicht die einzig mögliche Lesart der Daten." };
 }
 
 /* =====================================================================
    Ableitungen - Ziel, Einstieg, Invalidierung
    ===================================================================== */
-
-/**
- * Retracement-Level einer Welle.
- * level = ende − (ende − start) × r
- * Richtungsunabhaengig: Bei einer Abwaertswelle ist (ende − start) negativ,
- * das Level liegt dann oberhalb des Endes.
- */
-function elRetracement(start, ende, ratios) {
-  return ratios.map(r => ({ level: ende - (ende - start) * r, ratio: r }));
-}
 
 /**
  * Extension: eine Strecke vom Bezugspunkt aus verlaengern.
@@ -649,9 +721,16 @@ function elZonen(level, kurs) {
   gruppen.push(aktuell);
   return gruppen.map(g => {
     const werte = g.map(x => x.level);
+    const low = Math.min(...werte), high = Math.max(...werte);
     return {
-      low: Math.min(...werte), high: Math.max(...werte),
+      low, high,
       mid: werte.reduce((a, b) => a + b, 0) / werte.length,
+      /* Breite der Zone, in Prozent des Kurses. Kumar (2022) zeigt fuer
+         Fibonacci-Zonen: Je breiter die Zone, desto haeufiger wird sie
+         "getroffen" - und zufaellig gesetzte Zonen gleicher Breite werden
+         genauso oft getroffen. Wer eine Trefferquote nennt, ohne die Breite
+         zu nennen, nennt die Haelfte. */
+      breite: ((high - low) / kurs) * 100,
       hits: g.map(x => ({ ratio: x.ratio, herkunft: x.herkunft, level: x.level })),
     };
   }).sort((a, b) => Math.abs(a.mid - kurs) - Math.abs(b.mid - kurs));
@@ -676,93 +755,93 @@ function elBereitsErreicht(reihe, vonIndex, low, high) {
    ===================================================================== */
 
 /**
- * Gibt immer ein Objekt zurueck - im Zweifel mit grund, nie mit erfundenen
- * Zonen. Ziel- und Einstiegszonen entstehen nur, wenn der Signifikanztest
- * die Zaehlung traegt.
+ * Gesamtlauf fuer einen Titel.
+ *
+ * Ohne Bootstrap: Der frueher hier gerechnete Signifikanztest hat 999
+ * Surrogatreihen gebaut, um eine Kennzahl zu pruefen, die - gemessen - nicht
+ * trennt. Was dabei herauskam, war ein gleichverteilter p-Wert und in fuenf
+ * Prozent der Faelle ein gruenes Licht ohne Inhalt. Die Rechenzeit ist
+ * gespart, die Aussage ehrlicher.
  */
-function elAnalysiere(reihe, saat = 1) {
-  if (!reihe || !Array.isArray(reihe.c) || reihe.c.length < EL_MIN_CANDLES) {
-    return { ok: false, grund: `Zu wenige Kursdaten (${reihe && reihe.c ? reihe.c.length : 0} Kerzen, mindestens ${EL_MIN_CANDLES} nötig – der Signifikanztest braucht genug Renditen für den Bootstrap).` };
+function elAnalysiere(reihe) {
+  if (!reihe || !Array.isArray(reihe.c) || reihe.c.length < EL_MIN_KERZEN) {
+    return { ok: false, grund: `Zu wenige Kursdaten (${reihe && reihe.c ? reihe.c.length : 0} Kerzen, mindestens ${EL_MIN_KERZEN} nötig – darunter reicht das Fenster nicht für einen vollständigen Impuls auf der kleinsten Ebene).` };
   }
   const kurs = reihe.c[reihe.c.length - 1];
   const suche = elSuche(reihe);
 
   if (!suche.ok) {
-    const ebenen = [...suche.proSkala.values()].map(x => x.pivots.length).join(", ");
+    const ebenen = [...suche.proEbene.values()].map(x => x.length).join(", ");
     return { ok: false, kurs, verworfen: suche.verworfen, gepruefte: suche.gepruefte,
       grund: suche.verworfen
-        ? `Auf keiner der ${EL_SKALEN.length} Betrachtungsebenen bildet die Kursbewegung einen regelkonformen Impuls. ${suche.verworfen} von ${suche.gepruefte} geprüften Fenstern verletzen eine harte Regel.`
-        : `Die Umkehrpunkte bilden auf keiner Betrachtungsebene eine impulsähnliche Abfolge (Umkehrpunkte je Ebene: ${ebenen}).` };
+        ? `Auf keiner der ${EL_EBENEN.length} Ebenen bildet die Kursbewegung einen regelkonformen Impuls. ${suche.verworfen} von ${suche.gepruefte} geprüften Fenstern verletzen eine harte Regel.`
+        : `Die Umkehrpunkte bilden auf keiner Ebene eine impulsähnliche Abfolge (Umkehrpunkte je Ebene: ${ebenen}).` };
   }
 
   const beste = suche.beste;
+  const eindeutig = elEindeutigkeit(suche);
 
-  /* Reicht die Zaehlung bis an den Rand? Nur dann ist ein Einstiegsbereich
-     ueberhaupt sinnvoll - eine Zaehlung, die vor achtzig Kerzen endete,
-     beschreibt eine Bewegung, die laengst weitergelaufen ist. */
-  const letzterPivot = beste.pivots[beste.pivots.length - 1];
-  const letzterIdx = letzterPivot.index;
-  const abstand = reihe.c.length - 1 - letzterIdx;
-  const aktuell = !!beste.letzterDerSkala;
-  /* Der letzte Punkt kann das laufende Extrem sein - dann ist die Welle, die
-     dort endet, noch nicht bestaetigt abgeschlossen. Das aendert die Aussage
-     erheblich und muss dabeistehen. */
-  const letzterOffen = !!letzterPivot.offen;
-
-  // Signifikanz gegen Surrogatreihen desselben Titels.
-  const rnd = elZufall(saat);
-  const sig = elPWert(reihe, beste.guete, EL_N_SURROGATE, rnd);
-  if (!sig) {
-    return { ok: false, kurs, grund: "Der Signifikanztest ließ sich nicht rechnen – die Reihe ist für den Bootstrap zu kurz." };
-  }
-  const ampel = elAmpel(sig.p);
-
-  /* Bei Rot werden bewusst keine Ziele und kein Einstieg gezeigt. Die
-     Zaehlung selbst bleibt sichtbar, damit nachvollziehbar ist, was geprueft
-     wurde - aber sie traegt nichts. */
-  const traegt = ampel.stufe !== "rot";
-  const abl = traegt ? elAbleitungen(beste, kurs, aktuell, suche.atr) : null;
+  /* Ziele, Einstieg und Invalidierung nur fuer eine AKTUELLE Zaehlung.
+     Das ist die entscheidende Sperre: Eine Zaehlung, die vor Monaten endete,
+     beschreibt eine Bewegung, die laengst weitergelaufen ist. Frueher
+     entschied darueber der p-Wert - also eine Zahl ohne Trennschaerfe. */
+  const traegt = beste.aktuell;
+  const abl = traegt ? elAbleitungen(beste, kurs, true, suche.atr) : null;
   const zielZonen = abl ? elZonen(abl.ziele, kurs) : [];
-  /* Fibonacci-Leiter. Alle Anker werden mitgegeben, damit die Oberflaeche
-     ohne Neurechnung umschalten kann - die Leiter ist eine reine Funktion
-     zweier Preise. */
   const fibAnker = traegt ? elFibAnker(beste) : [];
   const fib = fibAnker.length
     ? { ...fibAnker[0], leiter: elFibLeiter(fibAnker[0].von, fibAnker[0].bis, kurs) }
     : null;
-  // Seit dem letzten Punkt der Zaehlung: schon angelaufen oder noch offen?
+  const letzterIdx = beste.pivots[beste.pivots.length - 1].index;
   zielZonen.forEach(z => { z.erreicht = elBereitsErreicht(reihe, letzterIdx, z.low, z.high); });
   if (abl && abl.einstieg) {
     abl.einstieg.erreicht = elBereitsErreicht(reihe, letzterIdx, abl.einstieg.low, abl.einstieg.high);
   }
 
   return {
-    ok: true, kurs, beste, ampel, sig, aktuell, abstand, traegt, letzterOffen,
+    ok: true, kurs, beste, eindeutig, traegt,
+    aktuell: beste.aktuell, abstand: beste.alter, letzterOffen: beste.letzterOffen,
     zielZonen, fibAnker, fib,
     einstieg: abl ? abl.einstieg : null,
     invalid: abl ? abl.invalid : null,
     erstesZiel: abl ? abl.erstesZiel : null,
     crv: abl ? abl.crv : null,
     lage: abl ? abl.lage : "",
-    alternativen: suche.kandidaten.slice(1, 4),
+    /* Weitere aktuelle Lesarten. Nur die aktuellen: Historische gibt es je
+       nach Titel dutzendweise, und sie aufzuzaehlen erweckt den Eindruck,
+       man haette die Wahl. */
+    alternativen: (suche.aktuelle || []).slice(1, 4),
     gepruefte: suche.gepruefte, verworfen: suche.verworfen,
-    skala: beste.skala, schwelle: beste.schwelle,
-    pivots: suche.proSkala.get(beste.skala).pivots,
+    ebene: beste.ebene, schwelle: beste.schwelle, sigma: suche.sigma,
+    pivots: suche.proEbene.get(beste.ebene),
   };
 }
 
 /* =====================================================================
    Speicherung - bewusst freiwillig, nichts wird ungefragt behalten
    ===================================================================== */
+/** Form der gespeicherten Ergebnisse. Erhoehen, sobald sich das Ergebnis-
+    objekt aendert - sonst zeigt ein alter Eintrag Felder an, die es nicht
+    mehr gibt, und die Anzeige bricht beim Aufklappen ab. */
+const EL_FORM = 2;
+
 const ElliottSpeicher = {
   alle() {
     try { return JSON.parse(localStorage.getItem(EL_SPEICHER)) || {}; }
     catch (e) { return {}; }
   },
-  lade(sym) { return this.alle()[sym] || null; },
+  /* Eintraege aus einer aelteren Fassung werden verworfen, nicht angezeigt.
+     Sie enthalten einen p-Wert aus einem Test, den es nicht mehr gibt - sie
+     zu zeigen hiesse, eine widerlegte Aussage weiterzureichen. */
+  lade(sym) {
+    const e = this.alle()[sym];
+    if (!e) return null;
+    if (e.form !== EL_FORM) { this.entferne(sym); return null; }
+    return e;
+  },
   sichere(sym, eintrag) {
     const a = this.alle();
-    a[sym] = { ...eintrag, gespeichert: Date.now() };
+    a[sym] = { ...eintrag, form: EL_FORM, gespeichert: Date.now() };
     try { localStorage.setItem(EL_SPEICHER, JSON.stringify(a)); return true; }
     catch (e) { return false; }
   },
@@ -974,18 +1053,12 @@ function elAbschnitt() {
     <h3>Elliot Wellen bestimmen</h3>
     <button class="el-run" id="el-run">Elliot Waves berechnen</button>
     <div id="el-out"></div>
-    <p class="el-hint">Elliott-Wellen sind Auslegung, keine Messung. Jede Zählung wird hier
-      gegen ${EL_N_SURROGATE} Zufallsreihen aus den eigenen Renditen dieses Titels geprüft –
-      angezeigt wird, wie oft der Zufall dieselbe Passung erreicht. Die Zählung ist keine
-      Kursprognose und keine Anlageempfehlung.</p>
+    <p class="el-hint">Elliott-Wellen sind Auslegung, keine Messung. Gemessen an
+      ${EL_BEFUND.titel} Titeln über ${EL_BEFUND.jahre} Jahre unterscheidet sich die Form einer
+      Zählung nicht von der auf Zufallsreihen, und sie sagt über die folgenden Kurse nichts,
+      was die zurückliegende Bewegung nicht schon sagt. Was dieses Werkzeug leistet, ist die saubere Konstruktion der Zählung und der
+      Preis, ab dem sie widerlegt ist – keine Kursprognose und keine Anlageempfehlung.</p>
   </div>`;
-}
-
-/** Aus dem Tickersymbol eine feste Saat - gleicher Titel, gleiches Ergebnis. */
-function elSaat(sym) {
-  let h = 2166136261;
-  for (let i = 0; i < sym.length; i++) { h ^= sym.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return h >>> 0;
 }
 
 function elVerdrahte(item, reihe, neuZeichnen) {
@@ -1011,7 +1084,7 @@ function elVerdrahte(item, reihe, neuZeichnen) {
   btn.onclick = async () => {
     btn.disabled = true;
     const alt = btn.textContent;
-    btn.innerHTML = '<span class="spin"></span> Wellen werden gezählt und gegen Zufall geprüft …';
+    btn.innerHTML = '<span class="spin"></span> Wendepunkte werden gesucht …';
     out.innerHTML = "";
     /* Kurz zuruecktreten, damit der Ladezustand gezeichnet wird, bevor gerechnet
        wird. Bewusst setTimeout statt requestAnimationFrame: rAF pausiert,
@@ -1021,7 +1094,7 @@ function elVerdrahte(item, reihe, neuZeichnen) {
     try {
       const key = elSchluessel(item.s, reihe);
       let erg = elCache.get(key);
-      if (!erg) { erg = elAnalysiere(reihe, elSaat(item.s)); elCache.set(key, erg); }
+      if (!erg) { erg = elAnalysiere(reihe); elCache.set(key, erg); }
       elZeige(out, erg, reihe, item, neuZeichnen, false);
     } catch (e) {
       out.innerHTML = `<div class="el-leer">Die Zählung ist fehlgeschlagen: ${esc(e.message)}</div>`;
@@ -1049,7 +1122,7 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
      Bindestrich. toFixed liefert beides falsch. */
   const pz = (v, d = 1) => (v >= 0 ? "+" : "−") + Math.abs(v).toLocaleString("de-DE",
     { minimumFractionDigits: d, maximumFractionDigits: d }) + " %";
-  const zahl = (v, d = 2) => Number(v).toLocaleString("de-DE",
+  const zahl = (v, d = 2) => (v < 0 ? "−" : "") + Math.abs(Number(v)).toLocaleString("de-DE",
     { minimumFractionDigits: d, maximumFractionDigits: d });
 
   if (!erg.ok) {
@@ -1073,20 +1146,52 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
     marken, total: reihe.c.length,
   };
 
-  /* --- Ampel: das Erste, was zu sehen ist --- */
-  const a = erg.ampel;
+  /* --- Eindeutigkeit: das Erste, was zu sehen ist ---
+     Bewusst NICHT als Trefferwahrscheinlichkeit beschriftet. Die Farbe sagt,
+     wie eindeutig die Daten diese Lesart hergeben, und der Kasten darunter
+     sagt, was eine Zaehlung ueberhaupt wert ist - beides gemessen, nicht
+     behauptet. */
+  const a = erg.eindeutig;
   const ampelHtml = `<div class="el-ampel el-${a.stufe}">
     <div class="el-ampel-kopf">
       <span class="el-punkt"></span>
       <div><b>${esc(a.text)}</b>
-        <span class="el-p">p = ${zahl(erg.sig.p, 3)}</span></div>
+        <span class="el-p">Eindeutigkeit der Lesart</span></div>
     </div>
     <p>${esc(a.erklaerung)}</p>
-    <p class="el-detail">Geprüft gegen ${erg.sig.n} Surrogatreihen aus den Renditen dieses Titels
-      (Block-Bootstrap, ${EL_BLOCK} Handelstage). Davon ergaben ${erg.sig.mitZaehlung}
-      überhaupt eine regelkonforme Zählung${erg.sig.mittelZufall != null
-        ? ` – mittlere Güte ${zahl(erg.sig.mittelZufall, 3)}, beste ${zahl(erg.sig.maxZufall, 3)}` : ""}.
-      ${erg.sig.soGut} Surrogate erreichten die Güte dieser Zählung (${zahl(k.guete, 3)}) oder mehr.</p>
+    ${a.gruende.length ? `<ul class="el-gruende">${a.gruende.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    <p class="el-detail">Diese Stufe bewertet die <b>Eindeutigkeit</b>, nicht die Treffsicherheit.
+      Ob eine Zählung eintrifft, ist nicht messbar – der folgende Kasten sagt, was gemessen wurde.</p>
+  </div>
+  <div class="el-befund">
+    <b>Was eine Zählung wert ist – gemessen, nicht behauptet</b>
+    <p>An ${EL_BEFUND.titel} Titeln über ${EL_BEFUND.jahre} Jahre Tagesdaten
+      (${EL_BEFUND.zeitpunkte.toLocaleString("de-DE")} geprüfte Zeitpunkte):</p>
+    <ul>
+      <li><b>Die Form trägt nichts.</b> Die Wellenverhältnisse echter Kurse sind von denen auf
+        Zufallsreihen nicht zu unterscheiden (Kolmogorov-Smirnov höchstens
+        ${zahl(EL_BEFUND.ksMax, 2)}; ab ${zahl(EL_BEFUND.ksKritisch, 2)} wäre der Unterschied
+        belegt). Die harten Regeln erzwingen die Fibonacci-Nähe – im Rauschen genauso.
+        Ein Klassifikator über alle Verhältnisse erreicht ${zahl(EL_BEFUND.aucInnen, 3)} auf den
+        Lerndaten und ${zahl(EL_BEFUND.aucAussen, 3)} auf ungesehenen Titeln; 0,5 ist der Münzwurf.</li>
+      <li><b>Die Richtung trägt nichts.</b> Rendite der folgenden ${EL_BEFUND.vw.tage} Handelstage,
+        in Standardabweichungen, verglichen nur mit Zeitpunkten gleicher Vorbewegung:
+        <table class="el-tab el-befundtab">
+          ${EL_BEFUND.vw.lagen.map(l => `<tr><td>${esc(l.name)}</td>
+            <td>${zahl(l.d, 3)}</td><td>[${zahl(l.lo, 3)}; ${zahl(l.hi, 3)}]</td>
+            <td>${l.n.toLocaleString("de-DE")} Fälle</td></tr>`).join("")}
+        </table>
+        Alle vier zeigen in dieselbe Richtung – auch die, die sich widersprechen müssten.
+        Ohne die Kontrolle auf die Vorbewegung sah es nach einem sauberen Richtungsmuster aus
+        (${EL_BEFUND.vw.ohneKontrolle.map(v => zahl(v, 3)).join(" · ")}); das war der Rückschlag
+        auf die zurückliegende Bewegung, nicht die Zählung.</li>
+      <li>Eine aktuelle Zählung gibt es an ${zahl(EL_BEFUND.anteilAktuell * 100, 0)} % der
+        Handelstage. An den übrigen ist die einzige ehrliche Antwort: keine Lesart.</li>
+    </ul>
+    <p class="el-detail">Deshalb steht hier kein p-Wert mehr. Die frühere Fassung prüfte die
+      Passung gegen Zufallsreihen – eine Kennzahl ohne Trennschärfe liefert gleichverteilte
+      p-Werte und vergibt in fünf Prozent der Fälle ein grünes Licht ohne Inhalt.
+      Nachrechenbar mit <code>scripts/elliott_befund.js</code>.</p>
   </div>`;
 
   /* --- Die Zaehlung selbst --- */
@@ -1100,26 +1205,39 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
     }).join("")}
   </table>`;
 
-  /* --- Passung je Beziehung, offen ausgewiesen --- */
+  /* --- Wellenverhaeltnisse, als Beschreibung ---
+     Frueher stand hier eine "Passung" zwischen null und eins mit Balken. Sie
+     sah aus wie ein Guetesiegel und war keins: Auf Zufallsreihen faellt sie
+     genauso hoch aus. Jetzt steht da, was tatsaechlich gemessen wurde - das
+     Verhaeltnis, der naechste Fibonacci-Wert und der Abstand dorthin. */
   const relHtml = `<table class="el-tab el-rel">
-    <tr><th>Beziehung</th><th>gemessen</th><th>nächstes Ziel</th><th>Passung</th></tr>
+    <tr><th>Beziehung</th><th>gemessen</th><th>nächster Fibonacci-Wert</th><th>Abweichung</th></tr>
     ${k.relationen.map(r => `<tr>
       <td>${esc(r.name)}</td><td>${zahl(r.r, 3)}</td>
       <td>${r.ziel != null ? zahl(r.ziel, 3) : "–"}</td>
-      <td><span class="el-fit"><i style="width:${Math.round(r.fit * 100)}%"></i></span>${zahl(r.fit, 2)}</td>
+      <td class="${Math.abs(r.abweichung) < 0.1 ? "" : "el-fern"}">${pz(r.abweichung * 100)}</td>
     </tr>`).join("")}
   </table>
-  <p class="el-detail">Passung = exp(−ln(gemessen/Ziel)² / 2σ²) mit σ = ${zahl(EL_SIGMA, 2)}.
-    Im Logarithmus gerechnet, damit das Doppelte und die Hälfte eines Zielwerts gleich weit
-    entfernt sind. Gesamtpassung ${zahl(k.passung, 3)}, Alternation ${zahl(k.altern, 2)},
-    Güte ${zahl(k.guete, 3)} = 0,75 × Passung + 0,25 × Alternation.</p>`;
+  <p class="el-detail">Beschreibung, keine Bewertung: Auf Zufallsreihen liegen dieselben
+    Verhältnisse. Der Median von Welle 2 / Welle 1 beträgt dort 0,60 – das Retracement,
+    das als „goldener Schnitt“ gilt, ist der Normalfall einer regelkonformen Zickzackfolge.</p>
+  <p class="el-detail">Spielraum der harten Regeln – wie deutlich jede hält:
+    <b>R1</b> Welle 2 bleibt ${zahl(k.spielraum.r1 * 100, 0)} % unter der Länge von Welle 1.
+    <b>R3</b> Welle 4 hält ${zahl(k.spielraum.r3 * 100, 0)} % einer Welle-1-Länge Abstand zum
+    Gebiet von Welle 1.${k.spielraum.r2 != null
+      ? ` <b>R2</b> Welle 3 übertrifft die kürzere der beiden anderen Antriebswellen um
+        ${zahl(k.spielraum.r2 * 100, 0)} %.` : ` <b>R2</b> ist noch nicht prüfbar – dafür muss
+        Welle 5 abgeschlossen sein.`}
+    Je knapper eine Regel hält, desto eher kippt die Zählung bei der nächsten Kerze.</p>`;
 
   /* --- Lage, Einstieg, Invalidierung, CRV --- */
   let handel = "";
   if (!erg.traegt) {
     handel = `<div class="el-leer"><b>Keine Ziel- oder Einstiegszonen</b>
-      <p>Diese Zählung ist statistisch nicht von einer Zufallsbewegung zu unterscheiden.
-      Zonen daraus abzuleiten hieße, Rauschen als Struktur auszugeben.</p></div>`;
+      <p>Der letzte Punkt dieser Zählung liegt ${erg.abstand} Handelstage zurück – mehr als die
+      ${erg.beste.frist} Tage, bis zu denen eine Zählung dieses Grades als aktuell gilt. Die Bewegung ist seither
+      weitergelaufen; Ziele und Einstiegsbereiche daraus abzuleiten hieße, eine abgeschlossene
+      Vergangenheit als Gegenwart auszugeben.</p></div>`;
   } else {
     const iv = erg.invalid;
     const c = erg.crv;
@@ -1190,6 +1308,7 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
       <div class="el-zone-k"><b>${g(z.low)}${z.low !== z.high ? " – " + g(z.high) : ""}</b>
         <span class="${abst >= 0 ? "up" : "down"}">${pz(abst)} zum Kurs</span></div>
       <div class="el-zone-d">${z.hits.length} Level · Verhältnisse ${ratios}
+        · Breite ${zahl(z.breite, 1)} % des Kurses
         ${z.erreicht ? `<span class="el-marke el-alt-marke">seit Ende der Zählung bereits angelaufen</span>`
                      : `<span class="el-marke el-ok">noch offen</span>`}
         <br><i>${esc(herkunft)}</i></div>
@@ -1228,7 +1347,9 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
         <tr><th>Stufe</th><th>Preis</th><th>Abstand</th><th></th></tr>${stufen}
       </table>
       <p class="el-detail">Stufe = Ende − (Ende − Anfang) × Verhältnis. 0 liegt am Ende der
-        Bewegung, 1 an ihrem Anfang.
+        Bewegung, 1 an ihrem Anfang. Zeichenhilfe, kein Beleg: Kumar (2022) findet über drei
+        Aktienmärkte, dass die Trefferquote einer Fibonacci-Zone allein mit ihrer Breite steigt
+        und zufällig gesetzte Zonen gleicher Breite genauso oft getroffen werden.
         ${drin ? `Der Kurs steht zwischen ${verh(drin.von)} und ${verh(drin.bis)}${
           drin.gold ? " – also in der goldenen Zone" : ""}.`
         : "Der Kurs liegt außerhalb der Leiter."}</p>`;
@@ -1254,29 +1375,35 @@ function elZeige(out, erg, reihe, item, neuZeichnen, ausSpeicher) {
     });
   };
 
-  /* --- Weitere zulaessige Zaehlungen --- */
+  /* --- Weitere aktuelle Lesarten ---
+     Nur die aktuellen. Historische gibt es je nach Titel dutzendweise; sie
+     aufzuzaehlen erweckte den Eindruck einer Auswahl, wo keine besteht. */
   const alt = erg.alternativen.length ? `<details class="el-alt">
-    <summary>${erg.alternativen.length} weitere regelkonforme Zählung${erg.alternativen.length > 1 ? "en" : ""}</summary>
-    <p class="el-detail">Ohne eigenen Signifikanztest. Der p-Wert oben gilt für die beste Zählung
-      und schließt die Auswahl unter allen geprüften Fenstern bereits ein – für jede Alternative
-      einzeln wäre er nicht in derselben Weise definiert.</p>
+    <summary>${erg.alternativen.length} weitere aktuelle Lesart${erg.alternativen.length > 1 ? "en" : ""}</summary>
+    <p class="el-detail">Gleichrangig. Nichts Messbares unterscheidet sie von der oben gezeigten –
+      die Reihenfolge folgt allein dem Grad und der Länge, nicht einer Bewertung.</p>
     ${erg.alternativen.map(x => `<div class="el-alt-e">
-      <b>Güte ${zahl(x.guete, 3)}</b> · ${x.vollstaendig ? "fünf Wellen" : "Welle 5 läuft"} ·
-      ${x.auf ? "aufwärts" : "abwärts"} · Ebene ATR × ${zahl(x.skala, 2)} ·
+      ${x.vollstaendig ? "fünf Wellen" : "Welle 5 läuft"} ·
+      ${x.auf ? "aufwärts" : "abwärts"} · Ebene ${x.ebene} Handelstage ·
       ${dat(x.pivots[0].date)} bis ${dat(x.pivots[x.pivots.length - 1].date)}
     </div>`).join("")}
   </details>` : "";
 
   const fuss = `<p class="el-detail">Richtung ${k.auf ? "aufwärts" : "abwärts"} ·
-    Betrachtungsebene ATR × ${zahl(erg.skala, 2)} (Schwelle
-    ${zahl(erg.schwelle * 100, 1)} %) · ${erg.pivots.length} Umkehrpunkte auf dieser Ebene ·
-    ${erg.gepruefte} Fenster über ${EL_SKALEN.length} Ebenen geprüft${erg.verworfen
-      ? `, ${erg.verworfen} wegen Regelverstoß verworfen` : ""}.</p>`;
+    Ebene ${erg.ebene} Handelstage (Schwelle ${zahl((Math.exp(erg.schwelle) - 1) * 100, 1)} %
+    = σ·√${erg.ebene} bei einer Tagesstreuung von ${zahl(erg.sigma * 100, 2)} %) ·
+    ${erg.pivots.length} Umkehrpunkte auf dieser Ebene · Wellen ${erg.beste.dauer} Handelstage lang ·
+    ${erg.gepruefte} Fenster über ${EL_EBENEN.length} Ebenen geprüft${erg.verworfen
+      ? `, ${erg.verworfen} wegen Regelverstoß verworfen` : ""}.<br>
+    Umkehrpunkte nach Bry &amp; Boschan (1971) / Pagan &amp; Sossounov (2003): Kandidat im
+    Fenster ±${Math.max(2, Math.round(erg.ebene / 6))} Tage, Mindestdauer je Phase
+    ${Math.max(3, Math.round(erg.ebene / 5))} Tage, Mindestzyklus
+    ${Math.max(8, Math.round(erg.ebene * 0.8))} Tage.</p>`;
 
   out.innerHTML = `
     ${ampelHtml}
     <h4 class="el-h">Gefundene Zählung</h4>${zaehlung}
-    <h4 class="el-h">Passung der Wellenverhältnisse</h4>${relHtml}
+    <h4 class="el-h">Wellenverhältnisse</h4>${relHtml}
     <h4 class="el-h">Einordnung</h4>${handel}
     ${erg.traegt && erg.fib ? `<h4 class="el-h">Fibonacci-Retracement</h4>
       <div id="el-fib">${fibHtml()}</div>` : ""}
