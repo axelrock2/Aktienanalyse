@@ -1,202 +1,202 @@
 {
-  "stand": "2026-09-03",
-  "erzeugt": "2026-09-04T11:13:45.570Z",
+  "stand": "2026-09-04",
+  "erzeugt": "2026-09-07T12:25:31.392Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 17.35,
+      "cur": "HKD",
+      "wert": 7.1,
+      "stichtag": "2026-09-07"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 266.51,
+      "cur": "USD",
+      "wert": -6.73,
+      "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 145.72,
+      "cur": "USD",
+      "wert": 4.91,
+      "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 477.57,
+      "cur": "USD",
+      "wert": 4.69,
+      "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 95.8,
+      "cur": "USD",
+      "wert": 4.51,
+      "stichtag": "2026-09-04"
+    },
+    {
       "sym": "1686.HK",
       "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5.74,
+      "kurs": 5.49,
       "cur": "HKD",
-      "wert": 5.8,
+      "wert": -4.35,
+      "stichtag": "2026-09-07"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.22,
+      "cur": "USD",
+      "wert": 3.25,
       "stichtag": "2026-09-04"
     },
     {
       "sym": "ORCL",
       "name": "Oracle Corporation",
-      "kurs": 154.04,
+      "kurs": 158.78,
       "cur": "USD",
-      "wert": 5.69,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 138.9,
-      "cur": "USD",
-      "wert": 5.3,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "SAP.DE",
-      "name": "SAP SE",
-      "kurs": 189.08,
-      "cur": "EUR",
-      "wert": 4.21,
+      "wert": 3.08,
       "stichtag": "2026-09-04"
     },
     {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 153.92,
+      "sym": "GTES",
+      "name": "Gates Industrial Corporation Ltd.",
+      "kurs": 25.95,
       "cur": "USD",
-      "wert": 3.53,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "BMW.DE",
-      "name": "Bayerische Motoren Werke Aktiengesellschaft",
-      "kurs": 62.66,
-      "cur": "EUR",
-      "wert": 3.26,
+      "wert": 3.02,
       "stichtag": "2026-09-04"
     },
     {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 63.03,
-      "cur": "CAD",
-      "wert": 3.14,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 610.68,
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 428.91,
       "cur": "USD",
-      "wert": 3.01,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 260.49,
-      "cur": "USD",
-      "wert": 2.98,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "CRM",
-      "name": "Salesforce, Inc.",
-      "kurs": 264.43,
-      "cur": "USD",
-      "wert": 2.92,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 357.16,
-      "cur": "USD",
-      "wert": -2.74,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "MBG.DE",
-      "name": "Mercedes-Benz Group AG",
-      "kurs": 47.63,
-      "cur": "EUR",
-      "wert": 2.7,
+      "wert": 2.85,
       "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "6758.T",
+      "name": "Sony Group Corporation",
+      "kurs": 3780,
+      "cur": "JPY",
+      "wert": -2.7,
+      "stichtag": "2026-09-07"
+    },
+    {
+      "sym": "NOVN.SW",
+      "name": "Novartis AG",
+      "kurs": 126.22,
+      "cur": "CHF",
+      "wert": -2.59,
+      "stichtag": "2026-09-07"
     }
   ],
   "woche": [
     {
       "sym": "1686.HK",
       "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5.74,
+      "kurs": 5.49,
       "cur": "HKD",
-      "wert": 10.59,
-      "stichtag": "2026-09-04"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 156.36,
-      "cur": "USD",
-      "wert": -9.5,
-      "stichtag": "2026-09-03"
+      "wert": 12.03,
+      "stichtag": "2026-09-07"
     },
     {
       "sym": "HAFN",
       "name": "Hafnia Limited",
-      "kurs": 8.93,
+      "kurs": 9.22,
       "cur": "USD",
-      "wert": 7.72,
-      "stichtag": "2026-09-03"
+      "wert": 8.85,
+      "stichtag": "2026-09-04"
     },
     {
-      "sym": "BNTX",
-      "name": "BioNTech SE",
-      "kurs": 102.88,
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 266.51,
       "cur": "USD",
-      "wert": -7.65,
-      "stichtag": "2026-09-03"
+      "wert": -8.58,
+      "stichtag": "2026-09-04"
     },
     {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 5.57,
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 17.35,
       "cur": "HKD",
-      "wert": 7.43,
+      "wert": 8.51,
+      "stichtag": "2026-09-07"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 145.72,
+      "cur": "USD",
+      "wert": 7.49,
+      "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 95.8,
+      "cur": "USD",
+      "wert": 7.07,
+      "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 616.77,
+      "cur": "USD",
+      "wert": 6.7,
       "stichtag": "2026-09-04"
     },
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 31.12,
+      "kurs": 31.36,
       "cur": "USD",
-      "wert": -7.13,
-      "stichtag": "2026-09-03"
+      "wert": -6.12,
+      "stichtag": "2026-09-04"
     },
     {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 610.68,
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 230.36,
       "cur": "USD",
-      "wert": 6.93,
-      "stichtag": "2026-09-03"
+      "wert": 5.89,
+      "stichtag": "2026-09-04"
     },
     {
-      "sym": "CW",
-      "name": "Curtiss-Wright Corporation",
-      "kurs": 568.72,
+      "sym": "6758.T",
+      "name": "Sony Group Corporation",
+      "kurs": 3780,
+      "cur": "JPY",
+      "wert": -5.88,
+      "stichtag": "2026-09-07"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 156.29,
       "cur": "USD",
-      "wert": -6.07,
-      "stichtag": "2026-09-03"
+      "wert": -5.85,
+      "stichtag": "2026-09-04"
     },
     {
       "sym": "UNP",
       "name": "Union Pacific Corporation",
-      "kurs": 289.15,
-      "cur": "USD",
-      "wert": -6.02,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "HON",
-      "name": "Honeywell International",
-      "kurs": 207.63,
+      "kurs": 289.62,
       "cur": "USD",
       "wert": -5.79,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "CVX",
-      "name": "Chevron Corporation",
-      "kurs": 211.32,
-      "cur": "USD",
-      "wert": 5.78,
-      "stichtag": "2026-09-03"
-    },
-    {
-      "sym": "WMT",
-      "name": "Walmart Inc.",
-      "kurs": 108.42,
-      "cur": "USD",
-      "wert": 5.64,
-      "stichtag": "2026-09-03"
+      "stichtag": "2026-09-04"
     }
   ]
 }
