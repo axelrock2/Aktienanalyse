@@ -136,28 +136,79 @@ bestimmen"). Die Analyse läuft **ausschließlich auf Klick** – nie beim Laden
 nie beim Tickerwechsel. Beim Wechsel wird ein vorhandenes Ergebnis verworfen und
 der Abschnitt zurückgesetzt.
 
-Ablauf: ZigZag-Pivots über eine Schwelle von 3 % oder, wenn die Tagesspanne
-vorliegt, ATR(14) × 2 – je nachdem was größer ist. Über die letzten 20 Pivots
-wird jedes Fenster aus fünf Wellen gegen die drei harten Regeln geprüft (Welle 2
-holt Welle 1 nicht vollständig zurück; Welle 3 ist nicht die kürzeste; Welle 4
-überlappt Welle 1 nicht). Wer eine Regel verletzt, fliegt raus – Richtlinien wie
-Alternation oder die Nähe zu 0,382/0,5/0,618/0,786 gehen nur in die Konfidenz
-ein. Laufende Impulse mit drei oder vier fertigen Wellen werden mitgezählt.
+*Umkehrpunkte.* Nicht per ZigZag, sondern nach dem Muster von Bry & Boschan
+(1971) in der Fassung von Pagan & Sossounov (2003): Kandidat ist, wer im Fenster
+±w Tage Höchst- oder Tiefstwert ist; danach wird Abwechslung erzwungen und nach
+Phasendauer, Amplitude und Zykluslänge zensiert. Der ZigZag kannte nur die
+Amplitude – dabei entstehen Zählungen, die in der Amplitude sauber sind und in
+der Zeit Unsinn.
 
-Aus der besten Zählung entstehen Fibonacci-Projektionen; Level, die näher als
-1 % des Kurses beieinanderliegen, werden zu Zonen gebündelt. Gezeigt werden
-höchstens vier Zonen mit mindestens zwei Leveln, nach Score sortiert, als Bänder
-im Chart und mit Wellenlabels an den Pivots.
+Die Amplitudenschwelle steht in Einheiten der Zufallsbewegung: σ·√h, wobei σ die
+Tagesstreuung der Log-Renditen ist und h der Bezugshorizont. Gesucht wird auf
+vier Ebenen – 21, 42, 63 und 126 Handelstage. Größere Grade passen nicht ins
+Fenster: Die Seite lädt zwei Jahre Tagesdaten, und auf Ebene 126 braucht ein
+vollständiger Impuls bereits rund 250 Handelstage.
+
+*Auswahl.* Aktuelle Zählungen vor historischen, größerer Grad vor kleinerem,
+längere vor kürzerer. Das ist eine Darstellungsentscheidung und steht auch so
+dabei. Ziele, Einstiegsbereich und Invalidierung gibt es **nur für eine aktuelle
+Zählung** – der letzte Punkt muss jünger sein als die halbe Horizontlänge.
+Vorher entschied darüber ein p-Wert, und die beste Zählung endete im Median 775
+Handelstage vor dem rechten Rand: Sie beschrieb Vergangenes und bekam trotzdem
+einen Einstiegsbereich.
+
+*Die Ampel bewertet die Eindeutigkeit, nicht die Treffsicherheit.* Rot heißt:
+keine aktuelle Lesart. Gelb: es gibt eine, aber sie ist nicht die einzige –
+mehrere Ebenen, widersprüchliche Richtungen, ein unbestätigter letzter Punkt
+oder eine Regel, die nur knapp hält. Grün: genau eine aktuelle Lesart, letzter
+Punkt bestätigt, alle drei harten Regeln mit Abstand erfüllt.
+
+*Warum kein Signifikanztest mehr.* Die vorige Fassung prüfte jede Zählung gegen
+999 Surrogatreihen und zeigte einen p-Wert. Gemessen an 107 Titeln über zehn
+Jahre trägt die geprüfte Kennzahl nichts:
+
+- Die Wellenverhältnisse echter Kurse sind von denen auf Surrogatreihen nicht zu
+  unterscheiden – Kolmogorov-Smirnov höchstens 1,17 gegen einen kritischen Wert
+  von 1,36. Der Grund ist strukturell: Wer Abwechslung, R1, R2 und R3 verlangt,
+  erzwingt Verhältnisse nahe den Fibonacci-Werten, im Rauschen genauso. Der
+  Median von Welle 2 / Welle 1 liegt auf Zufallsreihen bei 0,60.
+- Ein Klassifikator über alle Verhältnisse erreicht 0,588 auf den Lerndaten und
+  0,466 auf ungesehenen Titeln – schlechter als der Münzwurf. Der Vorsprung auf
+  den Lerndaten ist reine Anpassung.
+- Die Rendite der folgenden 20 Handelstage nach einer aktuellen Zählung liegt
+  zwischen −0,09 und 0,00 Standardabweichungen – in **allen vier** Lagen gleich
+  gerichtet, auch in denen, die sich widersprechen müssten, und in dreien
+  schließt das 95-%-Band die Null ein. Ohne Kontrolle auf die Vorbewegung sah es
+  nach einem sauberen Richtungsmuster aus (−0,123 / +0,039 / −0,044 / +0,106);
+  das war der Rückschlag auf die zurückliegende Bewegung, nicht die Zählung.
+
+Ein Test ohne Trennschärfe liefert gleichverteilte p-Werte und vergibt in fünf
+Prozent der Fälle ein grünes Licht ohne Inhalt – das ist schädlicher als kein
+Test. Nachrechenbar mit `node scripts/elliott_befund.js`; das Skript lädt den
+ausgelieferten Rechenteil aus `elliott.js` und misst ihn, nicht eine
+Nacherzählung davon.
+
+*Was bleibt.* Die Zählung selbst als nachvollziehbare Konstruktion, der
+Spielraum jeder harten Regel, die Fibonacci-Leiter als Zeichenhilfe und – das
+eigentlich Nützliche – die **Invalidierung**: der Preis, ab dem die Zählung
+nicht mehr auslegbar, sondern widerlegt ist. Der gilt ohne Statistik.
+
+Zur Fibonacci-Leiter gehört ein Vorbehalt: Kumar (2022, *Expert Systems with
+Applications*) findet über drei Aktienmärkte, dass die Trefferquote einer
+Fibonacci-Zone allein mit ihrer Breite steigt und zufällig gesetzte Zonen
+gleicher Breite genauso oft getroffen werden. Deshalb steht bei jeder Zone ihre
+Breite dabei.
 
 **Findet sich keine regelkonforme Zählung, wird das gesagt** – mit Grund, und
-ohne Zonen. Bei NVIDIA etwa verletzen derzeit alle 17 geprüften Kandidaten eine
-harte Regel; dann steht dort die Meldung statt einer erfundenen Zahl.
+ohne Zonen.
 
 Auf Wunsch lässt sich eine Zählung speichern (`localStorage`, nur dieser
 Browser). Beim nächsten Aufruf wird sie **angeboten**, nicht automatisch
-angewendet.
+angewendet. Einträge aus einer älteren Fassung werden verworfen statt gezeigt –
+sie enthalten einen p-Wert aus einem Test, den es nicht mehr gibt.
 
-Elliott-Wellen sind Auslegung, keine Messung – der Abschnitt sagt das selbst.
+Elliott-Wellen sind Auslegung, keine Messung – der Abschnitt sagt das selbst,
+und sagt seit dieser Fassung auch, wie viel die Auslegung wert ist.
 
 **Kennzahl-Erklärungen.** Neben Größen, die Erklärung vertragen, steht ein
 kleines **i**. Beim Überfahren mit der Maus erscheint ein Kästchen mit einer

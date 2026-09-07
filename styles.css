@@ -652,11 +652,30 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 .el-gelb{border-left-color:var(--warn)}     .el-gelb .el-punkt{background:var(--warn)}
 .el-rot{border-left-color:var(--down)}      .el-rot .el-punkt{background:var(--down)}
 
-/* Passungsbalken je Wellenverhaeltnis - klein, direkt neben der Zahl */
+/* Gruende fuer eine mehrdeutige Lesart - kurz, direkt unter der Ampel */
+.el-gruende{margin:8px 0 0;padding-left:17px;color:var(--muted);font-size:12px;line-height:1.6}
+.el-gruende li{margin-bottom:3px}
+
+/* Der gemessene Befund. Bewusst mit eigenem Rahmen: Er gilt fuer jede
+   Zaehlung, nicht nur fuer die gerade gezeigte. */
+.el-befund{border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:0 0 14px;
+  background:var(--bg2);font-size:12.5px;line-height:1.6}
+.el-befund>b{font:600 13px var(--sans);color:var(--ink);display:block;margin-bottom:6px}
+.el-befund p{color:var(--muted);margin:0 0 6px}
+.el-befund ul{margin:0;padding-left:17px;color:var(--muted)}
+.el-befund li{margin-bottom:8px}
+.el-befund li b{color:var(--ink)}
+.el-befund code{font:11.5px var(--mono);color:var(--muted)}
+.el-befundtab{margin:6px 0}
+.el-befundtab td{padding:3px 9px 3px 0;font-size:11.5px;white-space:nowrap}
+.el-befundtab td:first-child{font-family:var(--sans);color:var(--muted);white-space:normal}
+.el-befundtab td:nth-child(2){font-family:var(--mono);color:var(--ink)}
+
+/* Wellenverhaeltnisse: kein Balken mehr. Ein Balken sieht aus wie eine
+   Bewertung, und bewertet wird hier nichts - es steht da, was gemessen wurde. */
 .el-rel td:first-child{font-family:var(--sans);color:var(--muted)}
-.el-rel td:last-child{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
-.el-fit{display:block;width:52px;height:5px;background:var(--bg2);border-radius:99px;overflow:hidden;flex:none}
-.el-fit i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.el-rel td:last-child{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.el-fern{color:var(--faint)}
 
 .el-lage{font-size:12.5px;color:var(--ink);margin-bottom:10px;display:flex;
   align-items:center;gap:9px;flex-wrap:wrap}
