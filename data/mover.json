@@ -1,16 +1,16 @@
 {
   "stand": "2026-09-04",
-  "erzeugt": "2026-09-07T12:25:31.392Z",
+  "erzeugt": "2026-09-08T11:13:02.054Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 17.35,
-      "cur": "HKD",
-      "wert": 7.1,
-      "stichtag": "2026-09-07"
+      "sym": "NOVN.SW",
+      "name": "Novartis AG",
+      "kurs": 114.1,
+      "cur": "CHF",
+      "wert": -11.95,
+      "stichtag": "2026-09-08"
     },
     {
       "sym": "ADBE",
@@ -29,6 +29,14 @@
       "stichtag": "2026-09-04"
     },
     {
+      "sym": "MUV2.DE",
+      "name": "Münchener Rückversicherungs-Gesellschaft Aktiengesellschaft in München",
+      "kurs": 501.8,
+      "cur": "EUR",
+      "wert": -4.89,
+      "stichtag": "2026-09-08"
+    },
+    {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
       "kurs": 477.57,
@@ -45,12 +53,28 @@
       "stichtag": "2026-09-04"
     },
     {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5.49,
-      "cur": "HKD",
-      "wert": -4.35,
-      "stichtag": "2026-09-07"
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 2968.5,
+      "cur": "JPY",
+      "wert": -4.12,
+      "stichtag": "2026-09-08"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1517.8,
+      "cur": "EUR",
+      "wert": 3.43,
+      "stichtag": "2026-09-08"
+    },
+    {
+      "sym": "6758.T",
+      "name": "Sony Group Corporation",
+      "kurs": 3654,
+      "cur": "JPY",
+      "wert": -3.33,
+      "stichtag": "2026-09-08"
     },
     {
       "sym": "HAFN",
@@ -75,40 +99,24 @@
       "cur": "USD",
       "wert": 3.02,
       "stichtag": "2026-09-04"
-    },
-    {
-      "sym": "TSM",
-      "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 428.91,
-      "cur": "USD",
-      "wert": 2.85,
-      "stichtag": "2026-09-04"
-    },
-    {
-      "sym": "6758.T",
-      "name": "Sony Group Corporation",
-      "kurs": 3780,
-      "cur": "JPY",
-      "wert": -2.7,
-      "stichtag": "2026-09-07"
-    },
-    {
-      "sym": "NOVN.SW",
-      "name": "Novartis AG",
-      "kurs": 126.22,
-      "cur": "CHF",
-      "wert": -2.59,
-      "stichtag": "2026-09-07"
     }
   ],
   "woche": [
     {
       "sym": "1686.HK",
       "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5.49,
+      "kurs": 5.63,
       "cur": "HKD",
-      "wert": 12.03,
-      "stichtag": "2026-09-07"
+      "wert": 15.03,
+      "stichtag": "2026-09-08"
+    },
+    {
+      "sym": "6758.T",
+      "name": "Sony Group Corporation",
+      "kurs": 3654,
+      "cur": "JPY",
+      "wert": -9.69,
+      "stichtag": "2026-09-08"
     },
     {
       "sym": "HAFN",
@@ -127,12 +135,12 @@
       "stichtag": "2026-09-04"
     },
     {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 17.35,
-      "cur": "HKD",
-      "wert": 8.51,
-      "stichtag": "2026-09-07"
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 2968.5,
+      "cur": "JPY",
+      "wert": -8.46,
+      "stichtag": "2026-09-08"
     },
     {
       "sym": "CAMT",
@@ -141,6 +149,22 @@
       "cur": "USD",
       "wert": 7.49,
       "stichtag": "2026-09-04"
+    },
+    {
+      "sym": "NOVN.SW",
+      "name": "Novartis AG",
+      "kurs": 114.1,
+      "cur": "CHF",
+      "wert": -7.43,
+      "stichtag": "2026-09-08"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 17.26,
+      "cur": "HKD",
+      "wert": 7.14,
+      "stichtag": "2026-09-08"
     },
     {
       "sym": "INTC",
@@ -172,30 +196,6 @@
       "kurs": 230.36,
       "cur": "USD",
       "wert": 5.89,
-      "stichtag": "2026-09-04"
-    },
-    {
-      "sym": "6758.T",
-      "name": "Sony Group Corporation",
-      "kurs": 3780,
-      "cur": "JPY",
-      "wert": -5.88,
-      "stichtag": "2026-09-07"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 156.29,
-      "cur": "USD",
-      "wert": -5.85,
-      "stichtag": "2026-09-04"
-    },
-    {
-      "sym": "UNP",
-      "name": "Union Pacific Corporation",
-      "kurs": 289.62,
-      "cur": "USD",
-      "wert": -5.79,
       "stichtag": "2026-09-04"
     }
   ]
