@@ -1,103 +1,103 @@
 {
-  "stand": "2026-09-08",
-  "erzeugt": "2026-09-09T11:17:55.531Z",
+  "stand": "2026-09-09",
+  "erzeugt": "2026-09-10T11:14:28.636Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 231.53,
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 653.69,
       "cur": "USD",
-      "wert": -10.7,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 104.47,
-      "cur": "USD",
-      "wert": 9.05,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 39.79,
-      "cur": "USD",
-      "wert": 6.08,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 505.74,
-      "cur": "USD",
-      "wert": 5.9,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 144.48,
-      "cur": "USD",
-      "wert": -5.18,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "HMC",
-      "name": "Honda Motor Co., Ltd.",
-      "kurs": 31.06,
-      "cur": "USD",
-      "wert": -4.93,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "BNTX",
-      "name": "BioNTech SE",
-      "kurs": 98.66,
-      "cur": "USD",
-      "wert": -4.92,
-      "stichtag": "2026-09-08"
+      "wert": 6.55,
+      "stichtag": "2026-09-09"
     },
     {
       "sym": "6666.HK",
       "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.22,
+      "kurs": 1.14,
       "cur": "HKD",
-      "wert": 4.74,
+      "wert": -5.76,
+      "stichtag": "2026-09-10"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 16.51,
+      "cur": "HKD",
+      "wert": -4.51,
+      "stichtag": "2026-09-10"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 41.2,
+      "cur": "USD",
+      "wert": 3.54,
       "stichtag": "2026-09-09"
     },
     {
-      "sym": "CRM",
-      "name": "Salesforce, Inc.",
-      "kurs": 249.12,
+      "sym": "AX",
+      "name": "Axos Financial, Inc.",
+      "kurs": 93.31,
       "cur": "USD",
-      "wert": -3.9,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "SIE.DE",
-      "name": "Siemens Aktiengesellschaft",
-      "kurs": 261.95,
-      "cur": "EUR",
-      "wert": -3.87,
+      "wert": -3.31,
       "stichtag": "2026-09-09"
     },
     {
-      "sym": "ADBE",
-      "name": "Adobe Inc.",
-      "kurs": 257.26,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 521.1,
       "cur": "USD",
-      "wert": -3.47,
-      "stichtag": "2026-09-08"
+      "wert": 3.04,
+      "stichtag": "2026-09-09"
     },
     {
-      "sym": "BMED.MI",
-      "name": "Banca Mediolanum S.p.A.",
-      "kurs": 22.9,
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 109.4,
+      "cur": "USD",
+      "wert": -2.89,
+      "stichtag": "2026-09-09"
+    },
+    {
+      "sym": "GE",
+      "name": "GE Aerospace",
+      "kurs": 325.42,
+      "cur": "USD",
+      "wert": -2.83,
+      "stichtag": "2026-09-09"
+    },
+    {
+      "sym": "GTES",
+      "name": "Gates Industrial Corporation Ltd.",
+      "kurs": 26.32,
+      "cur": "USD",
+      "wert": 2.61,
+      "stichtag": "2026-09-09"
+    },
+    {
+      "sym": "SAP.DE",
+      "name": "SAP SE",
+      "kurs": 178.14,
       "cur": "EUR",
-      "wert": -3.29,
+      "wert": -2.58,
+      "stichtag": "2026-09-10"
+    },
+    {
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 7.05,
+      "cur": "USD",
+      "wert": -2.35,
+      "stichtag": "2026-09-09"
+    },
+    {
+      "sym": "GOOGL",
+      "name": "Alphabet Inc.",
+      "kurs": 330.65,
+      "cur": "USD",
+      "wert": -2.28,
       "stichtag": "2026-09-09"
     }
   ],
@@ -105,98 +105,98 @@
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 104.47,
+      "kurs": 106.24,
       "cur": "USD",
-      "wert": 16.71,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "NOVN.SW",
-      "name": "Novartis AG",
-      "kurs": 111.26,
-      "cur": "CHF",
-      "wert": -15.04,
+      "wert": 19.41,
       "stichtag": "2026-09-09"
-    },
-    {
-      "sym": "ADBE",
-      "name": "Adobe Inc.",
-      "kurs": 257.26,
-      "cur": "USD",
-      "wert": -12.13,
-      "stichtag": "2026-09-08"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 147.01,
+      "kurs": 148.66,
       "cur": "USD",
-      "wert": 9.71,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 17.29,
-      "cur": "HKD",
-      "wert": 9.22,
+      "wert": 16.01,
       "stichtag": "2026-09-09"
     },
     {
       "sym": "ORCL",
       "name": "Oracle Corporation",
-      "kurs": 162.52,
+      "kurs": 161.63,
       "cur": "USD",
-      "wert": 8.99,
-      "stichtag": "2026-09-08"
+      "wert": 14.37,
+      "stichtag": "2026-09-09"
     },
     {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 157.47,
-      "cur": "USD",
-      "wert": -7.87,
-      "stichtag": "2026-09-08"
+      "sym": "NOVN.SW",
+      "name": "Novartis AG",
+      "kurs": 113.58,
+      "cur": "CHF",
+      "wert": -13.51,
+      "stichtag": "2026-09-10"
     },
     {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 5.86,
-      "cur": "HKD",
-      "wert": 7.72,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 521.1,
+      "cur": "USD",
+      "wert": 13.38,
+      "stichtag": "2026-09-09"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 653.69,
+      "cur": "USD",
+      "wert": 12.99,
+      "stichtag": "2026-09-09"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 254.86,
+      "cur": "USD",
+      "wert": -10.91,
       "stichtag": "2026-09-09"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 39.79,
+      "kurs": 41.2,
       "cur": "USD",
-      "wert": 7.69,
-      "stichtag": "2026-09-08"
-    },
-    {
-      "sym": "6758.T",
-      "name": "Sony Group Corporation",
-      "kurs": 3625,
-      "cur": "JPY",
-      "wert": -7.53,
+      "wert": 10.07,
       "stichtag": "2026-09-09"
     },
     {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 505.74,
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 232.62,
       "cur": "USD",
-      "wert": 7.44,
-      "stichtag": "2026-09-08"
+      "wert": -8.74,
+      "stichtag": "2026-09-09"
     },
     {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 613.48,
+      "sym": "MC.PA",
+      "name": "LVMH Moët Hennessy - Louis Vuitton, Société Européenne",
+      "kurs": 409.05,
+      "cur": "EUR",
+      "wert": -6.82,
+      "stichtag": "2026-09-10"
+    },
+    {
+      "sym": "0151.HK",
+      "name": "Want Want China Holdings Limited",
+      "kurs": 2.85,
+      "cur": "HKD",
+      "wert": -6.71,
+      "stichtag": "2026-09-10"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.16,
       "cur": "USD",
-      "wert": 7.19,
-      "stichtag": "2026-09-08"
+      "wert": 6.64,
+      "stichtag": "2026-09-09"
     }
   ]
 }
