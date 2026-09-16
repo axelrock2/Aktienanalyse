@@ -1,202 +1,202 @@
 {
-  "stand": "2026-09-14",
-  "erzeugt": "2026-09-15T11:40:12.016Z",
+  "stand": "2026-09-15",
+  "erzeugt": "2026-09-16T11:27:25.805Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 133.84,
+      "sym": "TMO",
+      "name": "Thermo Fisher Scientific Inc.",
+      "kurs": 641.39,
       "cur": "USD",
-      "wert": -9.55,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 170.18,
-      "cur": "USD",
-      "wert": 9.04,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 37.08,
-      "cur": "USD",
-      "wert": -6.06,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 41.54,
-      "cur": "USD",
-      "wert": -5.7,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 97.19,
-      "cur": "USD",
-      "wert": -5.59,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "ADBE",
-      "name": "Adobe Inc.",
-      "kurs": 265.6,
-      "cur": "USD",
-      "wert": 5.3,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "BAC",
-      "name": "Bank of America Corporation",
-      "kurs": 59.47,
-      "cur": "USD",
-      "wert": -5.14,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 344.72,
-      "cur": "USD",
-      "wert": -4.77,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "CRM",
-      "name": "Salesforce, Inc.",
-      "kurs": 259.43,
-      "cur": "USD",
-      "wert": 4.73,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 493.41,
-      "cur": "USD",
-      "wert": -4.4,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 784,
-      "cur": "USD",
-      "wert": -4.22,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 144.79,
-      "cur": "USD",
-      "wert": -3.65,
-      "stichtag": "2026-09-14"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 227.13,
-      "cur": "USD",
-      "wert": -12.4,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 41.54,
-      "cur": "USD",
-      "wert": -11.2,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 170.18,
-      "cur": "USD",
-      "wert": 8.89,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 144.79,
-      "cur": "USD",
-      "wert": -8.81,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 210.96,
-      "cur": "USD",
-      "wert": -8.42,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 133.84,
-      "cur": "USD",
-      "wert": -8.15,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 665.6,
-      "cur": "USD",
-      "wert": 7.92,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "EPAC",
-      "name": "Enerpac Tool Group Corp.",
-      "kurs": 34.49,
-      "cur": "USD",
-      "wert": -7.63,
-      "stichtag": "2026-09-14"
-    },
-    {
-      "sym": "BALD-B.ST",
-      "name": "Fastighets AB Balder (publ)",
-      "kurs": 50,
-      "cur": "SEK",
-      "wert": -7.54,
+      "wert": 4.53,
       "stichtag": "2026-09-15"
     },
     {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1405.8,
-      "cur": "EUR",
-      "wert": -7.39,
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 39.71,
+      "cur": "USD",
+      "wert": -4.41,
       "stichtag": "2026-09-15"
     },
     {
       "sym": "QCOM",
       "name": "QUALCOMM Incorporated",
-      "kurs": 180.15,
+      "kurs": 187.8,
       "cur": "USD",
-      "wert": 6.76,
-      "stichtag": "2026-09-14"
+      "wert": 4.25,
+      "stichtag": "2026-09-15"
     },
     {
       "sym": "GE",
       "name": "GE Aerospace",
-      "kurs": 317.56,
+      "kurs": 307.05,
       "cur": "USD",
-      "wert": -5.8,
-      "stichtag": "2026-09-14"
+      "wert": -3.31,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 140.35,
+      "cur": "USD",
+      "wert": -3.07,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 257.76,
+      "cur": "USD",
+      "wert": -2.95,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1416.8,
+      "cur": "EUR",
+      "wert": 2.76,
+      "stichtag": "2026-09-16"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 104.77,
+      "cur": "USD",
+      "wert": -2.71,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "CVX",
+      "name": "Chevron Corporation",
+      "kurs": 217.77,
+      "cur": "USD",
+      "wert": 2.64,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "XOM",
+      "name": "ExxonMobil Holdings Corporation",
+      "kurs": 169.32,
+      "cur": "USD",
+      "wert": 2.57,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "MBG.DE",
+      "name": "Mercedes-Benz Group AG",
+      "kurs": 45.49,
+      "cur": "EUR",
+      "wert": -2.31,
+      "stichtag": "2026-09-16"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 36.22,
+      "cur": "USD",
+      "wert": -2.24,
+      "stichtag": "2026-09-15"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 39.71,
+      "cur": "USD",
+      "wert": -17.18,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 140.35,
+      "cur": "USD",
+      "wert": -13.64,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 172.37,
+      "cur": "USD",
+      "wert": 9.46,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 670.24,
+      "cur": "USD",
+      "wert": 9.25,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 134.66,
+      "cur": "USD",
+      "wert": -8.4,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "GE",
+      "name": "GE Aerospace",
+      "kurs": 307.05,
+      "cur": "USD",
+      "wert": -8.32,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 339.27,
+      "cur": "USD",
+      "wert": -7.95,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 187.8,
+      "cur": "USD",
+      "wert": 7.88,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 97.14,
+      "cur": "USD",
+      "wert": -7.02,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 37.12,
+      "cur": "USD",
+      "wert": -6.71,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "EPAC",
+      "name": "Enerpac Tool Group Corp.",
+      "kurs": 34.59,
+      "cur": "USD",
+      "wert": -6.59,
+      "stichtag": "2026-09-15"
+    },
+    {
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 153.74,
+      "cur": "USD",
+      "wert": 6.41,
+      "stichtag": "2026-09-15"
     }
   ]
 }
