@@ -1,6 +1,6 @@
 {
   "stand": "2026-09-21",
-  "erzeugt": "2026-09-22T11:32:50.357Z",
+  "erzeugt": "2026-09-23T11:29:53.557Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
@@ -69,14 +69,6 @@
       "stichtag": "2026-09-21"
     },
     {
-      "sym": "CBDG.PA",
-      "name": "Compagnie du Cambodge",
-      "kurs": 103,
-      "cur": "EUR",
-      "wert": -3.74,
-      "stichtag": "2026-09-22"
-    },
-    {
       "sym": "UNP",
       "name": "Union Pacific Corporation",
       "kurs": 269.63,
@@ -85,20 +77,28 @@
       "stichtag": "2026-09-21"
     },
     {
-      "sym": "ERIBR.HE",
-      "name": "Telefonaktiebolaget LM Ericsson (publ)",
-      "kurs": 8.61,
-      "cur": "EUR",
-      "wert": -3.33,
-      "stichtag": "2026-09-22"
-    },
-    {
       "sym": "XOM",
       "name": "ExxonMobil Holdings Corporation",
       "kurs": 158.3,
       "cur": "USD",
       "wert": -3.2,
       "stichtag": "2026-09-21"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 175.23,
+      "cur": "USD",
+      "wert": 3.17,
+      "stichtag": "2026-09-21"
+    },
+    {
+      "sym": "CBDG.PA",
+      "name": "Compagnie du Cambodge",
+      "kurs": 103,
+      "cur": "EUR",
+      "wert": -2.83,
+      "stichtag": "2026-09-23"
     }
   ],
   "woche": [
@@ -169,10 +169,10 @@
     {
       "sym": "ASML.AS",
       "name": "ASML Holding N.V.",
-      "kurs": 1487.2,
+      "kurs": 1507.8,
       "cur": "EUR",
-      "wert": 7.86,
-      "stichtag": "2026-09-22"
+      "wert": 7.99,
+      "stichtag": "2026-09-23"
     },
     {
       "sym": "QCOM",
