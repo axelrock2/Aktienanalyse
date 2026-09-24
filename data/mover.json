@@ -1,103 +1,103 @@
 {
-  "stand": "2026-09-21",
-  "erzeugt": "2026-09-23T11:29:53.557Z",
+  "stand": "2026-09-23",
+  "erzeugt": "2026-09-24T11:40:19.415Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 121.78,
-      "cur": "USD",
-      "wert": 12.14,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 741.25,
-      "cur": "USD",
-      "wert": 11.34,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 615.52,
-      "cur": "USD",
-      "wert": 9.95,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 194.23,
-      "cur": "USD",
-      "wert": 9.29,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 43.73,
-      "cur": "USD",
-      "wert": 5.04,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 34.25,
-      "cur": "USD",
-      "wert": 4.45,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 6.62,
-      "cur": "USD",
-      "wert": -4.06,
-      "stichtag": "2026-09-21"
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.26,
+      "cur": "HKD",
+      "wert": 7.66,
+      "stichtag": "2026-09-24"
     },
     {
       "sym": "HAFN",
       "name": "Hafnia Limited",
-      "kurs": 9.71,
+      "kurs": 9.1,
       "cur": "USD",
-      "wert": -4.05,
-      "stichtag": "2026-09-21"
+      "wert": -6.28,
+      "stichtag": "2026-09-23"
     },
     {
-      "sym": "UNP",
-      "name": "Union Pacific Corporation",
-      "kurs": 269.63,
+      "sym": "DB",
+      "name": "Deutsche Bank Aktiengesellschaft",
+      "kurs": 35.87,
       "cur": "USD",
-      "wert": -3.49,
-      "stichtag": "2026-09-21"
+      "wert": -6.22,
+      "stichtag": "2026-09-23"
     },
     {
-      "sym": "XOM",
-      "name": "ExxonMobil Holdings Corporation",
-      "kurs": 158.3,
+      "sym": "MCD",
+      "name": "McDonald's Corporation",
+      "kurs": 238.32,
       "cur": "USD",
-      "wert": -3.2,
-      "stichtag": "2026-09-21"
+      "wert": -4.81,
+      "stichtag": "2026-09-23"
     },
     {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 175.23,
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 110.8,
       "cur": "USD",
-      "wert": 3.17,
-      "stichtag": "2026-09-21"
+      "wert": -4.74,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 6.34,
+      "cur": "USD",
+      "wert": -4.23,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "CM",
+      "name": "Canadian Imperial Bank of Commerce",
+      "kurs": 111.45,
+      "cur": "USD",
+      "wert": -4.14,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "CW",
+      "name": "Curtiss-Wright Corporation",
+      "kurs": 545.15,
+      "cur": "USD",
+      "wert": -4.03,
+      "stichtag": "2026-09-23"
     },
     {
       "sym": "CBDG.PA",
       "name": "Compagnie du Cambodge",
-      "kurs": 103,
+      "kurs": 107,
       "cur": "EUR",
-      "wert": -2.83,
+      "wert": 3.88,
+      "stichtag": "2026-09-24"
+    },
+    {
+      "sym": "GOOGL",
+      "name": "Alphabet Inc.",
+      "kurs": 337.83,
+      "cur": "USD",
+      "wert": -3.8,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "GTES",
+      "name": "Gates Industrial Corporation Ltd.",
+      "kurs": 26.36,
+      "cur": "USD",
+      "wert": 3.58,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "AX",
+      "name": "Axos Financial, Inc.",
+      "kurs": 87.61,
+      "cur": "USD",
+      "wert": -3.33,
       "stichtag": "2026-09-23"
     }
   ],
@@ -105,98 +105,98 @@
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 121.78,
+      "kurs": 122.6,
       "cur": "USD",
-      "wert": 25.3,
-      "stichtag": "2026-09-21"
+      "wert": 21.33,
+      "stichtag": "2026-09-23"
     },
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 615.52,
+      "kurs": 614.61,
       "cur": "USD",
-      "wert": 24.75,
-      "stichtag": "2026-09-21"
+      "wert": 19.92,
+      "stichtag": "2026-09-23"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 43.73,
+      "kurs": 43.93,
       "cur": "USD",
-      "wert": 17.93,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 34.25,
-      "cur": "USD",
-      "wert": 13.15,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 149.63,
-      "cur": "USD",
-      "wert": 11.8,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 741.25,
-      "cur": "USD",
-      "wert": 11.37,
-      "stichtag": "2026-09-21"
+      "wert": 18.35,
+      "stichtag": "2026-09-23"
     },
     {
       "sym": "DNTH",
       "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 96.47,
+      "kurs": 93.44,
       "cur": "USD",
-      "wert": -10.42,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "CRM",
-      "name": "Salesforce, Inc.",
-      "kurs": 236.42,
-      "cur": "USD",
-      "wert": -8.87,
-      "stichtag": "2026-09-21"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1507.8,
-      "cur": "EUR",
-      "wert": 7.99,
+      "wert": -10.81,
       "stichtag": "2026-09-23"
     },
     {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 194.23,
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 6.34,
       "cur": "USD",
-      "wert": 7.82,
-      "stichtag": "2026-09-21"
+      "wert": -10.7,
+      "stichtag": "2026-09-23"
     },
     {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 227.38,
-      "cur": "USD",
-      "wert": 7.78,
-      "stichtag": "2026-09-21"
+      "sym": "BMW.DE",
+      "name": "Bayerische Motoren Werke Aktiengesellschaft",
+      "kurs": 56.46,
+      "cur": "EUR",
+      "wert": -10.69,
+      "stichtag": "2026-09-24"
     },
     {
-      "sym": "TMO",
-      "name": "Thermo Fisher Scientific Inc.",
-      "kurs": 658.76,
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 744.1,
       "cur": "USD",
-      "wert": 7.36,
-      "stichtag": "2026-09-21"
+      "wert": 10.51,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "MBG.DE",
+      "name": "Mercedes-Benz Group AG",
+      "kurs": 41.44,
+      "cur": "EUR",
+      "wert": -10.3,
+      "stichtag": "2026-09-24"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 147.06,
+      "cur": "USD",
+      "wert": 9.21,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 33.11,
+      "cur": "USD",
+      "wert": 8.77,
+      "stichtag": "2026-09-23"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.26,
+      "cur": "HKD",
+      "wert": 8.12,
+      "stichtag": "2026-09-24"
+    },
+    {
+      "sym": "DB",
+      "name": "Deutsche Bank Aktiengesellschaft",
+      "kurs": 35.87,
+      "cur": "USD",
+      "wert": -7.29,
+      "stichtag": "2026-09-23"
     }
   ]
 }
