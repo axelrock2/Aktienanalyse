@@ -1,202 +1,202 @@
 {
-  "stand": "2026-09-24",
-  "erzeugt": "2026-09-25T11:46:31.962Z",
+  "stand": "2026-09-28",
+  "erzeugt": "2026-09-28T13:47:23.036Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "ERIBR.HE",
-      "name": "Telefonaktiebolaget LM Ericsson (publ)",
-      "kurs": 8.46,
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 187.66,
+      "cur": "USD",
+      "wert": -7.09,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 116.89,
+      "cur": "USD",
+      "wert": -4.97,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 222.6,
+      "cur": "USD",
+      "wert": -4.88,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "CBDG.PA",
+      "name": "Compagnie du Cambodge",
+      "kurs": 110,
       "cur": "EUR",
-      "wert": 11.49,
-      "stichtag": "2026-09-25"
+      "wert": 4.76,
+      "stichtag": "2026-09-28"
     },
     {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 139.46,
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 225.51,
       "cur": "USD",
-      "wert": -4.58,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 777.59,
-      "cur": "USD",
-      "wert": 4.5,
-      "stichtag": "2026-09-24"
+      "wert": -4.23,
+      "stichtag": "2026-09-28"
     },
     {
       "sym": "6666.HK",
       "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.22,
+      "kurs": 1.26,
       "cur": "HKD",
-      "wert": -3.95,
-      "stichtag": "2026-09-25"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 127.39,
-      "cur": "USD",
-      "wert": 3.91,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 139.54,
-      "cur": "USD",
-      "wert": -3.47,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "BAS.DE",
-      "name": "BASF SE",
-      "kurs": 50.72,
-      "cur": "EUR",
-      "wert": -3.03,
-      "stichtag": "2026-09-25"
-    },
-    {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 90.71,
-      "cur": "USD",
-      "wert": -2.92,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "LLY",
-      "name": "Eli Lilly and Company",
-      "kurs": 1181.89,
-      "cur": "USD",
-      "wert": 2.68,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "WMT",
-      "name": "Walmart Inc.",
-      "kurs": 107.59,
-      "cur": "USD",
-      "wert": -2.66,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1539.2,
-      "cur": "EUR",
-      "wert": 2.39,
-      "stichtag": "2026-09-25"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 629.26,
-      "cur": "USD",
-      "wert": 2.38,
-      "stichtag": "2026-09-24"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 127.39,
-      "cur": "USD",
-      "wert": 17.09,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 629.26,
-      "cur": "USD",
-      "wert": 15.44,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 43.5,
-      "cur": "USD",
-      "wert": 14.62,
-      "stichtag": "2026-09-24"
+      "wert": 4.12,
+      "stichtag": "2026-09-28"
     },
     {
       "sym": "META",
       "name": "Meta Platforms, Inc.",
-      "kurs": 777.59,
+      "kurs": 723.96,
       "cur": "USD",
-      "wert": 13.96,
-      "stichtag": "2026-09-24"
+      "wert": -3.69,
+      "stichtag": "2026-09-28"
     },
     {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 90.71,
-      "cur": "USD",
-      "wert": -11.49,
-      "stichtag": "2026-09-24"
+      "sym": "SAP.DE",
+      "name": "SAP SE",
+      "kurs": 179.48,
+      "cur": "EUR",
+      "wert": -3.46,
+      "stichtag": "2026-09-28"
     },
     {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 33.32,
-      "cur": "USD",
-      "wert": 9.71,
-      "stichtag": "2026-09-24"
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 58.64,
+      "cur": "CAD",
+      "wert": -3.39,
+      "stichtag": "2026-09-28"
     },
     {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 6.36,
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 232.07,
       "cur": "USD",
-      "wert": -9.53,
-      "stichtag": "2026-09-24"
+      "wert": 3.11,
+      "stichtag": "2026-09-28"
     },
     {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 8.92,
-      "cur": "USD",
-      "wert": -8.14,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 139.54,
-      "cur": "USD",
-      "wert": -7.34,
-      "stichtag": "2026-09-24"
-    },
-    {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 35.62,
-      "cur": "USD",
-      "wert": -7.14,
-      "stichtag": "2026-09-24"
+      "sym": "EGLN.L",
+      "name": "iShares Physical Gold ETC",
+      "kurs": 70.64,
+      "cur": "EUR",
+      "wert": -3.09,
+      "stichtag": "2026-09-28"
     },
     {
       "sym": "CDW",
       "name": "CDW Corporation",
-      "kurs": 139.46,
+      "kurs": 131.38,
       "cur": "USD",
-      "wert": -7,
-      "stichtag": "2026-09-24"
+      "wert": -2.99,
+      "stichtag": "2026-09-28"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 131.38,
+      "cur": "USD",
+      "wert": -10.27,
+      "stichtag": "2026-09-28"
     },
     {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1539.2,
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 134.19,
+      "cur": "USD",
+      "wert": -9.67,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 225.51,
+      "cur": "USD",
+      "wert": -9.62,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 87.84,
+      "cur": "USD",
+      "wert": -8.95,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "BMW.DE",
+      "name": "Bayerische Motoren Werke Aktiengesellschaft",
+      "kurs": 55.96,
       "cur": "EUR",
-      "wert": 6.45,
-      "stichtag": "2026-09-25"
+      "wert": -6.95,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "ERIBR.HE",
+      "name": "Telefonaktiebolaget LM Ericsson (publ)",
+      "kurs": 8.29,
+      "cur": "EUR",
+      "wert": -6.87,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 32.15,
+      "cur": "USD",
+      "wert": -6.13,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 222.6,
+      "cur": "USD",
+      "wert": -5.85,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 6.24,
+      "cur": "USD",
+      "wert": -5.66,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.16,
+      "cur": "USD",
+      "wert": -5.66,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "CW",
+      "name": "Curtiss-Wright Corporation",
+      "kurs": 536.66,
+      "cur": "USD",
+      "wert": -5.52,
+      "stichtag": "2026-09-28"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.26,
+      "cur": "HKD",
+      "wert": 5.42,
+      "stichtag": "2026-09-28"
     }
   ]
 }
