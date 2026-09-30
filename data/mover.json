@@ -1,202 +1,202 @@
 {
-  "stand": "2026-09-28",
-  "erzeugt": "2026-09-29T12:46:48.757Z",
+  "stand": "2026-09-29",
+  "erzeugt": "2026-09-30T12:29:30.874Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 187.48,
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 152.82,
       "cur": "USD",
-      "wert": -7.17,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 116.03,
-      "cur": "USD",
-      "wert": -5.67,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 715.62,
-      "cur": "USD",
-      "wert": -4.79,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 58.18,
-      "cur": "CAD",
-      "wert": -4.15,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 130.33,
-      "cur": "USD",
-      "wert": -3.77,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 607.87,
-      "cur": "USD",
-      "wert": -3.61,
-      "stichtag": "2026-09-28"
+      "wert": 7.16,
+      "stichtag": "2026-09-29"
     },
     {
       "sym": "6666.HK",
       "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.22,
+      "kurs": 1.14,
       "cur": "HKD",
-      "wert": -3.56,
-      "stichtag": "2026-09-29"
+      "wert": -6.15,
+      "stichtag": "2026-09-30"
     },
     {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 2881.5,
-      "cur": "JPY",
-      "wert": -3.52,
-      "stichtag": "2026-09-29"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 31.66,
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.67,
       "cur": "USD",
-      "wert": -3.39,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1588.2,
-      "cur": "EUR",
-      "wert": 3.33,
+      "wert": 5.91,
       "stichtag": "2026-09-29"
     },
     {
       "sym": "ORCL",
       "name": "Oracle Corporation",
-      "kurs": 132.6,
+      "kurs": 137.79,
       "cur": "USD",
-      "wert": -3.28,
-      "stichtag": "2026-09-28"
+      "wert": 3.91,
+      "stichtag": "2026-09-29"
     },
     {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 6.19,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 45.31,
       "cur": "USD",
-      "wert": -3.28,
-      "stichtag": "2026-09-28"
+      "wert": 3.47,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 18.47,
+      "cur": "HKD",
+      "wert": 3.36,
+      "stichtag": "2026-09-30"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 738.79,
+      "cur": "USD",
+      "wert": 3.24,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 36.2,
+      "cur": "USD",
+      "wert": -3.21,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "BMW.DE",
+      "name": "Bayerische Motoren Werke Aktiengesellschaft",
+      "kurs": 56.22,
+      "cur": "EUR",
+      "wert": 3.16,
+      "stichtag": "2026-09-30"
+    },
+    {
+      "sym": "GPT.AX",
+      "name": "The GPT Group",
+      "kurs": 4.57,
+      "cur": "AUD",
+      "wert": 2.93,
+      "stichtag": "2026-09-30"
+    },
+    {
+      "sym": "AAPL",
+      "name": "Apple Inc.",
+      "kurs": 329.4,
+      "cur": "USD",
+      "wert": -2.66,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "BALD-B.ST",
+      "name": "Fastighets AB Balder (publ)",
+      "kurs": 47.02,
+      "cur": "SEK",
+      "wert": -2.39,
+      "stichtag": "2026-09-30"
     }
   ],
   "woche": [
     {
       "sym": "CDW",
       "name": "CDW Corporation",
-      "kurs": 130.33,
+      "kurs": 129.71,
       "cur": "USD",
-      "wert": -10.98,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 132.6,
-      "cur": "USD",
-      "wert": -10.74,
-      "stichtag": "2026-09-28"
+      "wert": -12.02,
+      "stichtag": "2026-09-29"
     },
     {
       "sym": "DNTH",
       "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 87.83,
+      "kurs": 87.16,
       "cur": "USD",
-      "wert": -8.96,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 31.66,
-      "cur": "USD",
-      "wert": -7.56,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "ADBE",
-      "name": "Adobe Inc.",
-      "kurs": 231.01,
-      "cur": "USD",
-      "wert": -7.42,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 6.19,
-      "cur": "USD",
-      "wert": -6.5,
-      "stichtag": "2026-09-28"
-    },
-    {
-      "sym": "BMW.DE",
-      "name": "Bayerische Motoren Werke Aktiengesellschaft",
-      "kurs": 55.8,
-      "cur": "EUR",
-      "wert": -6.34,
+      "wert": -11.38,
       "stichtag": "2026-09-29"
     },
     {
-      "sym": "CW",
-      "name": "Curtiss-Wright Corporation",
-      "kurs": 532.36,
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 36.2,
       "cur": "USD",
-      "wert": -6.28,
-      "stichtag": "2026-09-28"
+      "wert": -8.12,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 137.79,
+      "cur": "USD",
+      "wert": -7.65,
+      "stichtag": "2026-09-29"
     },
     {
       "sym": "BABA",
       "name": "Alibaba Group Holding Limited",
-      "kurs": 108.76,
+      "kurs": 107.74,
       "cur": "USD",
-      "wert": -6.04,
-      "stichtag": "2026-09-28"
+      "wert": -7.37,
+      "stichtag": "2026-09-29"
     },
     {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 9.13,
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 31.28,
       "cur": "USD",
-      "wert": -5.97,
-      "stichtag": "2026-09-28"
+      "wert": -7.32,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 184.1,
+      "cur": "USD",
+      "wert": -7.15,
+      "stichtag": "2026-09-29"
     },
     {
       "sym": "MCD",
       "name": "McDonald's Corporation",
-      "kurs": 233.6,
+      "kurs": 233.98,
       "cur": "USD",
-      "wert": -5.76,
-      "stichtag": "2026-09-28"
+      "wert": -6.54,
+      "stichtag": "2026-09-29"
     },
     {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 36.08,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 115.93,
+      "cur": "USD",
+      "wert": -6.4,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 6.14,
+      "cur": "USD",
+      "wert": -6.12,
+      "stichtag": "2026-09-29"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1604.6,
+      "cur": "EUR",
+      "wert": 5.86,
+      "stichtag": "2026-09-30"
+    },
+    {
+      "sym": "HD",
+      "name": "The Home Depot, Inc.",
+      "kurs": 288.04,
       "cur": "USD",
       "wert": -5.67,
-      "stichtag": "2026-09-28"
+      "stichtag": "2026-09-29"
     }
   ]
 }
