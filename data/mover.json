@@ -1,202 +1,202 @@
 {
-  "stand": "2026-09-30",
-  "erzeugt": "2026-10-01T13:06:39.895Z",
+  "stand": "2026-10-01",
+  "erzeugt": "2026-10-02T12:27:52.529Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.14,
-      "cur": "HKD",
-      "wert": -6.15,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 120.23,
-      "cur": "USD",
-      "wert": 3.71,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 18.47,
-      "cur": "HKD",
-      "wert": 3.36,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 46.55,
-      "cur": "EUR",
-      "wert": -2.92,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "ADBE",
-      "name": "Adobe Inc.",
-      "kurs": 239.94,
-      "cur": "USD",
-      "wert": 2.9,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 9.94,
-      "cur": "USD",
-      "wert": 2.79,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "WMT",
-      "name": "Walmart Inc.",
-      "kurs": 103.92,
-      "cur": "USD",
-      "wert": -2.7,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "MRK",
-      "name": "Merck & Co., Inc.",
-      "kurs": 145.31,
-      "cur": "USD",
-      "wert": -2.66,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "HSBA.L",
-      "name": "HSBC Holdings plc",
-      "kurs": 1458,
-      "cur": "GBp",
-      "wert": -2.64,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "CDP",
-      "name": "COPT Defense Properties",
-      "kurs": 33.4,
-      "cur": "USD",
-      "wert": -2.57,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "GPT.AX",
-      "name": "The GPT Group",
-      "kurs": 4.46,
-      "cur": "AUD",
-      "wert": -2.41,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "LLY",
-      "name": "Eli Lilly and Company",
-      "kurs": 1157.08,
-      "cur": "USD",
-      "wert": -2.33,
-      "stichtag": "2026-09-30"
-    }
-  ],
-  "woche": [
-    {
       "sym": "CDW",
       "name": "CDW Corporation",
-      "kurs": 128.16,
+      "kurs": 135.83,
       "cur": "USD",
-      "wert": -12.32,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 9.94,
-      "cur": "USD",
-      "wert": 9.23,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 35.98,
-      "cur": "USD",
-      "wert": -7.32,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "ERIBR.HE",
-      "name": "Telefonaktiebolaget LM Ericsson (publ)",
-      "kurs": 8.13,
-      "cur": "EUR",
-      "wert": 7.11,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 184.04,
-      "cur": "USD",
-      "wert": -6.69,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1598.8,
-      "cur": "EUR",
-      "wert": 6.36,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "WMT",
-      "name": "Walmart Inc.",
-      "kurs": 103.92,
-      "cur": "USD",
-      "wert": -5.98,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 88.05,
-      "cur": "USD",
-      "wert": -5.77,
-      "stichtag": "2026-09-30"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 46.55,
-      "cur": "EUR",
-      "wert": -5.73,
+      "wert": 5.98,
       "stichtag": "2026-10-01"
     },
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 31.23,
+      "kurs": 29.8,
       "cur": "USD",
-      "wert": -5.68,
-      "stichtag": "2026-09-30"
+      "wert": -4.58,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "TMO",
+      "name": "Thermo Fisher Scientific Inc.",
+      "kurs": 652.51,
+      "cur": "USD",
+      "wert": -3.34,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 236.69,
+      "cur": "USD",
+      "wert": 3.1,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "0388.HK",
+      "name": "Hong Kong Exchanges and Clearing Limited",
+      "kurs": 375.8,
+      "cur": "HKD",
+      "wert": -3.09,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "BALD-B.ST",
+      "name": "Fastighets AB Balder (publ)",
+      "kurs": 45.19,
+      "cur": "SEK",
+      "wert": -3.03,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "AIR.PA",
+      "name": "Airbus SE",
+      "kurs": 190.6,
+      "cur": "EUR",
+      "wert": 2.69,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "FRT-PC",
+      "name": "Federal Realty Investment Trust",
+      "kurs": 18.19,
+      "cur": "USD",
+      "wert": -2.57,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "0151.HK",
+      "name": "Want Want China Holdings Limited",
+      "kurs": 2.74,
+      "cur": "HKD",
+      "wert": -2.49,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 6.23,
+      "cur": "USD",
+      "wert": 2.47,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 2856.5,
+      "cur": "JPY",
+      "wert": -2.34,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "JNJ",
+      "name": "Johnson & Johnson",
+      "kurs": 258.66,
+      "cur": "USD",
+      "wert": -2.3,
+      "stichtag": "2026-10-01"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.07,
+      "cur": "USD",
+      "wert": 12.89,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 29.8,
+      "cur": "USD",
+      "wert": -10.56,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "BAYN.DE",
+      "name": "Bayer Aktiengesellschaft",
+      "kurs": 45,
+      "cur": "EUR",
+      "wert": -10.04,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.16,
+      "cur": "HKD",
+      "wert": -8.3,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1628.6,
+      "cur": "EUR",
+      "wert": 6.96,
+      "stichtag": "2026-10-02"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 725.93,
+      "cur": "USD",
+      "wert": -6.64,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 182.09,
+      "cur": "USD",
+      "wert": -6.26,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "HSBA.L",
+      "name": "HSBC Holdings plc",
+      "kurs": 1420.8,
+      "cur": "GBp",
+      "wert": -6.04,
+      "stichtag": "2026-10-02"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 155.25,
+      "kurs": 153.79,
       "cur": "USD",
-      "wert": 5.57,
-      "stichtag": "2026-09-30"
+      "wert": 5.97,
+      "stichtag": "2026-10-01"
     },
     {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 137.3,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 120,
       "cur": "USD",
-      "wert": -5.02,
-      "stichtag": "2026-09-30"
+      "wert": -5.8,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 35.99,
+      "cur": "USD",
+      "wert": -5.59,
+      "stichtag": "2026-10-01"
+    },
+    {
+      "sym": "BALD-B.ST",
+      "name": "Fastighets AB Balder (publ)",
+      "kurs": 45.19,
+      "cur": "SEK",
+      "wert": -4.92,
+      "stichtag": "2026-10-02"
     }
   ]
 }
