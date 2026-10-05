@@ -1,202 +1,202 @@
 {
-  "stand": "2026-10-01",
-  "erzeugt": "2026-10-02T12:27:52.529Z",
+  "stand": "2026-10-05",
+  "erzeugt": "2026-10-05T14:29:48.444Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 135.83,
-      "cur": "USD",
-      "wert": 5.98,
-      "stichtag": "2026-10-01"
+      "sym": "CBDG.PA",
+      "name": "Compagnie du Cambodge",
+      "kurs": 94,
+      "cur": "EUR",
+      "wert": -11.32,
+      "stichtag": "2026-10-05"
     },
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 29.8,
+      "kurs": 29.34,
       "cur": "USD",
-      "wert": -4.58,
-      "stichtag": "2026-10-01"
+      "wert": 6.44,
+      "stichtag": "2026-10-05"
     },
     {
-      "sym": "TMO",
-      "name": "Thermo Fisher Scientific Inc.",
-      "kurs": 652.51,
+      "sym": "MRK",
+      "name": "Merck & Co., Inc.",
+      "kurs": 139.06,
       "cur": "USD",
-      "wert": -3.34,
-      "stichtag": "2026-10-01"
+      "wert": -3.63,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "2005.HK",
+      "name": "SSY Group Limited",
+      "kurs": 2.7,
+      "cur": "HKD",
+      "wert": -3.22,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 108.92,
+      "cur": "USD",
+      "wert": 2.9,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 32.9,
+      "cur": "USD",
+      "wert": -2.85,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 136.99,
+      "cur": "USD",
+      "wert": 2.78,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "ABT",
+      "name": "Abbott Laboratories",
+      "kurs": 100.06,
+      "cur": "USD",
+      "wert": 2.62,
+      "stichtag": "2026-10-05"
     },
     {
       "sym": "CRM",
       "name": "Salesforce, Inc.",
-      "kurs": 236.69,
+      "kurs": 229.07,
       "cur": "USD",
-      "wert": 3.1,
-      "stichtag": "2026-10-01"
+      "wert": -2.39,
+      "stichtag": "2026-10-05"
     },
     {
-      "sym": "0388.HK",
-      "name": "Hong Kong Exchanges and Clearing Limited",
-      "kurs": 375.8,
-      "cur": "HKD",
-      "wert": -3.09,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "BALD-B.ST",
-      "name": "Fastighets AB Balder (publ)",
-      "kurs": 45.19,
-      "cur": "SEK",
-      "wert": -3.03,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "AIR.PA",
-      "name": "Airbus SE",
-      "kurs": 190.6,
-      "cur": "EUR",
-      "wert": 2.69,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "FRT-PC",
-      "name": "Federal Realty Investment Trust",
-      "kurs": 18.19,
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 145.65,
       "cur": "USD",
-      "wert": -2.57,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "0151.HK",
-      "name": "Want Want China Holdings Limited",
-      "kurs": 2.74,
-      "cur": "HKD",
-      "wert": -2.49,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 6.23,
-      "cur": "USD",
-      "wert": 2.47,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 2856.5,
-      "cur": "JPY",
-      "wert": -2.34,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "JNJ",
-      "name": "Johnson & Johnson",
-      "kurs": 258.66,
-      "cur": "USD",
-      "wert": -2.3,
-      "stichtag": "2026-10-01"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 10.07,
-      "cur": "USD",
-      "wert": 12.89,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 29.8,
-      "cur": "USD",
-      "wert": -10.56,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 45,
-      "cur": "EUR",
-      "wert": -10.04,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.16,
-      "cur": "HKD",
-      "wert": -8.3,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1628.6,
-      "cur": "EUR",
-      "wert": 6.96,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 725.93,
-      "cur": "USD",
-      "wert": -6.64,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 182.09,
-      "cur": "USD",
-      "wert": -6.26,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "HSBA.L",
-      "name": "HSBC Holdings plc",
-      "kurs": 1420.8,
-      "cur": "GBp",
-      "wert": -6.04,
-      "stichtag": "2026-10-02"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 153.79,
-      "cur": "USD",
-      "wert": 5.97,
-      "stichtag": "2026-10-01"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 120,
-      "cur": "USD",
-      "wert": -5.8,
-      "stichtag": "2026-10-01"
+      "wert": 2.35,
+      "stichtag": "2026-10-05"
     },
     {
       "sym": "CENX",
       "name": "Century Aluminum Company",
-      "kurs": 35.99,
+      "kurs": 36.44,
       "cur": "USD",
-      "wert": -5.59,
-      "stichtag": "2026-10-01"
+      "wert": 2.32,
+      "stichtag": "2026-10-05"
     },
     {
-      "sym": "BALD-B.ST",
-      "name": "Fastighets AB Balder (publ)",
-      "kurs": 45.19,
-      "cur": "SEK",
-      "wert": -4.92,
-      "stichtag": "2026-10-02"
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 743.97,
+      "cur": "USD",
+      "wert": 2.18,
+      "stichtag": "2026-10-05"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 163.75,
+      "cur": "USD",
+      "wert": 14.82,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "BAYN.DE",
+      "name": "Bayer Aktiengesellschaft",
+      "kurs": 44.03,
+      "cur": "EUR",
+      "wert": -13.33,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "CBDG.PA",
+      "name": "Compagnie du Cambodge",
+      "kurs": 94,
+      "cur": "EUR",
+      "wert": -11.32,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.04,
+      "cur": "USD",
+      "wert": 9.97,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 145.65,
+      "cur": "USD",
+      "wert": 9.84,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 32.9,
+      "cur": "USD",
+      "wert": -9.58,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 47.32,
+      "cur": "USD",
+      "wert": 8.06,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 29.34,
+      "cur": "USD",
+      "wert": -7.31,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1649.2,
+      "cur": "EUR",
+      "wert": 7.3,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "JNJ",
+      "name": "Johnson & Johnson",
+      "kurs": 253.68,
+      "cur": "USD",
+      "wert": -6.72,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "MRK",
+      "name": "Merck & Co., Inc.",
+      "kurs": 139.06,
+      "cur": "USD",
+      "wert": -6.48,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 479.17,
+      "cur": "USD",
+      "wert": 5.81,
+      "stichtag": "2026-10-05"
     }
   ]
 }
