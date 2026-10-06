@@ -1,6 +1,6 @@
 {
   "stand": "2026-10-05",
-  "erzeugt": "2026-10-05T14:29:48.444Z",
+  "erzeugt": "2026-10-06T13:15:24.905Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
@@ -15,107 +15,107 @@
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 29.34,
+      "kurs": 29.29,
       "cur": "USD",
-      "wert": 6.44,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "MRK",
-      "name": "Merck & Co., Inc.",
-      "kurs": 139.06,
-      "cur": "USD",
-      "wert": -3.63,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "2005.HK",
-      "name": "SSY Group Limited",
-      "kurs": 2.7,
-      "cur": "HKD",
-      "wert": -3.22,
+      "wert": 6.24,
       "stichtag": "2026-10-05"
     },
     {
       "sym": "BABA",
       "name": "Alibaba Group Holding Limited",
-      "kurs": 108.92,
+      "kurs": 110.8,
       "cur": "USD",
-      "wert": 2.9,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "NKE",
-      "name": "NIKE, Inc.",
-      "kurs": 32.9,
-      "cur": "USD",
-      "wert": -2.85,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 136.99,
-      "cur": "USD",
-      "wert": 2.78,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "ABT",
-      "name": "Abbott Laboratories",
-      "kurs": 100.06,
-      "cur": "USD",
-      "wert": 2.62,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "CRM",
-      "name": "Salesforce, Inc.",
-      "kurs": 229.07,
-      "cur": "USD",
-      "wert": -2.39,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 145.65,
-      "cur": "USD",
-      "wert": 2.35,
+      "wert": 4.68,
       "stichtag": "2026-10-05"
     },
     {
       "sym": "CENX",
       "name": "Century Aluminum Company",
-      "kurs": 36.44,
+      "kurs": 36.94,
       "cur": "USD",
-      "wert": 2.32,
+      "wert": 3.71,
       "stichtag": "2026-10-05"
     },
     {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 743.97,
+      "sym": "TMO",
+      "name": "Thermo Fisher Scientific Inc.",
+      "kurs": 676.76,
       "cur": "USD",
-      "wert": 2.18,
+      "wert": 3.35,
       "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "MRK",
+      "name": "Merck & Co., Inc.",
+      "kurs": 139.54,
+      "cur": "USD",
+      "wert": -3.3,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 485.8,
+      "cur": "USD",
+      "wert": 2.75,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "AZN.L",
+      "name": "AstraZeneca PLC",
+      "kurs": 12080,
+      "cur": "GBp",
+      "wert": 2.69,
+      "stichtag": "2026-10-06"
+    },
+    {
+      "sym": "ABT",
+      "name": "Abbott Laboratories",
+      "kurs": 100.1,
+      "cur": "USD",
+      "wert": 2.67,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 116.19,
+      "cur": "USD",
+      "wert": -2.63,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "V",
+      "name": "Visa Inc.",
+      "kurs": 369.71,
+      "cur": "USD",
+      "wert": 2.51,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 18.29,
+      "cur": "HKD",
+      "wert": 2.41,
+      "stichtag": "2026-10-06"
     }
   ],
   "woche": [
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 163.75,
+      "kurs": 162.05,
       "cur": "USD",
-      "wert": 14.82,
+      "wert": 13.63,
       "stichtag": "2026-10-05"
     },
     {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 44.03,
-      "cur": "EUR",
-      "wert": -13.33,
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.28,
+      "cur": "USD",
+      "wert": 12.6,
       "stichtag": "2026-10-05"
     },
     {
@@ -127,75 +127,75 @@
       "stichtag": "2026-10-05"
     },
     {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 10.04,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 47.53,
       "cur": "USD",
-      "wert": 9.97,
+      "wert": 8.54,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "BAYN.DE",
+      "name": "Bayer Aktiengesellschaft",
+      "kurs": 44.8,
+      "cur": "EUR",
+      "wert": -8.35,
+      "stichtag": "2026-10-06"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.17,
+      "cur": "HKD",
+      "wert": -7.51,
+      "stichtag": "2026-10-06"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 29.29,
+      "cur": "USD",
+      "wert": -7.49,
       "stichtag": "2026-10-05"
     },
     {
       "sym": "ORCL",
       "name": "Oracle Corporation",
-      "kurs": 145.65,
+      "kurs": 142.48,
       "cur": "USD",
-      "wert": 9.84,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "NKE",
-      "name": "NIKE, Inc.",
-      "kurs": 32.9,
-      "cur": "USD",
-      "wert": -9.58,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 47.32,
-      "cur": "USD",
-      "wert": 8.06,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 29.34,
-      "cur": "USD",
-      "wert": -7.31,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1649.2,
-      "cur": "EUR",
-      "wert": 7.3,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "JNJ",
-      "name": "Johnson & Johnson",
-      "kurs": 253.68,
-      "cur": "USD",
-      "wert": -6.72,
-      "stichtag": "2026-10-05"
-    },
-    {
-      "sym": "MRK",
-      "name": "Merck & Co., Inc.",
-      "kurs": 139.06,
-      "cur": "USD",
-      "wert": -6.48,
+      "wert": 7.45,
       "stichtag": "2026-10-05"
     },
     {
       "sym": "TSM",
       "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 479.17,
+      "kurs": 485.8,
       "cur": "USD",
-      "wert": 5.81,
+      "wert": 7.27,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "JNJ",
+      "name": "Johnson & Johnson",
+      "kurs": 252.93,
+      "cur": "USD",
+      "wert": -6.99,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 33.96,
+      "cur": "USD",
+      "wert": -6.68,
+      "stichtag": "2026-10-05"
+    },
+    {
+      "sym": "MRK",
+      "name": "Merck & Co., Inc.",
+      "kurs": 139.54,
+      "cur": "USD",
+      "wert": -6.15,
       "stichtag": "2026-10-05"
     }
   ]
