@@ -1,201 +1,201 @@
 {
-  "stand": "2026-10-07",
-  "erzeugt": "2026-10-08T13:22:32.383Z",
+  "stand": "2026-10-08",
+  "erzeugt": "2026-10-09T13:11:12.897Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "CW",
-      "name": "Curtiss-Wright Corporation",
-      "kurs": 509.1,
-      "cur": "USD",
-      "wert": -8,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 813.83,
-      "cur": "USD",
-      "wert": -5.75,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 33.55,
-      "cur": "USD",
-      "wert": -4.5,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 222.75,
-      "cur": "USD",
-      "wert": -3.82,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 55.84,
-      "cur": "CAD",
-      "wert": -3.64,
-      "stichtag": "2026-10-07"
+      "sym": "DTE.DE",
+      "name": "Deutsche Telekom AG",
+      "kurs": 24.94,
+      "cur": "EUR",
+      "wert": -7.04,
+      "stichtag": "2026-10-09"
     },
     {
       "sym": "6666.HK",
       "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.14,
+      "kurs": 1.21,
       "cur": "HKD",
-      "wert": -3.39,
+      "wert": 5.7,
+      "stichtag": "2026-10-09"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 135.69,
+      "cur": "USD",
+      "wert": -5.48,
       "stichtag": "2026-10-08"
     },
     {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5.4,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 107.08,
+      "cur": "USD",
+      "wert": -5.34,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.85,
+      "cur": "USD",
+      "wert": 5.03,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 360.14,
+      "cur": "USD",
+      "wert": -4.35,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "2005.HK",
+      "name": "SSY Group Limited",
+      "kurs": 2.66,
       "cur": "HKD",
-      "wert": -3.23,
+      "wert": -3.96,
+      "stichtag": "2026-10-09"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 620.68,
+      "cur": "USD",
+      "wert": -3.9,
       "stichtag": "2026-10-08"
     },
     {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 36.03,
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 30.44,
       "cur": "USD",
-      "wert": -3.09,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "GTES",
-      "name": "Gates Industrial Corporation Ltd.",
-      "kurs": 27.41,
-      "cur": "USD",
-      "wert": -2.97,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "CM",
-      "name": "Canadian Imperial Bank of Commerce",
-      "kurs": 108.33,
-      "cur": "USD",
-      "wert": -2.92,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "kurs": 288.98,
-      "cur": "USD",
-      "wert": -2.78,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "SHEL.L",
-      "name": "Shell plc",
-      "kurs": 3749.5,
-      "cur": "GBp",
-      "wert": 2.78,
+      "wert": -3.76,
       "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "PEP",
+      "name": "PepsiCo, Inc.",
+      "kurs": 128.34,
+      "cur": "USD",
+      "wert": 3.73,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 241.05,
+      "cur": "USD",
+      "wert": 3.56,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "0151.HK",
+      "name": "Want Want China Holdings Limited",
+      "kurs": 2.82,
+      "cur": "HKD",
+      "wert": 3.49,
+      "stichtag": "2026-10-09"
     }
   ],
   "woche": [
     {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 107.08,
+      "cur": "USD",
+      "wert": -10.77,
+      "stichtag": "2026-10-08"
+    },
+    {
       "sym": "CBDG.PA",
       "name": "Compagnie du Cambodge",
-      "kurs": 95,
+      "kurs": 96,
       "cur": "EUR",
-      "wert": -10.38,
+      "wert": -9.43,
+      "stichtag": "2026-10-09"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.85,
+      "cur": "USD",
+      "wert": 7.75,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "CW",
+      "name": "Curtiss-Wright Corporation",
+      "kurs": 507.29,
+      "cur": "USD",
+      "wert": -6.91,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 82.43,
+      "cur": "USD",
+      "wert": -6.67,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "DTE.DE",
+      "name": "Deutsche Telekom AG",
+      "kurs": 24.94,
+      "cur": "EUR",
+      "wert": -6.1,
+      "stichtag": "2026-10-09"
+    },
+    {
+      "sym": "WMT",
+      "name": "Walmart Inc.",
+      "kurs": 110.56,
+      "cur": "USD",
+      "wert": 6.04,
+      "stichtag": "2026-10-08"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 189.1,
+      "cur": "USD",
+      "wert": 5.81,
       "stichtag": "2026-10-08"
     },
     {
       "sym": "CSCO",
       "name": "Cisco Systems, Inc.",
-      "kurs": 117.39,
+      "kurs": 114.89,
       "cur": "USD",
-      "wert": 9.07,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 376.51,
-      "cur": "USD",
-      "wert": 7.21,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 136.82,
-      "cur": "USD",
-      "wert": 6.76,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 33.55,
-      "cur": "USD",
-      "wert": -6.52,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "CW",
-      "name": "Curtiss-Wright Corporation",
-      "kurs": 509.1,
-      "cur": "USD",
-      "wert": -6.38,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 113.12,
-      "cur": "USD",
-      "wert": -5.91,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 189.28,
-      "cur": "USD",
-      "wert": 5.88,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 645.86,
-      "cur": "USD",
-      "wert": 5.57,
-      "stichtag": "2026-10-07"
-    },
-    {
-      "sym": "CE.MI",
-      "name": "Credito Emiliano S.p.A.",
-      "kurs": 19.81,
-      "cur": "EUR",
-      "wert": -5.12,
+      "wert": 5.64,
       "stichtag": "2026-10-08"
     },
     {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 6.27,
-      "cur": "HKD",
-      "wert": 4.94,
+      "sym": "SHEL.L",
+      "name": "Shell plc",
+      "kurs": 3781,
+      "cur": "GBp",
+      "wert": 5.13,
+      "stichtag": "2026-10-09"
+    },
+    {
+      "sym": "BNTX",
+      "name": "BioNTech SE",
+      "kurs": 92.06,
+      "cur": "USD",
+      "wert": -4.95,
       "stichtag": "2026-10-08"
     },
     {
-      "sym": "BAS.DE",
-      "name": "BASF SE",
-      "kurs": 51.82,
-      "cur": "EUR",
-      "wert": 4.9,
+      "sym": "ABBV",
+      "name": "AbbVie Inc.",
+      "kurs": 272.42,
+      "cur": "USD",
+      "wert": 4.81,
       "stichtag": "2026-10-08"
     }
   ]
