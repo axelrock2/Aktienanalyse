@@ -1,202 +1,202 @@
 {
-  "stand": "2026-10-19",
-  "erzeugt": "2026-10-20T11:30:21.127Z",
+  "stand": "2026-10-20",
+  "erzeugt": "2026-10-21T11:42:19.986Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "AMZN",
-      "name": "Amazon.com, Inc.",
-      "kurs": 262.45,
-      "cur": "USD",
-      "wert": 4.98,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "SIE.DE",
-      "name": "Siemens Aktiengesellschaft",
-      "kurs": 256.7,
-      "cur": "EUR",
-      "wert": -3.57,
-      "stichtag": "2026-10-20"
-    },
-    {
       "sym": "DNTH",
       "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 74.54,
+      "kurs": 78.75,
       "cur": "USD",
-      "wert": 3.4,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 40.8,
-      "cur": "USD",
-      "wert": 3.21,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5.21,
-      "cur": "HKD",
-      "wert": 2.96,
+      "wert": 5.65,
       "stichtag": "2026-10-20"
     },
     {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 31.63,
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 256.73,
       "cur": "USD",
-      "wert": -2.89,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1453.4,
-      "cur": "EUR",
-      "wert": -2.85,
+      "wert": 3.9,
       "stichtag": "2026-10-20"
     },
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 22.47,
+      "kurs": 23.33,
       "cur": "USD",
-      "wert": -2.64,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 6.7,
-      "cur": "USD",
-      "wert": -2.47,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 92.03,
-      "cur": "USD",
-      "wert": 2.43,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "2005.HK",
-      "name": "SSY Group Limited",
-      "kurs": 2.68,
-      "cur": "HKD",
-      "wert": -2.36,
+      "wert": 3.83,
       "stichtag": "2026-10-20"
     },
     {
-      "sym": "BIP-PA",
-      "name": "Brookfield Infrastructure Partners L.P.",
-      "kurs": 16,
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 211.63,
       "cur": "USD",
-      "wert": 2.04,
-      "stichtag": "2026-10-19"
+      "wert": -3.82,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "GE",
+      "name": "GE Aerospace",
+      "kurs": 299.87,
+      "cur": "USD",
+      "wert": -3.67,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "LLY",
+      "name": "Eli Lilly and Company",
+      "kurs": 1283.66,
+      "cur": "USD",
+      "wert": 3.49,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "MRK",
+      "name": "Merck & Co., Inc.",
+      "kurs": 148.3,
+      "cur": "USD",
+      "wert": 3.25,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "UNH",
+      "name": "UnitedHealth Group Incorporated",
+      "kurs": 419.26,
+      "cur": "USD",
+      "wert": 3.04,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 33.5,
+      "cur": "USD",
+      "wert": -2.5,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "0151.HK",
+      "name": "Want Want China Holdings Limited",
+      "kurs": 2.83,
+      "cur": "HKD",
+      "wert": -2.41,
+      "stichtag": "2026-10-21"
+    },
+    {
+      "sym": "PFE",
+      "name": "Pfizer Inc.",
+      "kurs": 30.11,
+      "cur": "USD",
+      "wert": 2.28,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "ABBV",
+      "name": "AbbVie Inc.",
+      "kurs": 289.08,
+      "cur": "USD",
+      "wert": 2.26,
+      "stichtag": "2026-10-20"
     }
   ],
   "woche": [
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 22.47,
+      "kurs": 23.33,
       "cur": "USD",
-      "wert": -26.06,
-      "stichtag": "2026-10-19"
+      "wert": -21.18,
+      "stichtag": "2026-10-20"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 40.8,
+      "kurs": 40.77,
       "cur": "USD",
-      "wert": -14.16,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 128.94,
-      "cur": "USD",
-      "wert": -12.66,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 171.5,
-      "cur": "USD",
-      "wert": -11.11,
-      "stichtag": "2026-10-19"
+      "wert": -14.35,
+      "stichtag": "2026-10-20"
     },
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 538.05,
+      "kurs": 534.74,
       "cur": "USD",
-      "wert": -9.46,
-      "stichtag": "2026-10-19"
+      "wert": -11.69,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "UNH",
+      "name": "UnitedHealth Group Incorporated",
+      "kurs": 419.26,
+      "cur": "USD",
+      "wert": 10.99,
+      "stichtag": "2026-10-20"
     },
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 92.03,
+      "kurs": 91.69,
       "cur": "USD",
-      "wert": -9.2,
-      "stichtag": "2026-10-19"
+      "wert": -10.82,
+      "stichtag": "2026-10-20"
     },
     {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 725.79,
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 127.9,
       "cur": "USD",
-      "wert": -9.2,
-      "stichtag": "2026-10-19"
+      "wert": -10.42,
+      "stichtag": "2026-10-20"
     },
     {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 74.54,
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 170.93,
       "cur": "USD",
-      "wert": -8.62,
-      "stichtag": "2026-10-19"
+      "wert": -10.4,
+      "stichtag": "2026-10-20"
     },
     {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 9.98,
+      "sym": "LLY",
+      "name": "Eli Lilly and Company",
+      "kurs": 1283.66,
       "cur": "USD",
-      "wert": -8.61,
-      "stichtag": "2026-10-19"
+      "wert": 10.04,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 694.25,
+      "cur": "USD",
+      "wert": -8.95,
+      "stichtag": "2026-10-20"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 256.73,
+      "cur": "USD",
+      "wert": 8.65,
+      "stichtag": "2026-10-20"
     },
     {
       "sym": "ERIBR.HE",
       "name": "Telefonaktiebolaget LM Ericsson (publ)",
-      "kurs": 9.24,
+      "kurs": 9.38,
       "cur": "EUR",
-      "wert": 8.45,
+      "wert": 8.47,
+      "stichtag": "2026-10-21"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 131.14,
+      "cur": "USD",
+      "wert": -8.42,
       "stichtag": "2026-10-20"
-    },
-    {
-      "sym": "BAC",
-      "name": "Bank of America Corporation",
-      "kurs": 50.39,
-      "cur": "USD",
-      "wert": -7.68,
-      "stichtag": "2026-10-19"
-    },
-    {
-      "sym": "CSCO",
-      "name": "Cisco Systems, Inc.",
-      "kurs": 106.5,
-      "cur": "USD",
-      "wert": -7.66,
-      "stichtag": "2026-10-19"
     }
   ]
 }
