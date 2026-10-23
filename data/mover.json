@@ -1,103 +1,103 @@
 {
-  "stand": "2026-10-21",
-  "erzeugt": "2026-10-22T11:45:28.155Z",
+  "stand": "2026-10-22",
+  "erzeugt": "2026-10-23T11:32:33.623Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.15,
-      "cur": "HKD",
-      "wert": -4.55,
-      "stichtag": "2026-10-22"
-    },
-    {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 6.07,
-      "cur": "HKD",
-      "wert": -4.11,
-      "stichtag": "2026-10-22"
-    },
-    {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 16.27,
-      "cur": "HKD",
-      "wert": -4.07,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 37.74,
+      "cur": "USD",
+      "wert": -11.01,
       "stichtag": "2026-10-22"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 133.09,
+      "kurs": 119.48,
       "cur": "USD",
-      "wert": 4.06,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 42.41,
-      "cur": "USD",
-      "wert": 4.02,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "BABA",
-      "name": "Alibaba Group Holding Limited",
-      "kurs": 104.41,
-      "cur": "USD",
-      "wert": -3.87,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.93,
-      "cur": "HKD",
-      "wert": -3.71,
+      "wert": -10.23,
       "stichtag": "2026-10-22"
-    },
-    {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 10.53,
-      "cur": "USD",
-      "wert": 3.54,
-      "stichtag": "2026-10-21"
     },
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 552.72,
+      "kurs": 507.93,
       "cur": "USD",
-      "wert": 3.36,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 34.52,
-      "cur": "USD",
-      "wert": 3.04,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1453.4,
-      "cur": "EUR",
-      "wert": -2.7,
+      "wert": -8.1,
       "stichtag": "2026-10-22"
     },
     {
-      "sym": "2005.HK",
-      "name": "SSY Group Limited",
-      "kurs": 2.58,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 85.49,
+      "cur": "USD",
+      "wert": -8.04,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.07,
       "cur": "HKD",
-      "wert": -2.64,
+      "wert": -7.79,
+      "stichtag": "2026-10-23"
+    },
+    {
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 193.29,
+      "cur": "USD",
+      "wert": -7.14,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 648.85,
+      "cur": "USD",
+      "wert": -6.98,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 270.55,
+      "cur": "USD",
+      "wert": 6.07,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 22.14,
+      "cur": "USD",
+      "wert": -6.07,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "GTES",
+      "name": "Gates Industrial Corporation Ltd.",
+      "kurs": 25.1,
+      "cur": "USD",
+      "wert": -6.03,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "PG",
+      "name": "The Procter & Gamble Company",
+      "kurs": 165.59,
+      "cur": "USD",
+      "wert": 5.58,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 54.08,
+      "cur": "CAD",
+      "wert": -5.49,
       "stichtag": "2026-10-22"
     }
   ],
@@ -105,98 +105,98 @@
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 23.57,
+      "kurs": 22.14,
       "cur": "USD",
-      "wert": -8.86,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.93,
-      "cur": "HKD",
-      "wert": -6.36,
+      "wert": -12.56,
       "stichtag": "2026-10-22"
     },
     {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 6.07,
-      "cur": "HKD",
-      "wert": -6.33,
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 193.29,
+      "cur": "USD",
+      "wert": -12.02,
       "stichtag": "2026-10-22"
     },
     {
-      "sym": "NKE",
-      "name": "NIKE, Inc.",
-      "kurs": 37.53,
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 648.85,
       "cur": "USD",
-      "wert": 6.32,
-      "stichtag": "2026-10-21"
+      "wert": -11.93,
+      "stichtag": "2026-10-22"
     },
     {
-      "sym": "HD",
-      "name": "The Home Depot, Inc.",
-      "kurs": 314.14,
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.07,
+      "cur": "HKD",
+      "wert": -11.62,
+      "stichtag": "2026-10-23"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 85.49,
       "cur": "USD",
-      "wert": 6.3,
-      "stichtag": "2026-10-21"
+      "wert": -10.36,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 37.74,
+      "cur": "USD",
+      "wert": -9.91,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 507.93,
+      "cur": "USD",
+      "wert": -9.66,
+      "stichtag": "2026-10-22"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 119.48,
+      "cur": "USD",
+      "wert": -9.06,
+      "stichtag": "2026-10-22"
     },
     {
       "sym": "BABA",
       "name": "Alibaba Group Holding Limited",
-      "kurs": 104.41,
+      "kurs": 101.82,
       "cur": "USD",
-      "wert": -6.08,
-      "stichtag": "2026-10-21"
+      "wert": -8.38,
+      "stichtag": "2026-10-22"
     },
     {
-      "sym": "2005.HK",
-      "name": "SSY Group Limited",
-      "kurs": 2.58,
-      "cur": "HKD",
-      "wert": -6.01,
+      "sym": "PEP",
+      "name": "PepsiCo, Inc.",
+      "kurs": 138.83,
+      "cur": "USD",
+      "wert": 8.14,
       "stichtag": "2026-10-22"
     },
     {
       "sym": "ADBE",
       "name": "Adobe Inc.",
-      "kurs": 255.06,
+      "kurs": 270.55,
       "cur": "USD",
-      "wert": 5.97,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "CSCO",
-      "name": "Cisco Systems, Inc.",
-      "kurs": 107.26,
-      "cur": "USD",
-      "wert": -5.61,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "2196.HK",
-      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
-      "kurs": 16.27,
-      "cur": "HKD",
-      "wert": -5.52,
+      "wert": 7.5,
       "stichtag": "2026-10-22"
     },
     {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 158.28,
+      "sym": "GOOGL",
+      "name": "Alphabet Inc.",
+      "kurs": 324.22,
       "cur": "USD",
-      "wert": 5.45,
-      "stichtag": "2026-10-21"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 697.52,
-      "cur": "USD",
-      "wert": -5.43,
-      "stichtag": "2026-10-21"
+      "wert": -7.16,
+      "stichtag": "2026-10-22"
     }
   ]
 }
