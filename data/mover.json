@@ -1,201 +1,201 @@
 {
-  "stand": "2026-10-23",
-  "erzeugt": "2026-10-26T12:53:14.835Z",
+  "stand": "2026-10-26",
+  "erzeugt": "2026-10-27T12:05:01.365Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.2,
-      "cur": "HKD",
-      "wert": 12.21,
-      "stichtag": "2026-10-26"
+      "sym": "HSBA.L",
+      "name": "HSBC Holdings plc",
+      "kurs": 1273.4,
+      "cur": "GBp",
+      "wert": -6.74,
+      "stichtag": "2026-10-27"
     },
     {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 179.99,
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 298.12,
       "cur": "USD",
-      "wert": 4.05,
-      "stichtag": "2026-10-23"
+      "wert": 4.72,
+      "stichtag": "2026-10-26"
     },
     {
       "sym": "HWM",
       "name": "Howmet Aerospace Inc.",
-      "kurs": 185.91,
+      "kurs": 194.36,
       "cur": "USD",
-      "wert": -3.82,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 31.42,
-      "cur": "USD",
-      "wert": -3.77,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "CHD",
-      "name": "Church & Dwight Co., Inc.",
-      "kurs": 105.19,
-      "cur": "USD",
-      "wert": -3.37,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 45.45,
-      "cur": "EUR",
-      "wert": 3.34,
+      "wert": 4.55,
       "stichtag": "2026-10-26"
     },
     {
-      "sym": "CE.MI",
-      "name": "Credito Emiliano S.p.A.",
-      "kurs": 19.81,
-      "cur": "EUR",
-      "wert": 3.34,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 90.47,
+      "cur": "USD",
+      "wert": 4.04,
       "stichtag": "2026-10-26"
     },
     {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.88,
+      "sym": "MBG.DE",
+      "name": "Mercedes-Benz Group AG",
+      "kurs": 39.9,
+      "cur": "EUR",
+      "wert": -3.54,
+      "stichtag": "2026-10-27"
+    },
+    {
+      "sym": "CSCO",
+      "name": "Cisco Systems, Inc.",
+      "kurs": 110.24,
+      "cur": "USD",
+      "wert": 3.51,
+      "stichtag": "2026-10-26"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.15,
       "cur": "HKD",
-      "wert": -3.08,
+      "wert": -3.35,
+      "stichtag": "2026-10-27"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 79.33,
+      "cur": "USD",
+      "wert": 3.32,
       "stichtag": "2026-10-26"
     },
     {
-      "sym": "CVX",
-      "name": "Chevron Corporation",
-      "kurs": 233.21,
+      "sym": "MRK",
+      "name": "Merck & Co., Inc.",
+      "kurs": 140.61,
       "cur": "USD",
-      "wert": 2.88,
-      "stichtag": "2026-10-23"
+      "wert": -3.21,
+      "stichtag": "2026-10-26"
     },
     {
-      "sym": "XOM",
-      "name": "ExxonMobil Holdings Corporation",
-      "kurs": 183.21,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 39.91,
       "cur": "USD",
-      "wert": 2.79,
-      "stichtag": "2026-10-23"
+      "wert": 3.15,
+      "stichtag": "2026-10-26"
     },
     {
-      "sym": "PG",
-      "name": "The Procter & Gamble Company",
-      "kurs": 161.02,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 531.28,
       "cur": "USD",
-      "wert": -2.76,
-      "stichtag": "2026-10-23"
+      "wert": 2.8,
+      "stichtag": "2026-10-26"
     },
     {
-      "sym": "KO",
-      "name": "The Coca-Cola Company",
-      "kurs": 92.71,
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.77,
       "cur": "USD",
-      "wert": -2.76,
-      "stichtag": "2026-10-23"
+      "wert": 2.57,
+      "stichtag": "2026-10-26"
     }
   ],
   "woche": [
     {
       "sym": "HWM",
       "name": "Howmet Aerospace Inc.",
-      "kurs": 185.91,
+      "kurs": 194.36,
       "cur": "USD",
-      "wert": -15.86,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 31.42,
-      "cur": "USD",
-      "wert": -10.31,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 165.11,
-      "cur": "USD",
-      "wert": 9.72,
-      "stichtag": "2026-10-23"
+      "wert": -11.67,
+      "stichtag": "2026-10-26"
     },
     {
       "sym": "META",
       "name": "Meta Platforms, Inc.",
-      "kurs": 642.62,
+      "kurs": 630.56,
       "cur": "USD",
-      "wert": -9.4,
-      "stichtag": "2026-10-23"
+      "wert": -10.61,
+      "stichtag": "2026-10-26"
+    },
+    {
+      "sym": "HSBA.L",
+      "name": "HSBC Holdings plc",
+      "kurs": 1273.4,
+      "cur": "GBp",
+      "wert": -8.07,
+      "stichtag": "2026-10-27"
+    },
+    {
+      "sym": "GOOGL",
+      "name": "Alphabet Inc.",
+      "kurs": 316.8,
+      "cur": "USD",
+      "wert": -7.96,
+      "stichtag": "2026-10-26"
+    },
+    {
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 298.12,
+      "cur": "USD",
+      "wert": 7.96,
+      "stichtag": "2026-10-26"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.77,
+      "cur": "USD",
+      "wert": 7.92,
+      "stichtag": "2026-10-26"
+    },
+    {
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 100.25,
+      "cur": "USD",
+      "wert": -7.66,
+      "stichtag": "2026-10-26"
+    },
+    {
+      "sym": "1199.HK",
+      "name": "COSCO SHIPPING Ports Limited",
+      "kurs": 5.91,
+      "cur": "HKD",
+      "wert": -7.52,
+      "stichtag": "2026-10-27"
     },
     {
       "sym": "OR.PA",
       "name": "L'Oréal S.A.",
-      "kurs": 440.67,
+      "kurs": 434.1,
       "cur": "EUR",
-      "wert": 9.19,
+      "wert": 7.46,
+      "stichtag": "2026-10-27"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 31.8,
+      "cur": "USD",
+      "wert": -7.45,
       "stichtag": "2026-10-26"
     },
     {
       "sym": "GE",
       "name": "GE Aerospace",
-      "kurs": 285.64,
+      "kurs": 288.43,
       "cur": "USD",
-      "wert": -8.98,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "BABA",
-      "name": "Alibaba Group Holding Limited",
-      "kurs": 99.64,
-      "cur": "USD",
-      "wert": -8.68,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "ADBE",
-      "name": "Adobe Inc.",
-      "kurs": 263.82,
-      "cur": "USD",
-      "wert": 7.59,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 53.36,
-      "cur": "CAD",
-      "wert": -7.59,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "CW",
-      "name": "Curtiss-Wright Corporation",
-      "kurs": 464.94,
-      "cur": "USD",
-      "wert": -7.44,
-      "stichtag": "2026-10-23"
-    },
-    {
-      "sym": "SAP.DE",
-      "name": "SAP SE",
-      "kurs": 214.1,
-      "cur": "EUR",
-      "wert": 7.14,
+      "wert": -7.34,
       "stichtag": "2026-10-26"
     },
     {
-      "sym": "BALD-B.ST",
-      "name": "Fastighets AB Balder (publ)",
-      "kurs": 47.97,
-      "cur": "SEK",
-      "wert": 6.6,
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 163.23,
+      "cur": "USD",
+      "wert": 6.93,
       "stichtag": "2026-10-26"
     }
   ]
