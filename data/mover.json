@@ -1,202 +1,202 @@
 {
-  "stand": "2026-10-28",
-  "erzeugt": "2026-10-29T12:54:39.518Z",
+  "stand": "2026-10-29",
+  "erzeugt": "2026-10-30T12:47:36.262Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 144.54,
-      "cur": "USD",
-      "wert": 10.73,
-      "stichtag": "2026-10-28"
-    },
-    {
       "sym": "ADT",
       "name": "ADT Inc.",
-      "kurs": 7.41,
+      "kurs": 9.87,
       "cur": "USD",
-      "wert": 7.86,
-      "stichtag": "2026-10-28"
+      "wert": 33.2,
+      "stichtag": "2026-10-29"
     },
     {
       "sym": "FTNT",
       "name": "Fortinet, Inc.",
-      "kurs": 174.08,
+      "kurs": 139.1,
       "cur": "USD",
-      "wert": -5.9,
-      "stichtag": "2026-10-28"
+      "wert": -20.09,
+      "stichtag": "2026-10-29"
     },
     {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 35.1,
-      "cur": "USD",
-      "wert": 5.22,
-      "stichtag": "2026-10-28"
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 0.98,
+      "cur": "HKD",
+      "wert": -17.72,
+      "stichtag": "2026-10-30"
     },
     {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 23.86,
+      "sym": "GOOGL",
+      "name": "Alphabet Inc.",
+      "kurs": 283.82,
       "cur": "USD",
-      "wert": 4.6,
-      "stichtag": "2026-10-28"
+      "wert": -12.64,
+      "stichtag": "2026-10-29"
     },
     {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 43.92,
+      "sym": "EPAC",
+      "name": "Enerpac Tool Group Corp.",
+      "kurs": 39.42,
       "cur": "USD",
-      "wert": 4.42,
-      "stichtag": "2026-10-28"
+      "wert": 10.42,
+      "stichtag": "2026-10-29"
     },
     {
-      "sym": "DB",
-      "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 33.51,
+      "sym": "CAT",
+      "name": "Caterpillar Inc.",
+      "kurs": 647.39,
       "cur": "USD",
-      "wert": 4.33,
-      "stichtag": "2026-10-28"
+      "wert": -9.25,
+      "stichtag": "2026-10-29"
     },
     {
-      "sym": "SHEL.L",
-      "name": "Shell plc",
-      "kurs": 4101.48,
+      "sym": "1199.HK",
+      "name": "COSCO SHIPPING Ports Limited",
+      "kurs": 6.3,
+      "cur": "HKD",
+      "wert": 7.42,
+      "stichtag": "2026-10-30"
+    },
+    {
+      "sym": "LLY",
+      "name": "Eli Lilly and Company",
+      "kurs": 1373.7,
+      "cur": "USD",
+      "wert": 6.63,
+      "stichtag": "2026-10-29"
+    },
+    {
+      "sym": "AZN.L",
+      "name": "AstraZeneca PLC",
+      "kurs": 13820,
       "cur": "GBp",
-      "wert": 3.66,
-      "stichtag": "2026-10-29"
+      "wert": 5.88,
+      "stichtag": "2026-10-30"
     },
     {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 82.31,
-      "cur": "USD",
-      "wert": 3.51,
-      "stichtag": "2026-10-28"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 578.44,
-      "cur": "USD",
-      "wert": 3.24,
-      "stichtag": "2026-10-28"
-    },
-    {
-      "sym": "NOVN.SW",
-      "name": "Novartis AG",
-      "kurs": 133.32,
-      "cur": "CHF",
-      "wert": 3.17,
-      "stichtag": "2026-10-29"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 351.81,
-      "cur": "USD",
-      "wert": 2.77,
-      "stichtag": "2026-10-28"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 612.49,
-      "cur": "USD",
-      "wert": -12.19,
-      "stichtag": "2026-10-28"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 144.54,
-      "cur": "USD",
-      "wert": 11.93,
-      "stichtag": "2026-10-28"
-    },
-    {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 7.41,
-      "cur": "USD",
-      "wert": 8.97,
-      "stichtag": "2026-10-28"
-    },
-    {
-      "sym": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "kurs": 309.83,
-      "cur": "USD",
-      "wert": 8.85,
-      "stichtag": "2026-10-28"
-    },
-    {
-      "sym": "ERIBR.HE",
-      "name": "Telefonaktiebolaget LM Ericsson (publ)",
-      "kurs": 9.9,
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1420.6,
       "cur": "EUR",
-      "wert": 8.03,
-      "stichtag": "2026-10-29"
-    },
-    {
-      "sym": "SIE.DE",
-      "name": "Siemens Aktiengesellschaft",
-      "kurs": 271.8,
-      "cur": "EUR",
-      "wert": 6.3,
-      "stichtag": "2026-10-29"
+      "wert": -5.6,
+      "stichtag": "2026-10-30"
     },
     {
       "sym": "HWM",
       "name": "Howmet Aerospace Inc.",
-      "kurs": 195.19,
+      "kurs": 205.94,
       "cur": "USD",
-      "wert": -6.23,
-      "stichtag": "2026-10-28"
+      "wert": 5.51,
+      "stichtag": "2026-10-29"
     },
     {
-      "sym": "MRK",
-      "name": "Merck & Co., Inc.",
-      "kurs": 140.93,
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 230.9,
       "cur": "USD",
-      "wert": -5.97,
-      "stichtag": "2026-10-28"
+      "wert": -4.63,
+      "stichtag": "2026-10-29"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "ADT",
+      "name": "ADT Inc.",
+      "kurs": 9.87,
+      "cur": "USD",
+      "wert": 41.2,
+      "stichtag": "2026-10-29"
+    },
+    {
+      "sym": "FTNT",
+      "name": "Fortinet, Inc.",
+      "kurs": 139.1,
+      "cur": "USD",
+      "wert": -19.59,
+      "stichtag": "2026-10-29"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 44.55,
+      "cur": "USD",
+      "wert": 18.04,
+      "stichtag": "2026-10-29"
     },
     {
       "sym": "BAYN.DE",
       "name": "Bayer Aktiengesellschaft",
-      "kurs": 46.82,
+      "kurs": 49.71,
       "cur": "EUR",
-      "wert": 5.9,
+      "wert": 13.03,
+      "stichtag": "2026-10-30"
+    },
+    {
+      "sym": "GOOGL",
+      "name": "Alphabet Inc.",
+      "kurs": 283.82,
+      "cur": "USD",
+      "wert": -12.46,
       "stichtag": "2026-10-29"
     },
     {
-      "sym": "SHEL.L",
-      "name": "Shell plc",
-      "kurs": 4101.48,
-      "cur": "GBp",
-      "wert": 5.48,
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 312.94,
+      "cur": "USD",
+      "wert": 11.96,
       "stichtag": "2026-10-29"
     },
     {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 82.31,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 566.42,
       "cur": "USD",
-      "wert": 5.39,
-      "stichtag": "2026-10-28"
+      "wert": 11.52,
+      "stichtag": "2026-10-29"
     },
     {
-      "sym": "JNJ",
-      "name": "Johnson & Johnson",
-      "kurs": 271.04,
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 139.56,
       "cur": "USD",
-      "wert": 5.14,
-      "stichtag": "2026-10-28"
+      "wert": 11.17,
+      "stichtag": "2026-10-29"
+    },
+    {
+      "sym": "DB",
+      "name": "Deutsche Bank Aktiengesellschaft",
+      "kurs": 34.86,
+      "cur": "USD",
+      "wert": 10.74,
+      "stichtag": "2026-10-29"
+    },
+    {
+      "sym": "EPAC",
+      "name": "Enerpac Tool Group Corp.",
+      "kurs": 39.42,
+      "cur": "USD",
+      "wert": 10.64,
+      "stichtag": "2026-10-29"
+    },
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 0.98,
+      "cur": "HKD",
+      "wert": -8.45,
+      "stichtag": "2026-10-30"
+    },
+    {
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 248.12,
+      "cur": "USD",
+      "wert": -8.29,
+      "stichtag": "2026-10-29"
     }
   ]
 }
