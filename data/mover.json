@@ -1,103 +1,103 @@
 {
   "stand": "2026-11-02",
-  "erzeugt": "2026-11-02T15:41:16.893Z",
+  "erzeugt": "2026-11-03T14:04:48.912Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 213.54,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 59.97,
       "cur": "USD",
-      "wert": 7.19,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "EPAC",
-      "name": "Enerpac Tool Group Corp.",
-      "kurs": 42.96,
-      "cur": "USD",
-      "wert": 5.92,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 0.92,
-      "cur": "HKD",
-      "wert": -5.64,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "BABA",
-      "name": "Alibaba Group Holding Limited",
-      "kurs": 103.53,
-      "cur": "USD",
-      "wert": 5.6,
+      "wert": -8.8,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "ORCL",
       "name": "Oracle Corporation",
-      "kurs": 123.55,
+      "kurs": 119.22,
       "cur": "USD",
-      "wert": -5.45,
+      "wert": -8.76,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "AMZN",
-      "name": "Amazon.com, Inc.",
-      "kurs": 252.96,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 466.84,
       "cur": "USD",
-      "wert": 5.24,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "GE",
-      "name": "GE Aerospace",
-      "kurs": 315.14,
-      "cur": "USD",
-      "wert": 4.42,
+      "wert": -7.52,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "FTNT",
       "name": "Fortinet, Inc.",
-      "kurs": 130.46,
+      "kurs": 126.21,
       "cur": "USD",
-      "wert": -4.13,
+      "wert": -7.25,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 35.07,
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 108.25,
       "cur": "USD",
-      "wert": 4.07,
+      "wert": -7.22,
+      "stichtag": "2026-11-02"
+    },
+    {
+      "sym": "EPAC",
+      "name": "Enerpac Tool Group Corp.",
+      "kurs": 43.45,
+      "cur": "USD",
+      "wert": 7.13,
+      "stichtag": "2026-11-02"
+    },
+    {
+      "sym": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "kurs": 212.99,
+      "cur": "USD",
+      "wert": 6.91,
+      "stichtag": "2026-11-02"
+    },
+    {
+      "sym": "BAYN.DE",
+      "name": "Bayer Aktiengesellschaft",
+      "kurs": 53.2,
+      "cur": "EUR",
+      "wert": 6.36,
+      "stichtag": "2026-11-03"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 10.19,
+      "cur": "USD",
+      "wert": -6.26,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "AX",
       "name": "Axos Financial, Inc.",
-      "kurs": 93.95,
+      "kurs": 94.71,
       "cur": "USD",
-      "wert": 3.94,
+      "wert": 4.79,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 10.44,
+      "sym": "GE",
+      "name": "GE Aerospace",
+      "kurs": 315.78,
       "cur": "USD",
-      "wert": -3.91,
+      "wert": 4.63,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 40.98,
+      "sym": "XOM",
+      "name": "ExxonMobil Holdings Corporation",
+      "kurs": 179.67,
       "cur": "USD",
-      "wert": 3.74,
+      "wert": -4.05,
       "stichtag": "2026-11-02"
     }
   ],
@@ -105,97 +105,97 @@
     {
       "sym": "ADT",
       "name": "ADT Inc.",
-      "kurs": 9.88,
+      "kurs": 9.83,
       "cur": "USD",
-      "wert": 43.53,
+      "wert": 42.88,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 63.81,
+      "kurs": 59.97,
       "cur": "USD",
-      "wert": -29.47,
+      "wert": -33.71,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "FTNT",
       "name": "Fortinet, Inc.",
-      "kurs": 130.46,
+      "kurs": 126.21,
       "cur": "USD",
-      "wert": -28.84,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 0.92,
-      "cur": "HKD",
-      "wert": -23.01,
+      "wert": -31.16,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "EPAC",
       "name": "Enerpac Tool Group Corp.",
-      "kurs": 42.96,
+      "kurs": 43.45,
       "cur": "USD",
-      "wert": 21.73,
+      "wert": 23.12,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 35.07,
-      "cur": "USD",
-      "wert": 10.28,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "LLY",
-      "name": "Eli Lilly and Company",
-      "kurs": 1408.5,
-      "cur": "USD",
-      "wert": 10.11,
-      "stichtag": "2026-11-02"
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 0.94,
+      "cur": "HKD",
+      "wert": -19.05,
+      "stichtag": "2026-11-03"
     },
     {
       "sym": "BAYN.DE",
       "name": "Bayer Aktiengesellschaft",
-      "kurs": 50.12,
+      "kurs": 53.2,
       "cur": "EUR",
-      "wert": 10.01,
+      "wert": 15.28,
+      "stichtag": "2026-11-03"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 108.25,
+      "cur": "USD",
+      "wert": -12.21,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 623.46,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 466.84,
       "cur": "USD",
-      "wert": -9.92,
-      "stichtag": "2026-11-02"
-    },
-    {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 213.54,
-      "cur": "USD",
-      "wert": 9.87,
+      "wert": -12.13,
       "stichtag": "2026-11-02"
     },
     {
       "sym": "GOOGL",
       "name": "Alphabet Inc.",
-      "kurs": 285.64,
+      "kurs": 278.99,
       "cur": "USD",
-      "wert": -9.84,
+      "wert": -11.93,
       "stichtag": "2026-11-02"
     },
     {
-      "sym": "GE",
-      "name": "GE Aerospace",
-      "kurs": 315.14,
+      "sym": "CAT",
+      "name": "Caterpillar Inc.",
+      "kurs": 613.62,
       "cur": "USD",
-      "wert": 9.26,
+      "wert": -11.34,
+      "stichtag": "2026-11-02"
+    },
+    {
+      "sym": "LLY",
+      "name": "Eli Lilly and Company",
+      "kurs": 1410.99,
+      "cur": "USD",
+      "wert": 10.31,
+      "stichtag": "2026-11-02"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 162.08,
+      "cur": "USD",
+      "wert": -9.76,
       "stichtag": "2026-11-02"
     }
   ]
