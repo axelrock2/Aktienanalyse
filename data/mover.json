@@ -1,202 +1,202 @@
 {
-  "stand": "2026-11-03",
-  "erzeugt": "2026-11-04T14:25:44.472Z",
+  "stand": "2026-11-05",
+  "erzeugt": "2026-11-05T14:33:55.195Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 126.19,
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 3533,
+      "cur": "JPY",
+      "wert": 16.68,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 33.58,
       "cur": "USD",
-      "wert": 5.85,
-      "stichtag": "2026-11-03"
+      "wert": -10.48,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 223.12,
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 155.61,
       "cur": "USD",
-      "wert": 4.76,
-      "stichtag": "2026-11-03"
-    },
-    {
-      "sym": "HSBA.L",
-      "name": "HSBC Holdings plc",
-      "kurs": 1317.6,
-      "cur": "GBp",
-      "wert": 4.74,
-      "stichtag": "2026-11-04"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 54.08,
-      "cur": "EUR",
-      "wert": 4.32,
-      "stichtag": "2026-11-04"
-    },
-    {
-      "sym": "CE.MI",
-      "name": "Credito Emiliano S.p.A.",
-      "kurs": 20.44,
-      "cur": "EUR",
-      "wert": 3.91,
-      "stichtag": "2026-11-04"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 112.37,
-      "cur": "USD",
-      "wert": 3.81,
-      "stichtag": "2026-11-03"
+      "wert": -10.15,
+      "stichtag": "2026-11-05"
     },
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 483.9,
+      "kurs": 448.85,
       "cur": "USD",
-      "wert": 3.65,
-      "stichtag": "2026-11-03"
+      "wert": -8.17,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "BMED.MI",
-      "name": "Banca Mediolanum S.p.A.",
-      "kurs": 23.29,
+      "sym": "6758.T",
+      "name": "Sony Group Corporation",
+      "kurs": 4211,
+      "cur": "JPY",
+      "wert": 7.07,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "1686.HK",
+      "name": "SUNeVision Holdings Ltd.",
+      "kurs": 5,
+      "cur": "HKD",
+      "wert": 6.16,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "ERIBR.HE",
+      "name": "Telefonaktiebolaget LM Ericsson (publ)",
+      "kurs": 9.42,
       "cur": "EUR",
-      "wert": 3.6,
-      "stichtag": "2026-11-04"
+      "wert": -5.12,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "kurs": 312.49,
+      "sym": "ATHM",
+      "name": "Autohome Inc.",
+      "kurs": 21.36,
       "cur": "USD",
-      "wert": 3.47,
-      "stichtag": "2026-11-03"
+      "wert": -5.02,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "MBG.DE",
-      "name": "Mercedes-Benz Group AG",
-      "kurs": 41.85,
+      "sym": "EWL.DE",
+      "name": "Edwards Lifesciences Corporation",
+      "kurs": 92.44,
       "cur": "EUR",
-      "wert": 3.4,
-      "stichtag": "2026-11-04"
+      "wert": 4.81,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "MC.PA",
-      "name": "LVMH Moët Hennessy - Louis Vuitton, Société Européenne",
-      "kurs": 413.95,
-      "cur": "EUR",
-      "wert": 3.1,
-      "stichtag": "2026-11-04"
+      "sym": "FPH.AX",
+      "name": "Fisher & Paykel Healthcare Corporation Limited",
+      "kurs": 38.89,
+      "cur": "AUD",
+      "wert": 4.32,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "AIR.PA",
-      "name": "Airbus SE",
-      "kurs": 199.28,
-      "cur": "EUR",
-      "wert": 3.08,
-      "stichtag": "2026-11-04"
+      "sym": "HMC",
+      "name": "Honda Motor Co., Ltd.",
+      "kurs": 36.71,
+      "cur": "USD",
+      "wert": 4.22,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 24.3,
+      "cur": "USD",
+      "wert": 3.98,
+      "stichtag": "2026-11-05"
     }
   ],
   "woche": [
     {
-      "sym": "ADT",
-      "name": "ADT Inc.",
-      "kurs": 9.85,
-      "cur": "USD",
-      "wert": 43.38,
-      "stichtag": "2026-11-03"
-    },
-    {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 60.55,
+      "kurs": 56.18,
       "cur": "USD",
-      "wert": -35.41,
-      "stichtag": "2026-11-03"
+      "wert": -38.98,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 128.11,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 33.58,
       "cur": "USD",
-      "wert": -30.75,
-      "stichtag": "2026-11-03"
-    },
-    {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 0.94,
-      "cur": "HKD",
-      "wert": -20.25,
-      "stichtag": "2026-11-04"
-    },
-    {
-      "sym": "EPAC",
-      "name": "Enerpac Tool Group Corp.",
-      "kurs": 42.21,
-      "cur": "USD",
-      "wert": 19.37,
-      "stichtag": "2026-11-03"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 54.08,
-      "cur": "EUR",
-      "wert": 17.49,
-      "stichtag": "2026-11-04"
-    },
-    {
-      "sym": "HWM",
-      "name": "Howmet Aerospace Inc.",
-      "kurs": 223.12,
-      "cur": "USD",
-      "wert": 16.21,
-      "stichtag": "2026-11-03"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 483.9,
-      "cur": "USD",
-      "wert": -13.63,
-      "stichtag": "2026-11-03"
+      "wert": -24.62,
+      "stichtag": "2026-11-05"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 112.37,
+      "kurs": 97.53,
       "cur": "USD",
-      "wert": -12.82,
-      "stichtag": "2026-11-03"
+      "wert": -23,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "GOOGL",
-      "name": "Alphabet Inc.",
-      "kurs": 280.03,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 448.85,
       "cur": "USD",
-      "wert": -12.65,
-      "stichtag": "2026-11-03"
+      "wert": -20.76,
+      "stichtag": "2026-11-05"
     },
     {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 623.94,
-      "cur": "USD",
-      "wert": -12.53,
-      "stichtag": "2026-11-03"
-    },
-    {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 6.55,
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 0.95,
       "cur": "HKD",
-      "wert": 11.87,
-      "stichtag": "2026-11-04"
+      "wert": -19.83,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "BAYN.DE",
+      "name": "Bayer Aktiengesellschaft",
+      "kurs": 56.26,
+      "cur": "EUR",
+      "wert": 17.31,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 155.61,
+      "cur": "USD",
+      "wert": -16.07,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 3533,
+      "cur": "JPY",
+      "wert": 15.8,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1285,
+      "cur": "EUR",
+      "wert": -14.61,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 122.81,
+      "cur": "USD",
+      "wert": -12.01,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 380.55,
+      "cur": "USD",
+      "wert": -11.87,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.78,
+      "cur": "USD",
+      "wert": -11.57,
+      "stichtag": "2026-11-05"
     }
   ]
 }
