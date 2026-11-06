@@ -1,103 +1,103 @@
 {
   "stand": "2026-11-05",
-  "erzeugt": "2026-11-05T14:33:55.195Z",
+  "erzeugt": "2026-11-06T14:11:43.567Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 3533,
-      "cur": "JPY",
-      "wert": 16.68,
-      "stichtag": "2026-11-05"
-    },
-    {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 33.58,
+      "kurs": 29.72,
       "cur": "USD",
-      "wert": -10.48,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 155.61,
-      "cur": "USD",
-      "wert": -10.15,
+      "wert": -20.77,
       "stichtag": "2026-11-05"
     },
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 448.85,
+      "kurs": 404.4,
       "cur": "USD",
-      "wert": -8.17,
+      "wert": -17.26,
       "stichtag": "2026-11-05"
     },
     {
-      "sym": "6758.T",
-      "name": "Sony Group Corporation",
-      "kurs": 4211,
-      "cur": "JPY",
-      "wert": 7.07,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 5,
-      "cur": "HKD",
-      "wert": 6.16,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "ERIBR.HE",
-      "name": "Telefonaktiebolaget LM Ericsson (publ)",
-      "kurs": 9.42,
-      "cur": "EUR",
-      "wert": -5.12,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "ATHM",
-      "name": "Autohome Inc.",
-      "kurs": 21.36,
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 353.1,
       "cur": "USD",
-      "wert": -5.02,
+      "wert": -10.78,
       "stichtag": "2026-11-05"
     },
     {
-      "sym": "EWL.DE",
-      "name": "Edwards Lifesciences Corporation",
-      "kurs": 92.44,
-      "cur": "EUR",
-      "wert": 4.81,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "FPH.AX",
-      "name": "Fisher & Paykel Healthcare Corporation Limited",
-      "kurs": 38.89,
-      "cur": "AUD",
-      "wert": 4.32,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "HMC",
-      "name": "Honda Motor Co., Ltd.",
-      "kurs": 36.71,
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 278.15,
       "cur": "USD",
-      "wert": 4.22,
+      "wert": -10.7,
       "stichtag": "2026-11-05"
     },
     {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 24.3,
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 291.53,
       "cur": "USD",
-      "wert": 3.98,
+      "wert": -10.43,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 52.25,
+      "cur": "USD",
+      "wert": -10.33,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 156.75,
+      "cur": "USD",
+      "wert": -9.49,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 91.92,
+      "cur": "USD",
+      "wert": -9.4,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 181.6,
+      "cur": "USD",
+      "wert": -9.26,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 30.07,
+      "cur": "USD",
+      "wert": -8.32,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "CSCO",
+      "name": "Cisco Systems, Inc.",
+      "kurs": 95.72,
+      "cur": "USD",
+      "wert": -7.62,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "EPAC",
+      "name": "Enerpac Tool Group Corp.",
+      "kurs": 39.16,
+      "cur": "USD",
+      "wert": -7.23,
       "stichtag": "2026-11-05"
     }
   ],
@@ -105,97 +105,97 @@
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 56.18,
+      "kurs": 52.25,
       "cur": "USD",
-      "wert": -38.98,
+      "wert": -43.25,
       "stichtag": "2026-11-05"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 33.58,
+      "kurs": 29.72,
       "cur": "USD",
-      "wert": -24.62,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 97.53,
-      "cur": "USD",
-      "wert": -23,
+      "wert": -33.29,
       "stichtag": "2026-11-05"
     },
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 448.85,
+      "kurs": 404.4,
       "cur": "USD",
-      "wert": -20.76,
+      "wert": -28.6,
       "stichtag": "2026-11-05"
     },
     {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 0.95,
-      "cur": "HKD",
-      "wert": -19.83,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 56.26,
-      "cur": "EUR",
-      "wert": 17.31,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 155.61,
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 91.92,
       "cur": "USD",
-      "wert": -16.07,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 3533,
-      "cur": "JPY",
-      "wert": 15.8,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1285,
-      "cur": "EUR",
-      "wert": -14.61,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 122.81,
-      "cur": "USD",
-      "wert": -12.01,
+      "wert": -27.43,
       "stichtag": "2026-11-05"
     },
     {
       "sym": "TSM",
       "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 380.55,
+      "kurs": 353.1,
       "cur": "USD",
-      "wert": -11.87,
+      "wert": -18.23,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 115.16,
+      "cur": "USD",
+      "wert": -17.48,
       "stichtag": "2026-11-05"
     },
     {
       "sym": "HAFN",
       "name": "Hafnia Limited",
-      "kurs": 9.78,
+      "kurs": 9.34,
       "cur": "USD",
-      "wert": -11.57,
+      "wert": -15.55,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 291.53,
+      "cur": "USD",
+      "wert": -15.5,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 156.75,
+      "cur": "USD",
+      "wert": -15.46,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 181.6,
+      "cur": "USD",
+      "wert": -15.01,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "CAT",
+      "name": "Caterpillar Inc.",
+      "kurs": 553.64,
+      "cur": "USD",
+      "wert": -14.48,
+      "stichtag": "2026-11-05"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 30.07,
+      "cur": "USD",
+      "wert": -13.22,
       "stichtag": "2026-11-05"
     }
   ]
