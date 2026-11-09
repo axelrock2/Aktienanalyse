@@ -1,202 +1,202 @@
 {
-  "stand": "2026-11-05",
-  "erzeugt": "2026-11-06T14:11:43.567Z",
+  "stand": "2026-11-09",
+  "erzeugt": "2026-11-09T16:08:25.598Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 29.72,
-      "cur": "USD",
-      "wert": -20.77,
-      "stichtag": "2026-11-05"
-    },
-    {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 404.4,
+      "kurs": 502.59,
       "cur": "USD",
-      "wert": -17.26,
-      "stichtag": "2026-11-05"
+      "wert": 11.93,
+      "stichtag": "2026-11-09"
     },
     {
-      "sym": "TSM",
-      "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 353.1,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 34.58,
       "cur": "USD",
-      "wert": -10.78,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "kurs": 278.15,
-      "cur": "USD",
-      "wert": -10.7,
-      "stichtag": "2026-11-05"
+      "wert": 9.34,
+      "stichtag": "2026-11-09"
     },
     {
       "sym": "AVGO",
       "name": "Broadcom Inc.",
-      "kurs": 291.53,
+      "kurs": 319.92,
       "cur": "USD",
-      "wert": -10.43,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 52.25,
-      "cur": "USD",
-      "wert": -10.33,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 156.75,
-      "cur": "USD",
-      "wert": -9.49,
-      "stichtag": "2026-11-05"
+      "wert": 8.93,
+      "stichtag": "2026-11-09"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 91.92,
+      "kurs": 105.61,
       "cur": "USD",
-      "wert": -9.4,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 181.6,
-      "cur": "USD",
-      "wert": -9.26,
-      "stichtag": "2026-11-05"
+      "wert": 8.82,
+      "stichtag": "2026-11-09"
     },
     {
       "sym": "CENX",
       "name": "Century Aluminum Company",
-      "kurs": 30.07,
+      "kurs": 36.01,
       "cur": "USD",
-      "wert": -8.32,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "CSCO",
-      "name": "Cisco Systems, Inc.",
-      "kurs": 95.72,
-      "cur": "USD",
-      "wert": -7.62,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "EPAC",
-      "name": "Enerpac Tool Group Corp.",
-      "kurs": 39.16,
-      "cur": "USD",
-      "wert": -7.23,
-      "stichtag": "2026-11-05"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 52.25,
-      "cur": "USD",
-      "wert": -43.25,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 29.72,
-      "cur": "USD",
-      "wert": -33.29,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 404.4,
-      "cur": "USD",
-      "wert": -28.6,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 91.92,
-      "cur": "USD",
-      "wert": -27.43,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "TSM",
-      "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 353.1,
-      "cur": "USD",
-      "wert": -18.23,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 115.16,
-      "cur": "USD",
-      "wert": -17.48,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 9.34,
-      "cur": "USD",
-      "wert": -15.55,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 291.53,
-      "cur": "USD",
-      "wert": -15.5,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 156.75,
-      "cur": "USD",
-      "wert": -15.46,
-      "stichtag": "2026-11-05"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 181.6,
-      "cur": "USD",
-      "wert": -15.01,
-      "stichtag": "2026-11-05"
+      "wert": 7.57,
+      "stichtag": "2026-11-09"
     },
     {
       "sym": "CAT",
       "name": "Caterpillar Inc.",
-      "kurs": 553.64,
+      "kurs": 593.7,
       "cur": "USD",
-      "wert": -14.48,
-      "stichtag": "2026-11-05"
+      "wert": 6.28,
+      "stichtag": "2026-11-09"
     },
     {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 30.07,
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 175.42,
       "cur": "USD",
-      "wert": -13.22,
-      "stichtag": "2026-11-05"
+      "wert": 6.05,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "GTES",
+      "name": "Gates Industrial Corporation Ltd.",
+      "kurs": 25.54,
+      "cur": "USD",
+      "wert": 5.98,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 90.82,
+      "cur": "USD",
+      "wert": 5.57,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 3338,
+      "cur": "JPY",
+      "wert": -5.52,
+      "stichtag": "2026-11-06"
+    },
+    {
+      "sym": "1686.HK",
+      "name": "SUNeVision Holdings Ltd.",
+      "kurs": 4.72,
+      "cur": "HKD",
+      "wert": -5.5,
+      "stichtag": "2026-11-06"
+    },
+    {
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 292.39,
+      "cur": "USD",
+      "wert": 5.42,
+      "stichtag": "2026-11-09"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 176.78,
+      "cur": "USD",
+      "wert": -12.51,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "BAYN.DE",
+      "name": "Bayer Aktiengesellschaft",
+      "kurs": 56.2,
+      "cur": "EUR",
+      "wert": 12.36,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 59.64,
+      "cur": "CAD",
+      "wert": 12.32,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 34.58,
+      "cur": "USD",
+      "wert": -11.71,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "ATHM",
+      "name": "Autohome Inc.",
+      "kurs": 22.43,
+      "cur": "USD",
+      "wert": 11.54,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 90.82,
+      "cur": "USD",
+      "wert": 10.42,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "EWL.DE",
+      "name": "Edwards Lifesciences Corporation",
+      "kurs": 92.86,
+      "cur": "EUR",
+      "wert": 9.58,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "kurs": 268.45,
+      "cur": "USD",
+      "wert": 9.29,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.31,
+      "cur": "USD",
+      "wert": -8.59,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 3338,
+      "cur": "JPY",
+      "wert": 8.48,
+      "stichtag": "2026-11-06"
+    },
+    {
+      "sym": "BALD-B.ST",
+      "name": "Fastighets AB Balder (publ)",
+      "kurs": 53.6,
+      "cur": "SEK",
+      "wert": 8.39,
+      "stichtag": "2026-11-09"
+    },
+    {
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 163.07,
+      "cur": "USD",
+      "wert": 8.29,
+      "stichtag": "2026-11-09"
     }
   ]
 }
