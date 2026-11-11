@@ -1,201 +1,201 @@
 {
   "stand": "2026-11-10",
-  "erzeugt": "2026-11-10T14:48:17.621Z",
+  "erzeugt": "2026-11-11T14:11:47.326Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
       "sym": "ABX.TO",
       "name": "Barrick Mining Corporation",
-      "kurs": 56.76,
+      "kurs": 56.41,
       "cur": "CAD",
-      "wert": -5.02,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 34.88,
-      "cur": "USD",
-      "wert": -4.75,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 35.97,
-      "cur": "USD",
-      "wert": 4.67,
+      "wert": -5.61,
       "stichtag": "2026-11-10"
     },
     {
       "sym": "NVDA",
       "name": "NVIDIA Corporation",
-      "kurs": 170.84,
+      "kurs": 168.89,
       "cur": "USD",
-      "wert": -4.38,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "HMC",
-      "name": "Honda Motor Co., Ltd.",
-      "kurs": 34.53,
-      "cur": "USD",
-      "wert": -3.67,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 577.51,
-      "cur": "USD",
-      "wert": -3.57,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "2005.HK",
-      "name": "SSY Group Limited",
-      "kurs": 2.69,
-      "cur": "HKD",
-      "wert": 3.06,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "SHEL.L",
-      "name": "Shell plc",
-      "kurs": 3590.5,
-      "cur": "GBp",
-      "wert": -2.99,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "EPAC",
-      "name": "Enerpac Tool Group Corp.",
-      "kurs": 39.6,
-      "cur": "USD",
-      "wert": -2.82,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "NKE",
-      "name": "NIKE, Inc.",
-      "kurs": 38.87,
-      "cur": "USD",
-      "wert": -2.53,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 8.98,
-      "cur": "USD",
-      "wert": -2.29,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 21.76,
-      "cur": "USD",
-      "wert": -2.25,
-      "stichtag": "2026-11-10"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 170.84,
-      "cur": "USD",
-      "wert": -17.34,
+      "wert": -5.47,
       "stichtag": "2026-11-10"
     },
     {
       "sym": "6666.HK",
       "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.08,
+      "kurs": 1.13,
       "cur": "HKD",
-      "wert": 15.51,
-      "stichtag": "2026-11-10"
+      "wert": 5.09,
+      "stichtag": "2026-11-11"
     },
     {
-      "sym": "HAFN",
-      "name": "Hafnia Limited",
-      "kurs": 8.98,
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 331.98,
       "cur": "USD",
-      "wert": -13.65,
+      "wert": 3.91,
       "stichtag": "2026-11-10"
     },
     {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 3414,
-      "cur": "JPY",
-      "wert": 11.9,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "ATHM",
-      "name": "Autohome Inc.",
-      "kurs": 22.08,
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 21.41,
       "cur": "USD",
-      "wert": 10.6,
+      "wert": -3.82,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 35.48,
+      "cur": "USD",
+      "wert": 3.26,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 38.67,
+      "cur": "USD",
+      "wert": -3.03,
       "stichtag": "2026-11-10"
     },
     {
       "sym": "CDW",
       "name": "CDW Corporation",
-      "kurs": 164.58,
+      "kurs": 169.36,
       "cur": "USD",
-      "wert": 9.89,
+      "wert": 2.89,
       "stichtag": "2026-11-10"
     },
     {
-      "sym": "EWL.DE",
-      "name": "Edwards Lifesciences Corporation",
-      "kurs": 93.96,
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 102.19,
+      "cur": "USD",
+      "wert": -2.71,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "BMED.MI",
+      "name": "Banca Mediolanum S.p.A.",
+      "kurs": 23.38,
       "cur": "EUR",
-      "wert": 9.82,
+      "wert": -2.7,
+      "stichtag": "2026-11-11"
+    },
+    {
+      "sym": "HMC",
+      "name": "Honda Motor Co., Ltd.",
+      "kurs": 34.88,
+      "cur": "USD",
+      "wert": -2.68,
       "stichtag": "2026-11-10"
     },
     {
-      "sym": "BALD-B.ST",
-      "name": "Fastighets AB Balder (publ)",
-      "kurs": 53.76,
-      "cur": "SEK",
-      "wert": 9.74,
-      "stichtag": "2026-11-10"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 56.8,
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1396.8,
       "cur": "EUR",
-      "wert": 9.57,
+      "wert": 2.63,
+      "stichtag": "2026-11-11"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.13,
+      "cur": "HKD",
+      "wert": 20.11,
+      "stichtag": "2026-11-11"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 168.89,
+      "cur": "USD",
+      "wert": -18.29,
       "stichtag": "2026-11-10"
     },
     {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 56.76,
-      "cur": "CAD",
-      "wert": 9.3,
+      "sym": "7203.T",
+      "name": "Toyota Motor Corporation",
+      "kurs": 3435,
+      "cur": "JPY",
+      "wert": 13.44,
+      "stichtag": "2026-11-11"
+    },
+    {
+      "sym": "CDW",
+      "name": "CDW Corporation",
+      "kurs": 169.36,
+      "cur": "USD",
+      "wert": 13.08,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "ATHM",
+      "name": "Autohome Inc.",
+      "kurs": 22.46,
+      "cur": "USD",
+      "wert": 12.53,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "HAFN",
+      "name": "Hafnia Limited",
+      "kurs": 9.1,
+      "cur": "USD",
+      "wert": -12.5,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 36.42,
+      "cur": "USD",
+      "wert": 9.27,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 35.48,
+      "cur": "USD",
+      "wert": -9.14,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 102.19,
+      "cur": "USD",
+      "wert": -9.06,
       "stichtag": "2026-11-10"
     },
     {
       "sym": "DB",
       "name": "Deutsche Bank Aktiengesellschaft",
-      "kurs": 37.15,
+      "kurs": 37.1,
       "cur": "USD",
-      "wert": 9.17,
+      "wert": 9.02,
       "stichtag": "2026-11-10"
     },
     {
-      "sym": "AIR.PA",
-      "name": "Airbus SE",
-      "kurs": 210.4,
-      "cur": "EUR",
-      "wert": 8.84,
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 56.41,
+      "cur": "CAD",
+      "wert": 8.63,
+      "stichtag": "2026-11-10"
+    },
+    {
+      "sym": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "kurs": 270.87,
+      "cur": "USD",
+      "wert": 8.05,
       "stichtag": "2026-11-10"
     }
   ]
