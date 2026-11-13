@@ -1,103 +1,103 @@
 {
   "stand": "2026-11-12",
-  "erzeugt": "2026-11-12T15:05:38.624Z",
+  "erzeugt": "2026-11-13T14:30:12.820Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 19.42,
+      "kurs": 20.05,
       "cur": "USD",
-      "wert": -14.17,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 161.03,
-      "cur": "USD",
-      "wert": -7.31,
+      "wert": -11.36,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "BABA",
       "name": "Alibaba Group Holding Limited",
-      "kurs": 94.82,
+      "kurs": 94.36,
       "cur": "USD",
-      "wert": -6.6,
+      "wert": -7.05,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 35.37,
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 585.3,
       "cur": "USD",
-      "wert": -6.48,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 85.26,
-      "cur": "USD",
-      "wert": -4.52,
+      "wert": 5.86,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "AVGO",
       "name": "Broadcom Inc.",
-      "kurs": 360.77,
+      "kurs": 364.36,
       "cur": "USD",
-      "wert": 4.5,
+      "wert": 5.54,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 60.37,
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.17,
+      "cur": "HKD",
+      "wert": 4.46,
+      "stichtag": "2026-11-13"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 166.19,
       "cur": "USD",
-      "wert": -3.41,
+      "wert": -4.34,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 124.49,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 36.29,
       "cur": "USD",
-      "wert": -3.03,
+      "wert": -4.05,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 103.9,
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 92.48,
       "cur": "USD",
-      "wert": -2.94,
+      "wert": 3.56,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "MUV2.DE",
-      "name": "Münchener Rückversicherungs-Gesellschaft Aktiengesellschaft in München",
-      "kurs": 585.4,
-      "cur": "EUR",
-      "wert": 2.81,
+      "sym": "GE",
+      "name": "GE Aerospace",
+      "kurs": 330.86,
+      "cur": "USD",
+      "wert": -3.47,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "EGLN.L",
-      "name": "iShares Physical Gold ETC",
-      "kurs": 68.01,
-      "cur": "EUR",
-      "wert": -2.79,
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 35.51,
+      "cur": "USD",
+      "wert": -3.27,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "GPT.AX",
-      "name": "The GPT Group",
-      "kurs": 5.22,
-      "cur": "AUD",
-      "wert": 2.76,
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 53.96,
+      "cur": "CAD",
+      "wert": -3.07,
+      "stichtag": "2026-11-12"
+    },
+    {
+      "sym": "BNTX",
+      "name": "BioNTech SE",
+      "kurs": 85.04,
+      "cur": "USD",
+      "wert": -2.98,
       "stichtag": "2026-11-12"
     }
   ],
@@ -105,97 +105,97 @@
     {
       "sym": "AMD",
       "name": "Advanced Micro Devices, Inc.",
-      "kurs": 563.18,
+      "kurs": 585.3,
       "cur": "USD",
-      "wert": 39.26,
+      "wert": 44.73,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "AVGO",
       "name": "Broadcom Inc.",
-      "kurs": 360.77,
+      "kurs": 364.36,
       "cur": "USD",
-      "wert": 23.75,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 36.04,
-      "cur": "USD",
-      "wert": 19.85,
+      "wert": 24.98,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 35.37,
+      "kurs": 36.29,
       "cur": "USD",
-      "wert": 19.01,
+      "wert": 22.11,
+      "stichtag": "2026-11-12"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 35.51,
+      "cur": "USD",
+      "wert": 18.09,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "6666.HK",
       "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.12,
+      "kurs": 1.17,
       "cur": "HKD",
-      "wert": 17.89,
-      "stichtag": "2026-11-12"
+      "wert": 17.59,
+      "stichtag": "2026-11-13"
     },
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 60.37,
+      "kurs": 61.2,
       "cur": "USD",
-      "wert": 15.54,
+      "wert": 17.13,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "TSM",
       "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 403.43,
+      "kurs": 405.49,
       "cur": "USD",
-      "wert": 14.25,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 3435,
-      "cur": "JPY",
-      "wert": 13.44,
-      "stichtag": "2026-11-11"
-    },
-    {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 177.71,
-      "cur": "USD",
-      "wert": 13.37,
+      "wert": 14.84,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 103.9,
+      "kurs": 105.42,
       "cur": "USD",
-      "wert": 13.03,
+      "wert": 14.69,
+      "stichtag": "2026-11-12"
+    },
+    {
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 177.14,
+      "cur": "USD",
+      "wert": 13.01,
       "stichtag": "2026-11-12"
     },
     {
       "sym": "BABA",
       "name": "Alibaba Group Holding Limited",
-      "kurs": 94.82,
+      "kurs": 94.36,
       "cur": "USD",
-      "wert": -12.26,
+      "wert": -12.69,
       "stichtag": "2026-11-12"
     },
     {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 19.42,
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 312.48,
       "cur": "USD",
-      "wert": -11.67,
+      "wert": 12.34,
+      "stichtag": "2026-11-12"
+    },
+    {
+      "sym": "DNTH",
+      "name": "Dianthus Therapeutics, Inc.",
+      "kurs": 92.48,
+      "cur": "USD",
+      "wert": 11.41,
       "stichtag": "2026-11-12"
     }
   ]
