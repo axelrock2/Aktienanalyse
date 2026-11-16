@@ -1,202 +1,202 @@
 {
-  "stand": "2026-11-12",
-  "erzeugt": "2026-11-13T14:30:12.820Z",
+  "stand": "2026-11-16",
+  "erzeugt": "2026-11-16T15:36:47.499Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 20.05,
+      "kurs": 17.21,
       "cur": "USD",
-      "wert": -11.36,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "BABA",
-      "name": "Alibaba Group Holding Limited",
-      "kurs": 94.36,
-      "cur": "USD",
-      "wert": -7.05,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 585.3,
-      "cur": "USD",
-      "wert": 5.86,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 364.36,
-      "cur": "USD",
-      "wert": 5.54,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.17,
-      "cur": "HKD",
-      "wert": 4.46,
-      "stichtag": "2026-11-13"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 166.19,
-      "cur": "USD",
-      "wert": -4.34,
-      "stichtag": "2026-11-12"
+      "wert": -13.12,
+      "stichtag": "2026-11-16"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 36.29,
+      "kurs": 32.6,
       "cur": "USD",
-      "wert": -4.05,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 92.48,
-      "cur": "USD",
-      "wert": 3.56,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "GE",
-      "name": "GE Aerospace",
-      "kurs": 330.86,
-      "cur": "USD",
-      "wert": -3.47,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 35.51,
-      "cur": "USD",
-      "wert": -3.27,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 53.96,
-      "cur": "CAD",
-      "wert": -3.07,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "BNTX",
-      "name": "BioNTech SE",
-      "kurs": 85.04,
-      "cur": "USD",
-      "wert": -2.98,
-      "stichtag": "2026-11-12"
-    }
-  ],
-  "woche": [
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 585.3,
-      "cur": "USD",
-      "wert": 44.73,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 364.36,
-      "cur": "USD",
-      "wert": 24.98,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 36.29,
-      "cur": "USD",
-      "wert": 22.11,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 35.51,
-      "cur": "USD",
-      "wert": 18.09,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.17,
-      "cur": "HKD",
-      "wert": 17.59,
-      "stichtag": "2026-11-13"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 61.2,
-      "cur": "USD",
-      "wert": 17.13,
-      "stichtag": "2026-11-12"
-    },
-    {
-      "sym": "TSM",
-      "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 405.49,
-      "cur": "USD",
-      "wert": 14.84,
-      "stichtag": "2026-11-12"
+      "wert": -8.3,
+      "stichtag": "2026-11-16"
     },
     {
       "sym": "CAMT",
       "name": "Camtek Ltd.",
-      "kurs": 105.42,
+      "kurs": 93.56,
       "cur": "USD",
-      "wert": 14.69,
-      "stichtag": "2026-11-12"
+      "wert": -8.03,
+      "stichtag": "2026-11-16"
     },
     {
-      "sym": "QCOM",
-      "name": "QUALCOMM Incorporated",
-      "kurs": 177.14,
-      "cur": "USD",
-      "wert": 13.01,
-      "stichtag": "2026-11-12"
+      "sym": "6666.HK",
+      "name": "Evergrande Property Services Group Limited",
+      "kurs": 1.09,
+      "cur": "HKD",
+      "wert": -7.26,
+      "stichtag": "2026-11-16"
     },
     {
-      "sym": "BABA",
-      "name": "Alibaba Group Holding Limited",
-      "kurs": 94.36,
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 55.77,
       "cur": "USD",
-      "wert": -12.69,
-      "stichtag": "2026-11-12"
+      "wert": -6.52,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 372.86,
+      "cur": "USD",
+      "wert": -6.49,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 504.54,
+      "cur": "USD",
+      "wert": -5.53,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 119.17,
+      "cur": "USD",
+      "wert": -4.93,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 330.21,
+      "cur": "USD",
+      "wert": -4.84,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "1199.HK",
+      "name": "COSCO SHIPPING Ports Limited",
+      "kurs": 6.82,
+      "cur": "HKD",
+      "wert": 3.97,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1292.4,
+      "cur": "EUR",
+      "wert": -3.47,
+      "stichtag": "2026-11-16"
     },
     {
       "sym": "TXN",
       "name": "Texas Instruments Incorporated",
-      "kurs": 312.48,
+      "kurs": 293.38,
       "cur": "USD",
-      "wert": 12.34,
-      "stichtag": "2026-11-12"
+      "wert": -3.37,
+      "stichtag": "2026-11-16"
+    }
+  ],
+  "woche": [
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 17.21,
+      "cur": "USD",
+      "wert": -22.69,
+      "stichtag": "2026-11-16"
     },
     {
-      "sym": "DNTH",
-      "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 92.48,
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 91.66,
       "cur": "USD",
-      "wert": 11.41,
-      "stichtag": "2026-11-12"
+      "wert": -13.02,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 158.87,
+      "cur": "USD",
+      "wert": -11.08,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 53.21,
+      "cur": "CAD",
+      "wert": -10.96,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 93.56,
+      "cur": "USD",
+      "wert": -10.93,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 55.77,
+      "cur": "USD",
+      "wert": -6.06,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "1199.HK",
+      "name": "COSCO SHIPPING Ports Limited",
+      "kurs": 6.82,
+      "cur": "HKD",
+      "wert": 5.99,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 34.53,
+      "cur": "USD",
+      "wert": -5.71,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "EWL.DE",
+      "name": "Edwards Lifesciences Corporation",
+      "kurs": 97.94,
+      "cur": "EUR",
+      "wert": 5.45,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "1686.HK",
+      "name": "SUNeVision Holdings Ltd.",
+      "kurs": 4.59,
+      "cur": "HKD",
+      "wert": -5.17,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "MUV2.DE",
+      "name": "Münchener Rückversicherungs-Gesellschaft Aktiengesellschaft in München",
+      "kurs": 595.2,
+      "cur": "EUR",
+      "wert": 5.16,
+      "stichtag": "2026-11-16"
+    },
+    {
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 32.6,
+      "cur": "USD",
+      "wert": -5.12,
+      "stichtag": "2026-11-16"
     }
   ]
 }
