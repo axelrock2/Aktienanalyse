@@ -2122,6 +2122,8 @@ function renderDetail(item, chart, fund, a) {
       <div class="chartbox"><canvas id="cv"></canvas></div>
     </div>
 
+    ${typeof cpAbschnitt === "function" ? cpAbschnitt() : ""}
+
     ${typeof elAbschnitt === "function" ? elAbschnitt() : ""}
 
     <div class="blk">
@@ -2166,6 +2168,10 @@ function renderDetail(item, chart, fund, a) {
   if (xlsxBtn) xlsxBtn.onclick = () => vxExport(item, chart, fund, a, xlsxBtn);
   const dossierBtn = panel.querySelector(".p-dossier");
   if(dossierBtn) dossierBtn.onclick = () => openDossier(item);
+  /* Das Cockpit rechnet erst, wenn der Abschnitt im Dokument steht, und
+     laedt dafuer eine laengere Kursreihe nach. Bewusst ohne await: Das
+     Detailfenster soll stehen, bevor die Zusatzdaten da sind. */
+  if (typeof cpVerdrahte === "function") cpVerdrahte(item, chart);
   let curDays = 252, curMode = "candle";
   const draw = () => drawChart(chart, a, curDays, curMode);
   panel.querySelectorAll(".rbtn").forEach(b => b.onclick = () => {
