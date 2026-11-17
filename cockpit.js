@@ -394,6 +394,47 @@ function cpVerhalten(chart) {
 }
 
 /* =====================================================================
+   Modul 7 - Zyklusbereinigtes KGV (Shiller 1981, Campbell/Shiller)
+   ===================================================================== */
+
+/**
+ * CAPE = Marktwert / Zehnjahresmittel des inflationsbereinigten Gewinns.
+ *
+ * Shillers Befund: Kurse schwanken weit staerker, als die spaeteren Gewinne
+ * rechtfertigen. Ein KGV auf dem letzten Jahresgewinn misst deshalb vor allem,
+ * wo im Konjunkturzyklus dieser Gewinn stand - am Zyklushoch sieht alles
+ * guenstig aus, am Tief alles teuer. Der Zehnjahresschnitt nimmt das heraus.
+ *
+ * Auf Aggregatgroessen gerechnet, nicht je Aktie: Ein Aktiensplit veraendert
+ * den Gewinn je Aktie, ohne dass sich am Unternehmen etwas aendert. Die
+ * Gewinnseite entsteht in scripts/build_fundamentals.py, den Marktwert legt
+ * diese Funktion an - er aendert sich taeglich.
+ *
+ * @param {object} cape  Block aus data/fundamentals.json
+ * @param {number} marktwert  aktuelle Marktkapitalisierung
+ * @param {number|null} kgv  laufendes KGV zum Vergleich
+ */
+function cpCape(cape, marktwert, kgv) {
+  if (!cape || !(cape.gewinnRealMittel > 0) || !(marktwert > 0)) return null;
+  const wert = marktwert / cape.gewinnRealMittel;
+  /* Das Verhaeltnis der beiden KGV sagt, wo der laufende Gewinn gegenueber
+     dem Zehnjahresschnitt steht. Deutlich unter eins heisst: Der aktuelle
+     Gewinn liegt weit ueber dem Schnitt - entweder ist das Unternehmen
+     gewachsen, oder es steht am Zyklushoch. Welches davon, sagt die Zahl nicht. */
+  const verhaeltnis = (kgv > 0) ? kgv / wert : null;
+  return {
+    wert, kgv, verhaeltnis,
+    jahre: cape.jahre, vollstaendig: cape.vollstaendig,
+    verlustjahre: cape.verlustjahre, reihe: cape.reihe,
+    basisjahr: cape.basisjahr, waehrung: cape.waehrung,
+    lage: verhaeltnis == null ? null
+      : verhaeltnis < 0.6 ? "laufender Gewinn weit über dem Zehnjahresschnitt"
+      : verhaeltnis > 1.6 ? "laufender Gewinn weit unter dem Zehnjahresschnitt"
+      : "laufender Gewinn nahe am Zehnjahresschnitt",
+  };
+}
+
+/* =====================================================================
    Oberflaeche
    ===================================================================== */
 
@@ -441,13 +482,14 @@ async function cpBenchmark(symbol) {
 }
 
 /** Alles rechnen. Die Daten kommen von aussen - die Funktion holt nichts. */
-function cpRechne(chart, bench, rf) {
+function cpRechne(chart, bench, rf, roh, fund) {
   const risiko = cpRisiko(chart, bench);
   return {
     risiko,
     capm: cpCapm(chart, bench, rf, risiko.volaKurz),
     momentum: cpMomentum(chart, bench),
     verhalten: cpVerhalten(chart),
+    cape: cpCape(roh && roh.cape, fund && fund.marketCap, fund && fund.trailingPE),
   };
 }
 
@@ -524,7 +566,7 @@ function cpZeile(name, wert, note, klasse) {
 
 function cpZeige(out, erg, bench, rf, chart, item) {
   const e = typeof esc === "function" ? esc : (s => s);
-  const { risiko: r, capm: cm, momentum: m, verhalten: v } = erg;
+  const { risiko: r, capm: cm, momentum: m, verhalten: v, cape } = erg;
   const waehrung = (chart.meta && chart.meta.currency) || "";
   const zinsPasst = !waehrung || waehrung.toUpperCase().startsWith(AK_CONFIG.capm.rfWaehrung);
 
@@ -608,6 +650,28 @@ function cpZeige(out, erg, bench, rf, chart, item) {
     }
   } catch (err) { /* ohne Depot einfach nichts */ }
 
+  /* --- 7 Bewertung --- */
+  const capeHtml = !cape ? "" : `
+    <div class="cp-teil">
+      <h4>Bewertung <span class="cp-q">Shiller 1981</span></h4>
+      ${cpZeile("Zyklusbereinigtes KGV", cpZ(cape.wert, 1),
+         `Marktwert geteilt durch den Gewinnschnitt von ${cape.jahre} Jahren`
+         + (cape.vollstaendig ? "" : " – weniger als zehn, die Glättung ist schwächer"))}
+      ${cpZeile("Laufendes KGV", cpZ(cape.kgv, 1),
+         cape.verhaeltnis == null ? "" : `${cpZ(cape.verhaeltnis, 2)} × des zyklusbereinigten – ${e(cape.lage)}`)}
+      ${cape.verlustjahre ? cpZeile("Verlustjahre im Schnitt", String(cape.verlustjahre),
+         "gehen mit negativem Vorzeichen in den Durchschnitt ein") : ""}
+      <p class="cp-fuss">Gewinne der SEC-Jahresabschlüsse, mit dem US-Verbraucherpreisindex
+        auf die Kaufkraft von ${cape.basisjahr} gebracht. Gerechnet auf dem Gesamtgewinn,
+        nicht je Aktie: Ein Aktiensplit ändert den Gewinn je Aktie, ohne dass sich am
+        Unternehmen etwas ändert – Nvidias 10:1-Teilung 2024 ließ ihn von 12,08 auf 2,98
+        fallen. Marktwert und Gesamtgewinn sind beide Aggregate und dagegen unempfindlich.
+        <br><b>Kein Zeitpunktsignal.</b> Ein hohes CAPE ging historisch mit niedrigeren
+        Renditen der folgenden zehn Jahre einher und sagt über die nächsten Monate nichts.
+        Bei Unternehmen ohne lange Gewinnhistorie oder nach einem Geschäftsmodellwechsel
+        vergleicht der Zehnjahresschnitt zwei verschiedene Firmen miteinander.</p>
+    </div>`;
+
   out.className = "";
   out.innerHTML = `
     <div class="cp-teil">
@@ -622,6 +686,7 @@ function cpZeige(out, erg, bench, rf, chart, item) {
       <h4>Momentum <span class="cp-q">Jegadeesh &amp; Titman 1993</span></h4>
       ${momHtml}
     </div>
+    ${capeHtml}
     <div class="cp-teil">
       <h4>Verhaltens-Hinweise <span class="cp-q">Kahneman &amp; Tversky 1979</span></h4>
       ${verhHtml}${depotHtml}
@@ -635,15 +700,16 @@ function cpZeige(out, erg, bench, rf, chart, item) {
         gilt für den Dollarraum.</b> Eigenkapitalkosten und Sharpe-Verhältnis sind deshalb
         gegen den falschen Massstab gerechnet. Eine Euro-Zinsreihe fehlt bei der
         Kursquelle – sie kommt mit den Faktordaten.`}
-      <br>Alle Einstellungen stehen in <code>config.js</code>. Faktorprofil, Bilanzqualität
-      und Bewertung folgen in den nächsten Schritten.
+      <br>Alle Einstellungen stehen in <code>config.js</code>.
+      ${cape ? "" : "Ein zyklusbereinigtes KGV gibt es nur für Titel mit mehrjährigen SEC-Bilanzen. "}
+      Das Faktorprofil folgt im nächsten Schritt; die Bilanzqualität steht im Dossier.
       <br><b>Keine Anlageberatung.</b> Momentum- und Faktoreffekte sind Durchschnitte über
       viele Aktien; auf einen einzelnen Titel angewandt sind sie eine Einordnung, keine Prognose.
     </p>`;
 }
 
 /** Vom Detailfenster aufgerufen, nachdem der Abschnitt im Dokument steht. */
-async function cpVerdrahte(item, chart) {
+async function cpVerdrahte(item, chart, fund) {
   const out = document.getElementById("cp-out");
   if (!out) return;
   try {
@@ -654,7 +720,12 @@ async function cpVerdrahte(item, chart) {
        dass der ganze Abschnitt ausfaellt. */
     let lang = chart;
     try { lang = await loadChart(item.s, AK_CONFIG.benchmark.jahre); } catch (e) {}
-    const erg = cpRechne(lang, bench.reihe, rf.wert);
+    /* Rohdaten fuer die Gewinnreihe des CAPE. Fundamentals.load() ist bis
+       hierhin laengst gelaufen - das Detailfenster hat sie schon geholt. */
+    let roh = null;
+    try { roh = (typeof Fundamentals === "object") ? Fundamentals.get(item.s) : null; }
+    catch (err) { /* ohne Datei einfach kein CAPE */ }
+    const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund);
     cpZeige(out, erg, bench, rf, lang, item);
   } catch (e) {
     out.className = "";

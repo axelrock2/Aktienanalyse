@@ -181,8 +181,65 @@ Rangfolge. Momentum- und Faktoreffekte sind Durchschnitte über viele Aktien;
 auf einen einzelnen Titel angewandt sind sie eine Einordnung, keine Prognose.
 Das steht an jeder Kennzahl.
 
-Faktorprofil (Fama & French), Bilanzqualität (Piotroski) und Bewertung
-(Shiller) folgen in den nächsten Schritten.
+**Bewertung im Cockpit (Shiller 1981).** Neben dem laufenden KGV steht das
+zyklusbereinigte: Marktwert geteilt durch den Zehnjahresschnitt des
+inflationsbereinigten Gewinns. Shillers Befund war, dass Kurse weit stärker
+schwanken, als die späteren Gewinne rechtfertigen; ein KGV auf dem letzten
+Jahresgewinn misst deshalb vor allem, wo im Konjunkturzyklus dieser Gewinn
+stand. Bei Nvidia liegt das laufende KGV bei 20,6 und das zyklusbereinigte bei
+153,8 — derselbe Titel, je nach Maßstab billig oder sehr teuer.
+
+Gerechnet wird auf **Gesamtgewinn und Marktwert, nicht je Aktie**. Grund ist der
+Aktiensplit: Nvidia teilte 2024 im Verhältnis 10:1, der Gewinn je Aktie fiel
+dadurch von 12,08 auf 2,98, ohne dass sich am Unternehmen etwas geändert hätte.
+Ein Mittelwert über solche Zahlen wäre wertlos. Die Inflationsbereinigung nutzt
+den US-Verbraucherpreisindex der FRED, serverseitig geholt — die FRED setzt
+keinen CORS-Kopf, aus dem Browser wäre die Datei nicht erreichbar.
+
+**Piotroski F-Score, jetzt mit allen neun Kriterien.** Bisher waren es sieben,
+und zwei davon stimmten nicht:
+
+- Kriterium 3 verglich den *Nettogewinn* mit dem Vorjahr statt der
+  Gesamtkapitalrendite. Wer seine Bilanz schneller ausweitet als den Gewinn,
+  steigert den Gewinn und senkt die Rendite — das Kriterium sagte dann das
+  Gegenteil dessen, was Piotroski prüft.
+- Die Kriterien 6 (Current Ratio) und 7 (Verwässerung) fehlten ganz, weil die
+  nötigen Reihen nie mitgeschrieben wurden. Der Score konnte über sieben Punkte
+  nicht hinaus, und „7 / 7" las sich wie „7 / 9".
+
+Das Dossier zeigt jetzt die Checkliste mit beiden Jahreswerten je Kriterium.
+Kriterien, die die Datenlage nicht trägt, bleiben offen und zählen weder als
+erfüllt noch als verfehlt — bei Banken sind das regelmäßig Current Ratio und
+Bruttomarge, weil ihre Bilanz diese Posten nicht kennt. Die Verwässerung bleibt
+offen, wenn sich die Aktienzahl um mehr als die Hälfte ändert: Dann ist ein
+Split die wahrscheinlichere Erklärung als eine Emission dieser Größe.
+
+**Ein Fehler in der Bilanzreihe, der alles darunter betraf.** Ein 10-K enthält
+für Stromgrößen wie Gewinn oder Cashflow nicht nur das Jahr, sondern auch das
+vierte Quartal — beide enden am selben Bilanzstichtag. Die bisherige Regel
+„spätestes Enddatum gewinnt" griff deshalb je nach Reihenfolge das Quartal ab.
+Für Microsoft stand so im Jahr 2017 ein Gewinn von **minus 6,3 Milliarden**
+statt der tatsächlichen 21,2, und dieser Wert ging in den Piotroski-Vergleich
+ein. Jetzt zählt bei Stromgrößen die Periodenlänge: zwischen 300 und 400 Tagen,
+sonst ist es kein Jahreswert. Bei Neuausweisung gilt der zuletzt eingereichte
+Stand, nicht die ursprüngliche Meldung.
+
+**Das Vergleichsuniversum ist gewachsen: 16 → 74 Titel.** Die Fundamentalliste
+umfasst jetzt alle Titel aus `scripts/chancen_watchlist.txt`, die bei der SEC
+einreichen (67), plus sieben ADR-Notierungen. Die 41 nicht-US-Titel des Korbs
+können nicht dabei sein — ohne SEC-Einreichung gibt es keine Mehrjahresbilanz
+und damit weder F-Score noch CAPE. Der Lauf dauert dadurch rund drei Minuten
+statt einer; `data/fundamentals.json` wächst auf etwa 257 KB, über HTTPS
+gepackt rund 67 KB.
+
+Neu ist auch eine Prüfung auf zu dünne Registranten: Die Tickerliste der SEC
+zeigt bei Umstrukturierungen auf den neuen Registranten, der noch kaum etwas
+eingereicht hat. `XOM` verweist so auf „ExxonMobil Holdings Corporation" mit
+vier bis acht Fakten je Kennzahl. Solche Einträge sehen aus wie Daten und
+enthalten keine — sie werden jetzt verworfen. Bei 16 Titeln fällt so etwas auf,
+bei 74 nicht mehr.
+
+Das Faktorprofil (Fama & French, Carhart) folgt im nächsten Schritt.
 
 **Elliott-Wellen.** Ein eigener Abschnitt in der Detailansicht („Elliot Wellen
 bestimmen"). Die Analyse läuft **ausschließlich auf Klick** – nie beim Laden,

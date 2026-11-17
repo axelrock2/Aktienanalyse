@@ -23,6 +23,7 @@ Aufruf:
     python3 scripts/build_fundamentals.py
 """
 import gzip
+import datetime
 import json
 import os
 import re
@@ -262,8 +263,44 @@ def haupt_waehrung(facts):
     return max(zaehler, key=zaehler.get)
 
 
+# Ein Geschaeftsjahr darf zwischen diesen Tagen lang sein. 52/53-Wochen-Jahre
+# und verschobene Stichtage fallen in die Spanne, ein Quartal nicht.
+JAHR_MIN_TAGE, JAHR_MAX_TAGE = 300, 400
+
+
+def _periodentage(x):
+    """Laenge der Berichtsperiode in Tagen, oder None bei Stichtagswerten.
+
+    Bestandsgroessen wie die Bilanzsumme haben nur 'end' - sie gelten zum
+    Stichtag und haben keine Dauer. Stromgroessen wie Gewinn oder Cashflow
+    haben 'start' und 'end'.
+    """
+    start, ende = x.get("start"), x.get("end")
+    if not start or not ende:
+        return None
+    try:
+        return (datetime.date.fromisoformat(ende) - datetime.date.fromisoformat(start)).days
+    except ValueError:
+        return None
+
+
 def _jahresfakten(serie):
-    """Nur Jahresabschluesse, je Geschaeftsjahr der zuletzt gemeldete Wert."""
+    """Nur Jahresabschluesse, je Geschaeftsjahr der zuletzt eingereichte Wert.
+
+    Zwei Faelle, die hier frueher falsch liefen:
+
+    1. Ein 10-K enthaelt fuer Stromgroessen nicht nur das Jahr, sondern auch
+       das vierte Quartal. Beide enden am selben Bilanzstichtag. Die Regel
+       "spaetestes Enddatum gewinnt" griff dann je nach Reihenfolge das
+       Quartal ab. Bei Microsoft stand so fuer 2017 ein Gewinn von minus
+       6,3 Milliarden statt der tatsaechlichen 21,2 - und dieser Wert ging in
+       den Piotroski-Vergleich und in den Zehnjahresschnitt ein. Deshalb
+       zaehlt bei Stromgroessen jetzt die Periodenlaenge.
+
+    2. Wird ein Jahr spaeter neu ausgewiesen, stehen zwei Fakten mit demselben
+       Stichtag in der Datei. Massgeblich ist der zuletzt EINGEREICHTE - das
+       ist die Korrektur, nicht die urspruengliche Meldung.
+    """
     proJahr = {}
     for x in serie:
         if x.get("form") not in ("10-K", "20-F", "40-F"):
@@ -271,12 +308,15 @@ def _jahresfakten(serie):
         ende = x.get("end")
         if not ende or x.get("val") is None:
             continue
-        # fy/fp kennzeichnen das Geschaeftsjahr; 'end' ist der Bilanzstichtag
+        tage = _periodentage(x)
+        if tage is not None and not (JAHR_MIN_TAGE <= tage <= JAHR_MAX_TAGE):
+            continue                   # Quartal oder Halbjahr - kein Jahreswert
         jahr = ende[:4]
+        schluessel = (x.get("filed") or "", ende)
         vorher = proJahr.get(jahr)
-        if vorher is None or ende > vorher[0]:
-            proJahr[jahr] = (ende, x["val"])
-    return proJahr
+        if vorher is None or schluessel > vorher[0]:
+            proJahr[jahr] = (schluessel, ende, x["val"])
+    return {j: (v[1], v[2]) for j, v in proJahr.items()}
 
 
 def latest_val(facts, tags, unit_hint="USD"):
@@ -347,6 +387,120 @@ TAGS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Zyklusbereinigtes KGV nach Shiller - die Gewinnseite
+# ---------------------------------------------------------------------------
+CPI_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL"
+CAPE_JAHRE = 10
+CAPE_MIN = 5
+
+
+def hole_cpi():
+    """Jahresmittel des US-Verbraucherpreisindex von der FRED.
+
+    Serverseitig geholt, weil die FRED keinen CORS-Kopf setzt - aus dem
+    Browser waere die Datei nicht erreichbar. Ein Schluessel ist fuer den
+    CSV-Weg nicht noetig.
+
+    Rueckgabe {Jahr: Indexstand}. Faellt der Abruf aus, gibt es kein CAPE
+    statt eines unbereinigten, das so tut als waere es eines.
+    """
+    # Bewusst OHNE eigene Kopfzeilen und nicht ueber http_text: Mit einem
+    # gesetzten User-Agent - egal ob "AktienCockpit" oder eine Browserkennung -
+    # nimmt die FRED die Verbindung an und antwortet nie; der Aufruf laeuft in
+    # den Zeitablauf (gemessen: 59 und 69 Sekunden). Ohne Kopfzeile kommen
+    # dieselben 17 KB in 0,1 Sekunden. http_text setzt immer einen UA, deshalb
+    # hier der direkte Weg.
+    try:
+        with urllib.request.urlopen(CPI_URL, timeout=30) as r:
+            txt = r.read().decode("utf-8", "replace")
+    except Exception as e:
+        print(f"    CPI nicht erreichbar: {e}")
+        return None
+    if not txt:
+        return None
+    summe, zahl = {}, {}
+    for zeile in txt.splitlines()[1:]:
+        teile = zeile.split(",")
+        if len(teile) < 2:
+            continue
+        try:
+            jahr = int(teile[0][:4])
+            wert = float(teile[1])
+        except ValueError:
+            continue
+        summe[jahr] = summe.get(jahr, 0.0) + wert
+        zahl[jahr] = zahl.get(jahr, 0) + 1
+    return {j: summe[j] / zahl[j] for j in summe if zahl[j] >= 6} or None
+
+
+def cape_block(sec, cpi):
+    """Inflationsbereinigter Gewinn der letzten Jahre - die Gewinnseite des CAPE.
+
+    Shiller (1981) und Campbell/Shiller: Kurse schwanken weit staerker, als die
+    spaeteren Gewinne rechtfertigen. Das CAPE glaettet den Konjunkturzyklus,
+    indem es nicht am letzten Gewinn misst, sondern am Mittel von zehn Jahren -
+    jedes auf heutige Kaufkraft gebracht.
+
+    Gerechnet wird auf dem GESAMTGEWINN, nicht auf dem Gewinn je Aktie. Der
+    Grund ist ein Aktiensplit: Nvidia teilte 2024 im Verhaeltnis 10:1. Die SEC
+    meldet die Aktienzahl eines Geschaeftsjahres so, wie sie damals war - der
+    Gewinn je Aktie springt dadurch von 12,08 auf 2,98, ohne dass sich am
+    Unternehmen etwas geaendert haette. Ein Mittelwert ueber solche Zahlen ist
+    wertlos. Gesamtgewinn und Marktkapitalisierung sind beide Aggregate und
+    gegen Splits unempfindlich; solange die Aktienzahl konstant ist, ist
+    Marktwert/Gesamtgewinn genau dasselbe wie Kurs/Gewinn je Aktie.
+
+    Hier entsteht nur die Gewinnseite. Den Marktwert legt die Oberflaeche an,
+    weil er sich taeglich aendert und diese Datei nur einmal am Tag entsteht.
+    """
+    if not cpi:
+        return None
+    ser = (sec or {}).get("_series") or {}
+    gewinne = ser.get("netIncome") or {}
+    if not gewinne:
+        return None
+
+    basis = max(cpi)                       # heutige Kaufkraft als Bezugsjahr
+    jahre = []
+    for j_str, gewinn in gewinne.items():
+        try:
+            jahr = int(j_str)
+        except (TypeError, ValueError):
+            continue
+        if gewinn is None:
+            continue
+        index = cpi.get(jahr) or cpi.get(jahr - 1)
+        if not index:
+            continue
+        jahre.append({
+            "jahr": jahr,
+            "gewinn": gewinn,
+            "gewinnReal": round(gewinn * cpi[basis] / index),
+        })
+
+    jahre.sort(key=lambda x: x["jahr"], reverse=True)
+    jahre = jahre[:CAPE_JAHRE]
+    if len(jahre) < CAPE_MIN:
+        return None
+    mittel = sum(x["gewinnReal"] for x in jahre) / len(jahre)
+    if mittel <= 0:
+        # Ein negativer Zehnjahresschnitt ergibt ein negatives CAPE - eine Zahl,
+        # die wie eine Bewertung aussieht und keine ist. Dann lieber keine.
+        return None
+    verlustjahre = sum(1 for x in jahre if x["gewinn"] < 0)
+    return {
+        "reihe": jahre,
+        "gewinnRealMittel": round(mittel),
+        "jahre": len(jahre),
+        "vollstaendig": len(jahre) >= CAPE_JAHRE,
+        "verlustjahre": verlustjahre,
+        "basisjahr": basis,
+        "waehrung": (sec or {}).get("waehrung") or "USD",
+        "quelle": "SEC EDGAR, inflationsbereinigt mit FRED CPIAUCSL",
+    }
+
+
 def from_sec(cik):
     facts = http_json(FACTS.format(cik=cik))
     if not facts:
@@ -369,18 +523,43 @@ def from_sec(cik):
     if anteile is not None:
         out["sharesOutstanding"] = anteile
     # Trendreihen fuer Piotroski/Beneish
+    # Sechs Jahre reichen fuer Piotroski (Vorjahresvergleich, mit Reserve),
+    # aber nicht fuer das zyklusbereinigte KGV: Shiller mittelt ueber zehn
+    # Jahre. Die SEC haelt deutlich mehr vor - bei Apple 18 Jahre -, die
+    # Grenze war allein das Argument years=6.
+    JAHRE_KURZ, JAHRE_LANG = 6, 12
     out["_series"] = {
-        "netIncome": series_vals(facts, TAGS["netIncome"], waehrung),
-        "revenue": series_vals(facts, TAGS["revenue"], waehrung),
-        "cashFlowOps": series_vals(facts, TAGS["cashFlowOps"], waehrung),
-        "totalAssets": series_vals(facts, TAGS["totalAssets"], waehrung),
-        "longTermDebt": series_vals(facts, TAGS["longTermDebt"], waehrung),
-        "grossProfit": series_vals(facts, TAGS["grossProfit"], waehrung),
+        "netIncome": series_vals(facts, TAGS["netIncome"], waehrung, JAHRE_LANG),
+        "revenue": series_vals(facts, TAGS["revenue"], waehrung, JAHRE_KURZ),
+        "cashFlowOps": series_vals(facts, TAGS["cashFlowOps"], waehrung, JAHRE_KURZ),
+        "totalAssets": series_vals(facts, TAGS["totalAssets"], waehrung, JAHRE_KURZ),
+        "longTermDebt": series_vals(facts, TAGS["longTermDebt"], waehrung, JAHRE_KURZ),
+        "grossProfit": series_vals(facts, TAGS["grossProfit"], waehrung, JAHRE_KURZ),
+        # Fuer die beiden Piotroski-Kriterien, die bisher fehlten: Current
+        # Ratio und Verwaesserung. Beide Tags stehen laengst in TAGS, sie
+        # wurden nur nie als Reihe mitgeschrieben - deshalb kam der F-Score
+        # ueber sieben von neun Punkten nie hinaus.
+        "currentAssets": series_vals(facts, TAGS["currentAssets"], waehrung, JAHRE_KURZ),
+        "currentLiabilities": series_vals(facts, TAGS["currentLiabilities"], waehrung, JAHRE_KURZ),
+        "equity": series_vals(facts, TAGS["equity"], waehrung, JAHRE_KURZ),
+        # Aktienzahl in Stueck, nicht in Waehrung - sonst findet _reihen nichts.
+        "sharesOutstanding": series_vals(facts, TAGS["sharesOutstanding"], "shares", JAHRE_LANG),
     }
     # Bilanzjahr mitschreiben, damit im Dossier sichtbar ist, wie alt die Zahlen sind
     jahre = [j for j in (out["_series"].get("revenue") or {})]
     if jahre:
         out["geschaeftsjahr"] = max(jahre)
+
+    # Reicht die Datenlage ueberhaupt? Die Tickerliste der SEC zeigt bei einer
+    # Umstrukturierung auf den neuen Registranten, der noch fast nichts
+    # eingereicht hat: XOM zeigt auf "ExxonMobil Holdings Corporation" mit vier
+    # bis acht Fakten je Kennzahl statt auf die Exxon Mobil Corporation. Ohne
+    # diese Pruefung entsteht daraus ein Eintrag, der aussieht wie Daten und
+    # keine enthaelt - mit 16 Titeln faellt das auf, mit 67 nicht mehr.
+    gewinnjahre = len(out["_series"].get("netIncome") or {})
+    if gewinnjahre < 2 or not out.get("totalAssets"):
+        print(f"    zu duenne SEC-Daten ({gewinnjahre} Gewinnjahre) - verworfen")
+        return None
     return out if len(out) > 4 else None
 
 
@@ -580,7 +759,11 @@ def main():
 
     cikmap = build_ticker_cik()
     result = {}
-    ok_sec = ok_markt = ok_av = 0
+    ok_sec = ok_markt = ok_av = ok_cape = 0
+
+    # Einmal je Lauf, nicht je Titel: Der Preisindex gilt fuer alle.
+    cpi = hole_cpi()
+    print(f"Verbraucherpreisindex: {'ok, ' + str(len(cpi)) + ' Jahre' if cpi else 'nicht erreichbar - kein CAPE'}")
 
     for i, t in enumerate(tickers):
         entry = {}
@@ -596,6 +779,14 @@ def main():
             if sec:
                 entry["sec"] = sec
                 ok_sec += 1
+                try:
+                    cape = cape_block(sec, cpi)
+                except Exception as e:
+                    print(f"    CAPE-Fehler bei {t}: {e}")
+                    cape = None
+                if cape:
+                    entry["cape"] = cape
+                    ok_cape += 1
             time.sleep(0.15)      # SEC-Rate-Limit (10/s) grosszuegig einhalten
 
         # 2) Marktkennzahlen (KGV, Beta, Kursziel ...) - deckt auch Titel ohne
@@ -650,7 +841,8 @@ def main():
     with open(target, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, separators=(",", ":"))
     print(f"\nFertig: {len(result)} Titel "
-          f"({ok_sec} mit SEC, {ok_markt} mit Marktkennzahlen, {ok_av} mit Alpha Vantage)")
+          f"({ok_sec} mit SEC, {ok_markt} mit Marktkennzahlen, {ok_av} mit Alpha Vantage, "
+          f"{ok_cape} mit CAPE-Gewinnreihe)")
     print(f"        -> {target}")
 
 
