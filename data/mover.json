@@ -1,202 +1,202 @@
 {
-  "stand": "2026-11-16",
-  "erzeugt": "2026-11-16T15:36:47.499Z",
+  "stand": "2026-11-17",
+  "erzeugt": "2026-11-17T15:55:01.192Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 17.21,
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 194.43,
       "cur": "USD",
-      "wert": -13.12,
-      "stichtag": "2026-11-16"
+      "wert": -9.49,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 14.7,
+      "cur": "HKD",
+      "wert": -9.2,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 32.6,
+      "kurs": 30.82,
       "cur": "USD",
-      "wert": -8.3,
-      "stichtag": "2026-11-16"
+      "wert": -6.04,
+      "stichtag": "2026-11-17"
     },
     {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 93.56,
+      "sym": "DB",
+      "name": "Deutsche Bank Aktiengesellschaft",
+      "kurs": 33.92,
       "cur": "USD",
-      "wert": -8.03,
-      "stichtag": "2026-11-16"
+      "wert": -5.36,
+      "stichtag": "2026-11-17"
     },
     {
-      "sym": "6666.HK",
-      "name": "Evergrande Property Services Group Limited",
-      "kurs": 1.09,
-      "cur": "HKD",
-      "wert": -7.26,
-      "stichtag": "2026-11-16"
+      "sym": "SAP.DE",
+      "name": "SAP SE",
+      "kurs": 202.5,
+      "cur": "EUR",
+      "wert": -5.11,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "INTC",
       "name": "Intel Corporation",
-      "kurs": 55.77,
+      "kurs": 52.68,
       "cur": "USD",
-      "wert": -6.52,
-      "stichtag": "2026-11-16"
+      "wert": -5.03,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "TSM",
       "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 372.86,
+      "kurs": 354.69,
       "cur": "USD",
-      "wert": -6.49,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 504.54,
-      "cur": "USD",
-      "wert": -5.53,
-      "stichtag": "2026-11-16"
+      "wert": -5.02,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "ORCL",
       "name": "Oracle Corporation",
-      "kurs": 119.17,
+      "kurs": 113.34,
       "cur": "USD",
-      "wert": -4.93,
-      "stichtag": "2026-11-16"
+      "wert": -4.83,
+      "stichtag": "2026-11-17"
     },
     {
-      "sym": "AVGO",
-      "name": "Broadcom Inc.",
-      "kurs": 330.21,
+      "sym": "ADBE",
+      "name": "Adobe Inc.",
+      "kurs": 234.69,
       "cur": "USD",
-      "wert": -4.84,
-      "stichtag": "2026-11-16"
+      "wert": -4.6,
+      "stichtag": "2026-11-17"
     },
     {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 6.82,
-      "cur": "HKD",
-      "wert": 3.97,
-      "stichtag": "2026-11-16"
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 481.61,
+      "cur": "USD",
+      "wert": -4.5,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 86.77,
+      "cur": "USD",
+      "wert": -4.25,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "ASML.AS",
       "name": "ASML Holding N.V.",
-      "kurs": 1292.4,
+      "kurs": 1251.4,
       "cur": "EUR",
-      "wert": -3.47,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "kurs": 293.38,
-      "cur": "USD",
-      "wert": -3.37,
-      "stichtag": "2026-11-16"
+      "wert": -4.22,
+      "stichtag": "2026-11-17"
     }
   ],
   "woche": [
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 17.21,
+      "kurs": 16.22,
       "cur": "USD",
-      "wert": -22.69,
-      "stichtag": "2026-11-16"
+      "wert": -24.24,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "BABA",
       "name": "Alibaba Group Holding Limited",
-      "kurs": 91.66,
+      "kurs": 86.77,
       "cur": "USD",
-      "wert": -13.02,
-      "stichtag": "2026-11-16"
+      "wert": -15.53,
+      "stichtag": "2026-11-17"
     },
     {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 158.87,
-      "cur": "USD",
-      "wert": -11.08,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "ABX.TO",
-      "name": "Barrick Mining Corporation",
-      "kurs": 53.21,
-      "cur": "CAD",
-      "wert": -10.96,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "CAMT",
-      "name": "Camtek Ltd.",
-      "kurs": 93.56,
-      "cur": "USD",
-      "wert": -10.93,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "INTC",
-      "name": "Intel Corporation",
-      "kurs": 55.77,
-      "cur": "USD",
-      "wert": -6.06,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "1199.HK",
-      "name": "COSCO SHIPPING Ports Limited",
-      "kurs": 6.82,
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 14.7,
       "cur": "HKD",
-      "wert": 5.99,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 34.53,
-      "cur": "USD",
-      "wert": -5.71,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "EWL.DE",
-      "name": "Edwards Lifesciences Corporation",
-      "kurs": 97.94,
-      "cur": "EUR",
-      "wert": 5.45,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.59,
-      "cur": "HKD",
-      "wert": -5.17,
-      "stichtag": "2026-11-16"
-    },
-    {
-      "sym": "MUV2.DE",
-      "name": "Münchener Rückversicherungs-Gesellschaft Aktiengesellschaft in München",
-      "kurs": 595.2,
-      "cur": "EUR",
-      "wert": 5.16,
-      "stichtag": "2026-11-16"
+      "wert": -13.93,
+      "stichtag": "2026-11-17"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 32.6,
+      "kurs": 30.82,
       "cur": "USD",
-      "wert": -5.12,
-      "stichtag": "2026-11-16"
+      "wert": -13.13,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 150.67,
+      "cur": "USD",
+      "wert": -10.79,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 354.69,
+      "cur": "USD",
+      "wert": -10.54,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 91.6,
+      "cur": "USD",
+      "wert": -10.36,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 52.68,
+      "cur": "USD",
+      "wert": -9.38,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 194.43,
+      "cur": "USD",
+      "wert": -8.92,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "DB",
+      "name": "Deutsche Bank Aktiengesellschaft",
+      "kurs": 33.92,
+      "cur": "USD",
+      "wert": -8.57,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "ASML.AS",
+      "name": "ASML Holding N.V.",
+      "kurs": 1251.4,
+      "cur": "EUR",
+      "wert": -8.05,
+      "stichtag": "2026-11-17"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 33.49,
+      "cur": "USD",
+      "wert": -8.05,
+      "stichtag": "2026-11-17"
     }
   ]
 }
