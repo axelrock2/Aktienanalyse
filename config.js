@@ -126,6 +126,23 @@ const AK_CONFIG = {
     sprungFenster: 21,
   },
 
+  /* ---------- Module 3 und 5: Faktormodelle ---------- */
+  faktoren: {
+    /** Datei aus scripts/build_faktoren.py. */
+    quelle: "data/faktoren.json",
+    /** Fenster der Regression in Monaten. Fuenf Jahre: lang genug fuer sechs
+        Regressoren, kurz genug, um das heutige Unternehmen zu beschreiben.
+        Carhart rechnete mit 36 bis 60 Monaten. */
+    monate: 60,
+    minMonate: 36,
+    /** Unter so vielen Vergleichstiteln wird kein Perzentil gezeigt - ein Rang
+        unter zwanzig Titeln ist eine Zahl ohne Trennschaerfe. */
+    minUniversum: 20,
+    /** Ab diesem Zuwachs an bereinigtem R² tragen Profitabilitaet und
+        Investition beim einzelnen Titel sichtbar etwas bei. */
+    zugewinnSichtbar: 0.02,
+  },
+
   /* ---------- Darstellung ---------- */
   anzeige: {
     /** Haltbarkeit des Zwischenspeichers fuer Zins und Benchmark. */

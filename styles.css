@@ -784,3 +784,29 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 .ds-piot tr.nein .p-hak{color:var(--down)}
 .ds-piot tr.offen{opacity:.55}
 .ds-piot tr.offen .p-hak{color:var(--faint)}
+
+/* Faktorprofil: Perzentilrang als Punkt auf einer Skala. Ein Balken von
+   links waere falsch - der Rang ist eine POSITION, keine Menge. 50 heisst
+   Mitte des Korbs, nicht "halb voll". */
+.cp-rang{display:grid;grid-template-columns:minmax(110px,1fr) 92px 42px 2fr;
+  gap:6px 12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);
+  font-size:12.5px}
+.cp-rang:last-of-type{border-bottom:none}
+.cp-rang>b{font:600 14px var(--mono);color:var(--ink);text-align:right}
+.cp-balken{position:relative;height:5px;border-radius:99px;background:var(--bg2);
+  border:1px solid var(--line)}
+.cp-balken::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;
+  width:1px;background:var(--line)}
+.cp-balken i{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;
+  background:var(--accent);transform:translate(-50%,-50%)}
+.cp-rang.leer .cp-balken i{display:none}
+.cp-rang.leer>b{color:var(--faint)}
+
+/* Faktorladungen ohne gesicherte t-Statistik zurueckgenommen: Die Zahl steht
+   da, aber sie soll nicht dieselbe Aufmerksamkeit bekommen wie eine gesicherte. */
+.cp-z>b.cp-blass{color:var(--muted);font-weight:500}
+
+@media(max-width:620px){
+  .cp-rang{grid-template-columns:1fr 70px 36px;gap:2px 8px}
+  .cp-rang .cp-note{grid-column:1/-1}
+}

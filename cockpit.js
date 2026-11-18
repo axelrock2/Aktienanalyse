@@ -435,6 +435,253 @@ function cpCape(cape, marktwert, kgv) {
 }
 
 /* =====================================================================
+   Module 3 und 5 - Faktormodelle
+   (Fama & French 1993/2015, Carhart 1997)
+   ===================================================================== */
+
+/**
+ * Mehrfachregression y = b0 + b1*x1 + … + bk*xk nach der Methode der
+ * kleinsten Quadrate.
+ *
+ * Geloest ueber die Normalgleichungen (X'X)b = X'y mit Gauss-Jordan und
+ * Spaltenpivotisierung. Bei vier bis sechs Regressoren und sechzig Monaten
+ * ist das numerisch unbedenklich und braucht keine Zerlegung.
+ *
+ * Zurueck kommen nicht nur die Koeffizienten, sondern auch ihre
+ * t-Statistiken. Ohne sie ist eine Faktorladung nicht einzuordnen: 0,3 bei
+ * t = 0,4 heisst "wir wissen es nicht", 0,3 bei t = 3 heisst etwas.
+ *
+ * @param {number[]} y
+ * @param {number[][]} X  je Zeile eine Beobachtung, ohne Achsenabschnitt
+ */
+function cpOls(y, X) {
+  const n = y.length, k = X[0].length + 1;
+  if (n <= k + 2) return null;
+  // Entwurfsmatrix mit Einserspalte
+  const A = X.map(z => [1, ...z]);
+  const XtX = Array.from({ length: k }, () => new Array(k).fill(0));
+  const Xty = new Array(k).fill(0);
+  for (let i = 0; i < n; i++) {
+    for (let a = 0; a < k; a++) {
+      Xty[a] += A[i][a] * y[i];
+      for (let b = a; b < k; b++) XtX[a][b] += A[i][a] * A[i][b];
+    }
+  }
+  for (let a = 0; a < k; a++) for (let b = 0; b < a; b++) XtX[a][b] = XtX[b][a];
+
+  /* Inverse mitrechnen: Die Diagonale von (X'X)^-1 traegt die
+     Standardfehler, ohne sie gaebe es keine t-Statistik. */
+  const M = XtX.map((zeile, i) => [...zeile, ...Array.from({ length: k }, (_, j) => i === j ? 1 : 0)]);
+  for (let sp = 0; sp < k; sp++) {
+    let pivot = sp;
+    for (let z = sp + 1; z < k; z++) if (Math.abs(M[z][sp]) > Math.abs(M[pivot][sp])) pivot = z;
+    if (Math.abs(M[pivot][sp]) < 1e-12) return null;   // singulaer
+    [M[sp], M[pivot]] = [M[pivot], M[sp]];
+    const d = M[sp][sp];
+    for (let j = 0; j < 2 * k; j++) M[sp][j] /= d;
+    for (let z = 0; z < k; z++) {
+      if (z === sp) continue;
+      const f = M[z][sp];
+      if (!f) continue;
+      for (let j = 0; j < 2 * k; j++) M[z][j] -= f * M[sp][j];
+    }
+  }
+  const inv = M.map(z => z.slice(k));
+  const b = new Array(k).fill(0);
+  for (let a = 0; a < k; a++) for (let c = 0; c < k; c++) b[a] += inv[a][c] * Xty[c];
+
+  const my = cpMittel(y);
+  let rss = 0, tss = 0;
+  for (let i = 0; i < n; i++) {
+    let hut = 0;
+    for (let a = 0; a < k; a++) hut += b[a] * A[i][a];
+    rss += (y[i] - hut) ** 2;
+    tss += (y[i] - my) ** 2;
+  }
+  const s2 = rss / (n - k);
+  const t = b.map((wert, a) => {
+    const se = Math.sqrt(Math.max(0, s2 * inv[a][a]));
+    return se > 0 ? wert / se : null;
+  });
+  const r2 = tss > 0 ? 1 - rss / tss : null;
+  return {
+    b, t, r2, n, k,
+    r2adj: (r2 != null && n > k) ? 1 - (1 - r2) * (n - 1) / (n - k) : null,
+  };
+}
+
+/** Faktorregion zur Heimatboerse. */
+function cpRegionWahl(symbol) {
+  const teile = String(symbol || "").split(".");
+  const k = teile.length > 1 ? teile[teile.length - 1].toUpperCase() : null;
+  if (!k) return "US";
+  const eu = ["DE", "F", "BE", "MU", "SG", "HM", "DU", "PA", "AS", "BR", "MI",
+              "MC", "LS", "VI", "HE", "ST", "CO", "OL", "IC", "AT", "L", "SW",
+              "WA", "PR", "IS"];
+  if (eu.includes(k)) return "EU";
+  if (k === "T") return "JP";
+  if (["HK", "AX", "NZ", "SI", "KS", "KQ", "TW", "SS", "SZ", "NS", "BO"].includes(k)) return "AP";
+  return null;      // Kanada, Lateinamerika, Afrika - keine passende Reihe
+}
+
+/**
+ * Faktorregression: Wie viel der Kursbewegung erklaeren bekannte Faktoren?
+ *
+ *   Carhart (1997), vier Faktoren:
+ *     Ri − Rf = a + b·MKT + s·SMB + h·HML + m·MOM + e
+ *   Fama & French (2015), fuenf Faktoren plus Momentum:
+ *     zusaetzlich r·RMW + c·CMA
+ *
+ * Carharts Befund war, dass die scheinbare Treffsicherheit erfolgreicher
+ * Fondsmanager fast vollstaendig aus Faktor-Exposure und Kosten stammte und
+ * nicht aus Koennen. Dasselbe laesst sich fuer einen einzelnen Titel fragen:
+ * Bleibt nach Abzug der Faktoren noch etwas uebrig?
+ *
+ * Gerechnet auf gemeinsamen Monaten - die Faktorreihen enden rund zwei Monate
+ * vor heute, weil Kenneth French sie erst dann veroeffentlicht.
+ */
+function cpFaktorRegression(chart, faktoren, region) {
+  if (!faktoren || !faktoren.regionen) return { grund: "Keine Faktordaten geladen." };
+  if (!region) return { grund: "Für diese Börse gibt es keine passende Faktorreihe." };
+  const R = faktoren.regionen[region];
+  if (!R) return { grund: `Für die Region ${region} fehlen die Faktordaten.` };
+
+  const kurse = cpMonatsende(chart.t, chart.c);
+  const spalte = {}; R.spalten.forEach((n, i) => { spalte[n] = i; });
+
+  /* Monatsrenditen des Titels auf die Faktormonate legen. Die Faktordatei
+     nennt den Monat als "JJJJMM", cpMonatsende als "JJJJ-MM". */
+  const reihen = [];
+  for (let i = 1; i < R.monate.length; i++) {
+    const m0 = R.monate[i - 1], m1 = R.monate[i];
+    const k = x => x.slice(0, 4) + "-" + x.slice(4);
+    const p0 = kurse.get(k(m0)), p1 = kurse.get(k(m1));
+    if (!(p0 > 0 && p1 > 0)) continue;
+    reihen.push({ monat: m1, r: p1 / p0 - 1, f: R.werte[i], rf: R.rf[i] });
+  }
+  const K = AK_CONFIG.faktoren;
+  const teil = reihen.slice(-K.monate);
+  if (teil.length < K.minMonate) {
+    return { grund: `Nur ${teil.length} gemeinsame Monate mit der Faktorreihe, mindestens ${K.minMonate} nötig.` };
+  }
+
+  const y = teil.map(z => z.r - z.rf);
+  const nimm = namen => teil.map(z => namen.map(n => z.f[spalte[n]]));
+  const modell = (namen) => {
+    const erg = cpOls(y, nimm(namen));
+    if (!erg) return null;
+    return {
+      namen,
+      alpha: erg.b[0] * 12, tAlpha: erg.t[0],
+      ladungen: namen.map((n, i) => ({ name: n, wert: erg.b[i + 1], t: erg.t[i + 1] })),
+      r2: erg.r2, r2adj: erg.r2adj, n: erg.n,
+    };
+  };
+
+  const carhart = modell(["MktRF", "SMB", "HML", "Mom"]);
+  const ff5 = modell(["MktRF", "SMB", "HML", "RMW", "CMA", "Mom"]);
+  if (!carhart) return { grund: "Die Regression ließ sich nicht lösen (singuläre Matrix)." };
+
+  return {
+    carhart, ff5, region, regionName: R.name, quelle: R.quelle,
+    von: teil[0].monat, bis: teil[teil.length - 1].monat, stand: faktoren.stand,
+    /* Der Zuwachs an erklaerter Varianz durch Profitabilitaet und Investition.
+       Ist er klein, tragen die beiden zusaetzlichen Faktoren bei diesem Titel
+       nichts - und das gehoert gesagt, statt sechs Ladungen hinzustellen. */
+    zugewinn: (ff5 && carhart && ff5.r2adj != null && carhart.r2adj != null)
+      ? ff5.r2adj - carhart.r2adj : null,
+  };
+}
+
+/* =====================================================================
+   Modul 3a - Faktorprofil im Querschnitt
+   ===================================================================== */
+
+/**
+ * Perzentilrang eines Werts in einer Liste.
+ * 0 heisst kleinster, 100 groesster. Gleichstaende teilen sich den Rang.
+ */
+function cpRang(wert, liste) {
+  const gueltig = liste.filter(x => x != null && isFinite(x)).sort((a, b) => a - b);
+  if (gueltig.length < AK_CONFIG.faktoren.minUniversum || wert == null || !isFinite(wert)) return null;
+  let kleiner = 0, gleich = 0;
+  for (const x of gueltig) { if (x < wert) kleiner++; else if (x === wert) gleich++; }
+  return Math.round(100 * (kleiner + gleich / 2) / gueltig.length);
+}
+
+/**
+ * Faktorprofil eines Titels gegenueber dem Vergleichskorb.
+ *
+ * Die vier Fundamentalfaktoren aus Fama & French (1993, 2015), gerechnet aus
+ * data/fundamentals.json - dieselbe Datei, die die Seite ohnehin laedt. Kein
+ * zusaetzlicher Abruf, und das Universum ist genau die Menge, ueber die die
+ * Startseite spricht.
+ *
+ * Wichtig fuer die Lesart: Ein hoher Wert-Rang heisst "guenstig bewertet
+ * gemessen am Buchwert", nicht "guenstig". Und die Praemien sind Durchschnitte
+ * ueber viele Aktien und lange Zeitraeume - die Wertpraemie war von etwa 2007
+ * bis 2020 schwach.
+ */
+function cpProfil(symbol, alle) {
+  if (!alle) return null;
+  const basis = String(symbol).split(".")[0].toUpperCase();
+
+  const kennzahlen = (e) => {
+    const s = (e && e.sec) || {}, m = (e && e.markt) || {};
+    const ser = s._series || {};
+    const jahr = (k, i = 0) => {
+      const o = ser[k] || {};
+      const keys = Object.keys(o).sort().reverse();
+      return keys[i] != null ? o[keys[i]] : null;
+    };
+    const mw = m.marketCap;
+    const ek = s.equity ?? jahr("equity");
+    const ta0 = s.totalAssets ?? jahr("totalAssets"), ta1 = jahr("totalAssets", 1);
+    const gp = s.grossProfit ?? jahr("grossProfit");
+    return {
+      groesse: mw > 0 ? Math.log(mw) : null,
+      wert: (ek > 0 && mw > 0) ? ek / mw : null,
+      profit: (gp != null && ta0 > 0) ? gp / ta0 : null,
+      // Niedriges Bilanzwachstum = "konservativ" = die ertragreichere Seite
+      investition: (ta0 > 0 && ta1 > 0) ? ta0 / ta1 - 1 : null,
+    };
+  };
+
+  /* Nur fuer Titel des Vergleichskorbs. Ein Titel ausserhalb bekaeme sonst
+     ein Profil aus lauter Gedankenstrichen - ein leerer Rahmen, der aussieht,
+     als waeren die Daten nur gerade nicht da. */
+  if (!alle[basis]) return null;
+  const eigen = kennzahlen(alle[basis]);
+  const universum = Object.values(alle).map(kennzahlen);
+
+  const felder = [
+    { id: "groesse", name: "Größe", hoch: "groß", niedrig: "klein",
+      note: "Marktkapitalisierung, logarithmiert. Kleine Unternehmen hatten historisch die höhere Rendite (SMB)." },
+    { id: "wert", name: "Wert", hoch: "günstig zum Buchwert", niedrig: "teuer zum Buchwert",
+      note: "Buchwert geteilt durch Marktwert. Hoch heißt günstig gemessen am Eigenkapital (HML) – nicht günstig schlechthin." },
+    { id: "profit", name: "Profitabilität", hoch: "profitabel", niedrig: "wenig profitabel",
+      note: "Bruttogewinn je Einheit Bilanzsumme (RMW)." },
+    { id: "investition", name: "Investition", hoch: "wächst stark", niedrig: "wächst verhalten",
+      note: "Wachstum der Bilanzsumme. Verhalten wachsende Unternehmen schnitten besser ab (CMA) – hier ist der NIEDRIGE Rang die historisch ertragreichere Seite." },
+  ];
+  /* Je Faktor eine eigene Vergleichszahl: Nicht jeder Titel meldet jede
+     Groesse - Banken weisen keinen Bruttogewinn aus, und ohne Marktwert gibt
+     es weder Groesse noch Wert. Eine gemeinsame Zahl "n = 74" waere fuer
+     einzelne Zeilen schlicht falsch. */
+  return {
+    werte: felder.map(f => {
+      const spalte = universum.map(x => x[f.id]);
+      return {
+        ...f,
+        wert: eigen[f.id],
+        rang: cpRang(eigen[f.id], spalte),
+        n: spalte.filter(x => x != null && isFinite(x)).length,
+      };
+    }),
+  };
+}
+
+/* =====================================================================
    Oberflaeche
    ===================================================================== */
 
@@ -449,7 +696,7 @@ function cpBenchmarkWahl(symbol) {
 
 /* Zins und Benchmark aendern sich nicht je Titel - einmal je Sitzung holen.
    Dasselbe Muster wie loadBenchmark() in app.js. */
-const cpVorrat = { rf: null, benches: new Map() };
+const cpVorrat = { rf: null, faktoren: null, benches: new Map() };
 
 /**
  * Risikofreier Zins aus ^TNX ueber dieselbe Kursquelle wie alles andere.
@@ -471,6 +718,36 @@ async function cpRf() {
   return cpVorrat.rf;
 }
 
+/** Faktorreihen und Zinsen aus data/faktoren.json. Einmal je Sitzung. */
+async function cpFaktoren() {
+  if (!cpVorrat.faktoren) {
+    cpVorrat.faktoren = fetch(AK_CONFIG.faktoren.quelle + "?v=" + Date.now())
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null);
+  }
+  return cpVorrat.faktoren;
+}
+
+/**
+ * Risikofreier Zins in der Waehrung der Notierung.
+ *
+ * Fuer den Euroraum liefert die EZB die Rendite der Bundesanleihe - bis Phase 3
+ * rechnete das Cockpit auch fuer Euro-Titel mit dem US-Zins und sagte das dazu.
+ * Fuer alles andere bleibt ^TNX: aktuell, taeglich, aus derselben Kursquelle.
+ */
+async function cpRfFuer(waehrung) {
+  const w = String(waehrung || "").toUpperCase();
+  if (w === "EUR") {
+    const f = await cpFaktoren();
+    const z = f && f.zinsen && f.zinsen.EUR;
+    if (z && z.wert > 0) {
+      return { wert: z.wert, quelle: z.name, stand: z.stand, passt: true };
+    }
+  }
+  const us = await cpRf();
+  return { ...us, passt: !w || w.startsWith(AK_CONFIG.capm.rfWaehrung) };
+}
+
 async function cpBenchmark(symbol) {
   const wahl = cpBenchmarkWahl(symbol);
   if (!cpVorrat.benches.has(wahl.sym)) {
@@ -482,7 +759,7 @@ async function cpBenchmark(symbol) {
 }
 
 /** Alles rechnen. Die Daten kommen von aussen - die Funktion holt nichts. */
-function cpRechne(chart, bench, rf, roh, fund) {
+function cpRechne(chart, bench, rf, roh, fund, faktoren, symbol) {
   const risiko = cpRisiko(chart, bench);
   return {
     risiko,
@@ -490,6 +767,8 @@ function cpRechne(chart, bench, rf, roh, fund) {
     momentum: cpMomentum(chart, bench),
     verhalten: cpVerhalten(chart),
     cape: cpCape(roh && roh.cape, fund && fund.marketCap, fund && fund.trailingPE),
+    regression: cpFaktorRegression(chart, faktoren, cpRegionWahl(symbol)),
+    profil: cpProfil(symbol, (typeof Fundamentals === "object" && Fundamentals.data) || null),
   };
 }
 
@@ -530,7 +809,29 @@ if (typeof INFO === "object" && typeof INFO_LABELS === "object") {
     cpAnker: ["Anker 52-Wochen-Hoch",
       "Anleger zögern, über ein früheres Hoch hinaus zu kaufen – das Hoch wirkt als Referenzpunkt. George & Hwang (2004) finden, dass neue Hochs deshalb verzögert eingepreist werden.\n\nDas ist weder Kauf- noch Verkaufsgrund. Es markiert eine Stelle, an der Kursbewegungen häufiger aus Psychologie als aus Zahlen entstehen."],
   });
+  Object.assign(INFO, {
+    cpGroesse: ["Faktor Größe (SMB)",
+      "Perzentilrang der Marktkapitalisierung im eigenen Vergleichskorb, logarithmiert. 100 heißt: der größte Titel des Korbs.\n\nFama & French (1993) fanden, dass kleine Unternehmen systematisch höher rentierten als große – der Faktor heißt SMB für „small minus big“.\n\nEin Durchschnitt über viele Aktien und Jahrzehnte, keine Aussage über diesen Titel. Die Größenprämie war in den Jahren nach 2000 deutlich schwächer als davor."],
+    cpWert: ["Faktor Wert (HML)",
+      "Buchwert des Eigenkapitals geteilt durch den Marktwert, als Perzentilrang. Hoch heißt: günstig gemessen am Eigenkapital.\n\nFama & French (1993): Aktien mit hohem Buch-zu-Marktwert rentierten höher – HML für „high minus low“.\n\nZwei Vorbehalte. Erstens heißt „günstig zum Buchwert“ nicht „günstig“: Ein niedriger Buchwert kann auch heißen, dass das Geschäft auf immateriellen Werten beruht, die in keiner Bilanz stehen. Zweitens war die Wertprämie von etwa 2007 bis 2020 schwach. Bei Banken und Versicherungen ist der Buchwert ohnehin nur eingeschränkt vergleichbar."],
+    cpProfit: ["Faktor Profitabilität (RMW)",
+      "Bruttogewinn je Einheit Bilanzsumme, als Perzentilrang.\n\nFama & French (2015) nahmen diesen Faktor neu auf: Profitable Unternehmen rentierten besser als wenig profitable – RMW für „robust minus weak“.\n\nBanken und Versicherungen weisen keinen Bruttogewinn aus; für sie bleibt die Zeile leer, statt eine andere Größe hineinzurechnen."],
+    cpInvest: ["Faktor Investition (CMA)",
+      "Wachstum der Bilanzsumme gegenüber dem Vorjahr, als Perzentilrang.\n\nFama & French (2015): Unternehmen, die ihre Bilanz verhalten ausweiten, schnitten besser ab als stark investierende – CMA für „conservative minus aggressive“.\n\nAchtung bei der Leserichtung: Hier ist der NIEDRIGE Rang die historisch ertragreichere Seite. Bei allen anderen Faktoren ist es der hohe."],
+    cpLadung: ["Faktorladung",
+      "Wie stark der Titel auf einen Faktor reagiert – die Steigung in der Mehrfachregression der monatlichen Überschussrenditen.\n\nEine Ladung von 0,8 auf Wert (HML) heißt: Der Titel bewegt sich wie ein Portfolio mit kräftigem Value-Charakter. Negative Ladungen sind die Gegenseite – minus auf HML heißt Wachstumscharakter.\n\nEntscheidend ist die t-Statistik daneben. Unter |t| = 2 ist die Ladung nicht von null zu unterscheiden; die Zahl steht trotzdem da, aber zurückgenommen."],
+    cpR2adj: ["Erklärte Varianz (bereinigtes R²)",
+      "Welcher Anteil der monatlichen Kursbewegung sich durch die Faktoren erklären lässt, korrigiert um die Zahl der Regressoren.\n\nDie Korrektur ist nötig, weil jedes zusätzliche Merkmal das rohe R² mechanisch anhebt, auch wenn es nichts erklärt. Das bereinigte R² kann deshalb sinken, wenn man Faktoren hinzunimmt – und tut es hier regelmäßig."],
+    cpAlphaReg: ["Alpha der Faktor-Regression",
+      "Was nach Abzug der Faktoren übrig bleibt: der Achsenabschnitt der Regression, auf ein Jahr hochgerechnet.\n\nCarhart (1997) untersuchte damit Investmentfonds und fand, dass ihre scheinbare „Hot Hand“ fast vollständig durch Momentum-Exposure und Kosten erklärbar war – nicht durch Können. Dauerhaft war nur die Underperformance der schlechtesten Fonds.\n\nOhne gesicherte t-Statistik ist ein Alpha kein Können, sondern Streuung. Und es ist rückblickend: Dass etwas übrig blieb, sagt nicht, dass es wieder übrig bleibt."],
+  });
   Object.assign(INFO_LABELS, {
+    "faktor größe": "cpGroesse", "faktor wert": "cpWert",
+    "faktor profitabilität": "cpProfit", "faktor investition": "cpInvest",
+    "markt": "cpLadung", "größe smb": "cpLadung", "wert hml": "cpLadung",
+    "profitabilität rmw": "cpLadung", "investition cma": "cpLadung",
+    "momentum mom": "cpLadung",
+    "erklärte varianz": "cpR2adj", "alpha p. a.": "cpAlphaReg",
     "volatilität 1 jahr": "cpVola", "volatilität 3 jahre": "cpVola",
     "maximaler rückgang": "cpDrawdown", "korrelation": "cpKorr",
     /* NICHT "beta": Dieser Schluessel ist in app.js schon vergeben und zeigt
@@ -555,6 +856,13 @@ const cpZ = (v, d = 2) => v == null || !isFinite(v) ? "–"
 const cpDat = ts => ts ? new Date(ts).toLocaleDateString("de-DE",
   { day: "2-digit", month: "2-digit", year: "numeric" }) : "–";
 
+/** Faktorkuerzel in Worte. "SMB" sagt niemandem etwas, der es nicht ohnehin weiss. */
+function cpLadungName(k) {
+  return ({ MktRF: "Markt", SMB: "Größe (SMB)", HML: "Wert (HML)",
+            RMW: "Profitabilität (RMW)", CMA: "Investition (CMA)",
+            Mom: "Momentum (MOM)" })[k] || k;
+}
+
 /** Eine Zeile im Cockpit: Name, Wert, Einordnung. */
 function cpZeile(name, wert, note, klasse) {
   return `<div class="cp-z">
@@ -568,7 +876,7 @@ function cpZeige(out, erg, bench, rf, chart, item) {
   const e = typeof esc === "function" ? esc : (s => s);
   const { risiko: r, capm: cm, momentum: m, verhalten: v, cape } = erg;
   const waehrung = (chart.meta && chart.meta.currency) || "";
-  const zinsPasst = !waehrung || waehrung.toUpperCase().startsWith(AK_CONFIG.capm.rfWaehrung);
+  const zinsPasst = rf.passt !== false;
 
   /* --- 1 Risiko --- */
   const dd = r.drawdown;
@@ -672,6 +980,70 @@ function cpZeige(out, erg, bench, rf, chart, item) {
         vergleicht der Zehnjahresschnitt zwei verschiedene Firmen miteinander.</p>
     </div>`;
 
+  /* --- 3a Faktorprofil im Querschnitt --- */
+  const pf = erg.profil;
+  const profilHtml = !pf ? "" : `
+    <div class="cp-teil">
+      <h4>Faktorprofil <span class="cp-q">Fama &amp; French 1993 / 2015</span></h4>
+      ${pf.werte.map(w => `<div class="cp-rang${w.rang == null ? " leer" : ""}">
+        <span class="cp-n">${e(w.name)}${typeof infoFuer === "function" ? infoFuer("Faktor " + w.name) : ""}</span>
+        <span class="cp-balken"><i style="left:${w.rang == null ? 0 : w.rang}%"></i></span>
+        <b>${w.rang == null ? "–" : w.rang}</b>
+        <span class="cp-note">${w.rang == null
+          ? `zu wenige Vergleichstitel (${w.n})`
+          : `${e(w.rang >= 50 ? w.hoch : w.niedrig)} · Perzentil unter ${w.n} Titeln`}</span>
+      </div>`).join("")}
+      <p class="cp-fuss">Perzentilrang im eigenen Vergleichskorb, aus
+        <code>data/fundamentals.json</code>. 100 heißt höchster Wert, 0 niedrigster.
+        Je Faktor eine eigene Vergleichszahl – nicht jeder Titel meldet jede Größe;
+        Banken weisen keinen Bruttogewinn aus, ohne Marktwert gibt es weder Größe noch Wert.
+        Was jeder Faktor misst und in welche Richtung er historisch zahlte, steht im
+        <b>i</b> neben seinem Namen.
+        <br><b>Durchschnitte über viele Aktien, keine Prognose für diesen Titel.</b>
+        Die Wertprämie war von etwa 2007 bis 2020 schwach, und bei Banken und
+        Versicherungen ist der Buchwert nur eingeschränkt vergleichbar.</p>
+    </div>`;
+
+  /* --- 3b + 5 Faktor-Regression --- */
+  const rg = erg.regression;
+  let regHtml = "";
+  if (rg && !rg.grund && rg.carhart) {
+    const c = rg.carhart;
+    const sig = c.tAlpha != null && Math.abs(c.tAlpha) > 2;
+    const lad = (l) => cpZeile(e(cpLadungName(l.name)), cpZ(l.wert),
+      l.t == null ? "" : `t = ${cpZ(l.t, 1)}${Math.abs(l.t) > 2 ? "" : " – nicht gesichert"}`,
+      Math.abs(l.t || 0) > 2 ? "" : "cp-blass");
+    const lohnt = rg.zugewinn != null && rg.zugewinn >= AK_CONFIG.faktoren.zugewinnSichtbar;
+    regHtml = `
+    <div class="cp-teil">
+      <h4>Faktor-Regression <span class="cp-q">Carhart 1997</span></h4>
+      ${cpZeile("Erklärte Varianz", cpP(c.r2adj, 0),
+         `${cpP(c.r2adj, 0)} der monatlichen Kursbewegung erklären Markt, Größe, Wert und Momentum`)}
+      ${cpZeile("Alpha p. a.", cpP(c.alpha),
+         c.tAlpha == null ? "" : sig
+           ? `t = ${cpZ(c.tAlpha, 1)} – <b class="cp-ok">bleibt nach Abzug der Faktoren übrig</b>`
+           : `t = ${cpZ(c.tAlpha, 1)} – <b>nicht von null zu unterscheiden</b>`,
+         sig ? (c.alpha >= 0 ? "up" : "down") : "")}
+      ${c.ladungen.map(lad).join("")}
+      ${lohnt ? cpZeile("Fünf Faktoren statt vier", "+" + cpP(rg.zugewinn, 1),
+         `Profitabilität ${cpZ(rg.ff5.ladungen[3].wert)} (t ${cpZ(rg.ff5.ladungen[3].t, 1)}),
+          Investition ${cpZ(rg.ff5.ladungen[4].wert)} (t ${cpZ(rg.ff5.ladungen[4].t, 1)})`) : ""}
+      <p class="cp-fuss">Monatliche Überschussrenditen über ${c.n} Monate (${e(rg.von)} bis
+        ${e(rg.bis)}) auf die Faktorrenditen für ${e(rg.regionName)}. Quelle: ${e(rg.quelle)},
+        Stand ${e(rg.stand)} – die Reihen erscheinen rund zwei Monate nach dem Berichtsmonat.
+        ${lohnt ? "" : `Profitabilität und Investition bringen bei diesem Titel keinen
+          nennenswerten Zugewinn${rg.zugewinn != null ? ` (${cpP(rg.zugewinn, 1)} bereinigtes R²)` : ""} –
+          deshalb steht hier das Vierfaktorenmodell.`}
+        <br>Carharts Befund: Die scheinbare Treffsicherheit erfolgreicher Fondsmanager
+        ließ sich fast vollständig durch Faktor-Exposure und Kosten erklären. Ein Alpha ohne
+        gesicherte t-Statistik ist kein Können, sondern Streuung. Rückblickend, nicht prognostisch.</p>
+    </div>`;
+  } else if (rg && rg.grund) {
+    regHtml = `<div class="cp-teil">
+      <h4>Faktor-Regression <span class="cp-q">Carhart 1997</span></h4>
+      <p class="cp-leer">${e(rg.grund)}</p></div>`;
+  }
+
   out.className = "";
   out.innerHTML = `
     <div class="cp-teil">
@@ -686,6 +1058,8 @@ function cpZeige(out, erg, bench, rf, chart, item) {
       <h4>Momentum <span class="cp-q">Jegadeesh &amp; Titman 1993</span></h4>
       ${momHtml}
     </div>
+    ${profilHtml}
+    ${regHtml}
     ${capeHtml}
     <div class="cp-teil">
       <h4>Verhaltens-Hinweise <span class="cp-q">Kahneman &amp; Tversky 1979</span></h4>
@@ -698,11 +1072,11 @@ function cpZeige(out, erg, bench, rf, chart, item) {
       Kursdaten bis ${cpDat(chart.t[chart.t.length - 1])}.
       ${zinsPasst ? "" : `<br><b class="cp-warn">Der Titel notiert in ${e(waehrung)}, der Zins
         gilt für den Dollarraum.</b> Eigenkapitalkosten und Sharpe-Verhältnis sind deshalb
-        gegen den falschen Massstab gerechnet. Eine Euro-Zinsreihe fehlt bei der
-        Kursquelle – sie kommt mit den Faktordaten.`}
+        gegen den falschen Maßstab gerechnet. Für Euro-Notierungen liefert die EZB die
+        Bundesanleihe; für andere Währungen fehlt die Reihe noch.`}
       <br>Alle Einstellungen stehen in <code>config.js</code>.
       ${cape ? "" : "Ein zyklusbereinigtes KGV gibt es nur für Titel mit mehrjährigen SEC-Bilanzen. "}
-      Das Faktorprofil folgt im nächsten Schritt; die Bilanzqualität steht im Dossier.
+      Die Bilanzqualität steht im Dossier.
       <br><b>Keine Anlageberatung.</b> Momentum- und Faktoreffekte sind Durchschnitte über
       viele Aktien; auf einen einzelnen Titel angewandt sind sie eine Einordnung, keine Prognose.
     </p>`;
@@ -713,7 +1087,9 @@ async function cpVerdrahte(item, chart, fund) {
   const out = document.getElementById("cp-out");
   if (!out) return;
   try {
-    const [bench, rf] = await Promise.all([cpBenchmark(item.s), cpRf()]);
+    const waehrung = (chart.meta && chart.meta.currency) || "";
+    const [bench, rf, faktoren] = await Promise.all([
+      cpBenchmark(item.s), cpRfFuer(waehrung), cpFaktoren()]);
     /* Fuenf Jahre statt der zwei des Charts: Beta braucht 36 Monate, die
        Drei-Jahres-Volatilitaet 756 Handelstage. Scheitert der Abruf, wird mit
        der vorhandenen Reihe gerechnet - dann fehlen einzelne Werte, statt
@@ -725,7 +1101,7 @@ async function cpVerdrahte(item, chart, fund) {
     let roh = null;
     try { roh = (typeof Fundamentals === "object") ? Fundamentals.get(item.s) : null; }
     catch (err) { /* ohne Datei einfach kein CAPE */ }
-    const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund);
+    const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund, faktoren, item.s);
     cpZeige(out, erg, bench, rf, lang, item);
   } catch (e) {
     out.className = "";
