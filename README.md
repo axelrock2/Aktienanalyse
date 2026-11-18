@@ -287,6 +287,48 @@ in derselben Datei **dieselben Daten als Jahreswerte**. Wer nur prüft, ob eine
 Zeile mit Ziffern beginnt, liest sie als Monate mit und verschiebt die ganze
 Reihe.
 
+**Risikobeitrag im Depot (Markowitz 1952).** Die Depotansicht zeigt, was
+Markowitz' Satz eigentlich besagt: Risiko addiert sich nicht. Drei Zahlen oben —
+Depot-Volatilität, gewichtete Summe der Einzelrisiken, Differenz als
+Diversifikationsgewinn — und darunter je Position, wie viel sie zur Schwankung
+des **Gesamtdepots** beiträgt.
+
+Das ist nicht ihr Gewicht und auch nicht ihre eigene Volatilität, sondern
+w·(Σw)/σ. Diese Beiträge summieren sich exakt auf 100 % (Euler-Zerlegung,
+im Prüfskript auf zwölf Nachkommastellen nachgerechnet). An einem Beispiel aus
+sechs Positionen:
+
+| Position | Gewicht | Vola | Risikoanteil | Überhang | zum Rest |
+|---|---|---|---|---|---|
+| NVDA | 26,4 % | 38 % | **58,8 %** | +32,4 Pp | 0,05 |
+| KO | 21,0 % | 17 % | 3,3 % | −17,6 Pp | −0,15 |
+
+NVIDIA wiegt ein Viertel und trägt knapp sechzig Prozent des Risikos. Coca-Cola
+wiegt ein Fünftel und trägt drei Prozent — weil es wenig schwankt *und* mit
+−0,15 gegen den Rest läuft. Das Depot schwankt dadurch 49,5 % weniger als die
+gewichtete Summe seiner Teile.
+
+Dazu die Korrelationsmatrix als Farbfeld (rot läuft mit, türkis läuft gegen).
+Ab 15 Positionen bleibt sie aus — hundert Zellen sind keine Übersicht; die
+Spalte „zum Rest" sagt dasselbe je Position.
+
+Die Kovarianz entsteht aus gemeinsamen Monatsrenditen, aus demselben Grund wie
+beim Beta: Positionen aus verschiedenen Zeitzonen haben verschiedene
+Handelstage. Und ein Vorbehalt steht dabei: **Korrelationen steigen in Krisen**,
+also genau dann, wenn man die Streuung bräuchte.
+
+**Momentum im Querschnitt.** Jegadeesh & Titman (1993) haben den Effekt über
+die *Rangfolge* vieler Aktien gefunden, nicht am einzelnen Titel — „+25 % in
+zwölf Monaten" sagt ohne Vergleichsmenge nicht, ob das viel ist. Der
+Momentum-Abschnitt zeigt deshalb jetzt den Perzentilrang im Korb.
+
+Die Werte entstehen in `scripts/build_mover.js`, also im selben täglichen Lauf,
+der das Laufband der Startseite füllt: Die Kurse des Korbs werden dort ohnehin
+geholt, der Abrufzeitraum wächst von einem Monat auf zwei Jahre. Ergebnis ist
+`data/quer.json` — nur Symbol, zwei Momentum-Fenster und die Schwankung, damit
+die Datei klein bleibt. Titel außerhalb des Korbs bekommen keinen Rang, und das
+steht dann dort.
+
 **Der Euro-Zins ist da.** Die EZB liefert die Rendite der Bundesanleihe
 (3,42 % im Oktober 2026); dieselbe Action holt sie mit. Für Euro-Titel rechnet
 das Cockpit jetzt damit statt mit dem US-Zins — der Hinweis aus Phase 1
