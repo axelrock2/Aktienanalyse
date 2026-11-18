@@ -54,7 +54,7 @@ function ladeModul() {
   const schnitt = quelle.indexOf(marke);
   vm.runInContext((schnitt > 0 ? quelle.slice(0, schnitt) : quelle)
     + "\nglobalThis.__ex = { cpRisiko, cpCapm, cpMomentum, cpVerhalten, cpVola,"
-    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, cpOls, cpFaktorRegression, cpProfil, cpRang, cpRegionWahl, cpPortfolio, cpQuerRang, AK_CONFIG };", ctx);
+    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, cpOls, cpFaktorRegression, cpProfil, cpRang, cpRegionWahl, cpPortfolio, cpQuerRang, cpScore, cpScoreAusTeilen, AK_CONFIG };", ctx);
   return ctx.__ex;
 }
 
@@ -372,6 +372,53 @@ const Z = (v, d = 2) => v == null || !isFinite(v) ? "  – " : v.toFixed(d).padS
     const sortiert = mit.slice().sort((a, b) => b.m12 - a.m12);
     console.log(`  stärkstes ${sortiert[0].s} ${sortiert[0].m12.toFixed(0)} %, `
       + `schwächstes ${sortiert[sortiert.length - 1].s} ${sortiert[sortiert.length - 1].m12.toFixed(0)} %`);
+  }
+
+  /* --- Gesamt-Score ---
+     Der Score selbst sagt nichts voraus; das steht gemessen in config.js.
+     Hier wird geprueft, dass er wenigstens das tut, was er behauptet: ueber
+     vorhandene Bausteine normieren und fehlende nicht als null werten. */
+  console.log("\nGesamt-Score");
+  {
+    const g = { a: 0.5, b: 0.5 };
+    sagePruefung("gewichtetes Mittel zweier Bausteine",
+      Math.abs(M.cpScoreAusTeilen({ a: 80, b: 40 }, g) - 60) < 1e-9);
+    sagePruefung("fehlender Baustein zählt nicht als null, sondern fällt heraus",
+      Math.abs(M.cpScoreAusTeilen({ a: 80, b: null }, g) - 80) < 1e-9);
+    sagePruefung("ohne jeden Baustein kein Score",
+      M.cpScoreAusTeilen({ a: null, b: null }, g) === null);
+    sagePruefung("ungleiche Gewichte wirken",
+      Math.abs(M.cpScoreAusTeilen({ a: 100, b: 0 }, { a: 0.75, b: 0.25 }) - 75) < 1e-9);
+
+    const leer = { quer: null, profil: null };
+    sagePruefung("zu wenige Bausteine ergeben keinen Score, sondern einen Grund",
+      !!M.cpScore(leer, null, M.AK_CONFIG.score.gewichte).grund);
+
+    const voll = {
+      quer: { mom12: { rang: 90 }, vola: { rang: 20 } },
+      profil: { werte: [{ id: "wert", rang: 60 }, { id: "profit", rang: 70 }] },
+    };
+    const sc = M.cpScore(voll, { piotroski: 8, piotroskiMax: 9 }, M.AK_CONFIG.score.gewichte);
+    sagePruefung("vollständiger Score liegt zwischen 0 und 100",
+      !sc.grund && sc.wert >= 0 && sc.wert <= 100);
+    sagePruefung("die Beiträge summieren sich zum Score",
+      !sc.grund && Math.abs(sc.beitraege.reduce((a, b) => a + (b.beitrag || 0), 0) - sc.wert) < 1e-9);
+    sagePruefung("Anteile der vorhandenen Bausteine summieren sich auf 1",
+      !sc.grund && Math.abs(sc.beitraege.reduce((a, b) => a + (b.anteil || 0), 0) - 1) < 1e-9);
+    if (!sc.grund) console.log(`  Beispiel: Score ${sc.wert.toFixed(1)} aus `
+      + sc.beitraege.filter(b => b.wert != null)
+          .map(b => `${b.id} ${b.wert}×${(b.anteil * 100).toFixed(0)} %`).join(", "));
+
+    const B = M.AK_CONFIG.score.befund;
+    if (B) {
+      console.log(`  Rückmessung: Spanne ${(B.spanne * 100).toFixed(2)} % über ${B.stichtage}`
+        + ` Stichtage, 95 % von ${(B.lo * 100).toFixed(2)} bis ${(B.hi * 100).toFixed(2)} %`
+        + (B.lo > 0 ? "  – Band über null" : "  – Band schließt die Null ein"));
+      sagePruefung("der hinterlegte Befund ist in sich stimmig (Spanne im eigenen Band)",
+        B.spanne >= B.lo && B.spanne <= B.hi);
+    } else {
+      console.log("  Keine Rückmessung hinterlegt – scripts/score_befund.js ausführen.");
+    }
   }
 
   /* --- Plausibilitaet --- */

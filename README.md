@@ -287,6 +287,47 @@ in derselben Datei **dieselben Daten als Jahreswerte**. Wer nur prüft, ob eine
 Zeile mit Ziffern beginnt, liest sie als Monate mit und verschiebt die ganze
 Reihe.
 
+**Gesamt-Score — mit seiner eigenen Rückmessung.** Ganz oben im Cockpit steht
+eine Zahl von 0 bis 100 aus fünf Bausteinen: Momentum, Ruhe (wenig Schwankung),
+Bilanzqualität, Bewertung und Profitabilität. Ein Klick klappt die Gewichtung
+auf — mit Schiebereglern, dem Beitrag jedes Bausteins und einem Knopf zurück
+auf die Standardwerte. Änderungen bleiben im Browser.
+
+Fehlende Bausteine zählen **nicht als null**, sondern fallen aus der Rechnung;
+über den Rest wird neu normiert. Der Unterschied ist nicht akademisch: Ein
+Titel ohne Bilanzdaten bekäme sonst allein dafür eine schlechte Note. Unter
+drei vorhandenen Bausteinen gibt es gar keinen Score — aus zwei von fünf eine
+Gesamtnote zu bilden hieße, drei Lücken als Zustimmung zu lesen.
+
+**Und darunter steht, was der Score wert ist.** `scripts/score_befund.js`
+rechnet nach dem Verfahren von Jegadeesh & Titman: Monat für Monat alle Titel
+nach Score sortieren, oberstes gegen unterstes Fünftel, Rendite des
+Folgemonats. Über 103 monatliche Stichtage und zehn Jahre:
+
+| | Ø Folgemonat |
+|---|---|
+| oberstes Fünftel | +1,10 % |
+| unterstes Fünftel | +1,13 % |
+| **Spanne** | **−0,02 %** (95 %: −1,31 % bis +1,31 %) |
+
+**Das Band schließt die Null ein.** Als Rangfolge sagt der Score in diesem Korb
+nichts voraus. Als Zusammenfassung der Bausteine bleibt er brauchbar — solange
+ihn niemand für eine Prognose hält. Genau das steht in der Anzeige unter der
+Zahl, nicht in einer Fußnote.
+
+Drei Einschränkungen, die dazugehören und die das Skript selbst ausgibt:
+Geprüft sind nur Momentum und Ruhe, weil nur sie sich zu jedem historischen
+Zeitpunkt aus den damals vorliegenden Kursen rechnen lassen — Piotroski, CAPE
+und Faktorprofil kennen nur den heutigen Stand, sie auf die Vergangenheit
+anzuwenden wäre ein Blick in die eigenen Karten. Der Korb ist heute
+zusammengestellt, verschwundene Titel fehlen darin (Überlebensverzerrung). Und
+Gebühren sind nicht abgezogen.
+
+Beim Schreiben des Rückrechners lief der erste Durchgang ins Leere („zu wenige
+Stichtage"): Yahoo meldet je Börse die Eröffnungszeit in UTC — Hongkong 01:30,
+New York 14:30. Rohe Zeitstempel treffen sich über Börsen hinweg deshalb nie.
+Der Querschnitt wird jetzt über das Kalenderdatum gebildet.
+
 **Risikobeitrag im Depot (Markowitz 1952).** Die Depotansicht zeigt, was
 Markowitz' Satz eigentlich besagt: Risiko addiert sich nicht. Drei Zahlen oben —
 Depot-Volatilität, gewichtete Summe der Einzelrisiken, Differenz als

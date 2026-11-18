@@ -159,6 +159,51 @@ const AK_CONFIG = {
     korrHoch: 0.7,
   },
 
+  /* ---------- Gesamt-Score ----------
+     Bewusst abschaltbar und bewusst mit sichtbaren Gewichten. Die Zahlen hier
+     sind eine ENTSCHEIDUNG, keine Messung - niemand hat gemessen, dass
+     Momentum ein Viertel wiegen sollte. Wer sie aendert, aendert das
+     Ergebnis, und genau das soll sichtbar sein. */
+  score: {
+    /** Standardgewichte der Bausteine. Fehlt ein Baustein, wird ueber die
+        vorhandenen neu normiert - ein fehlender Wert zaehlt nicht als null. */
+    gewichte: {
+      momentum: 0.25,
+      ruhe: 0.15,
+      qualitaet: 0.25,
+      bewertung: 0.20,
+      profitabilitaet: 0.15,
+    },
+    /** Dieselbe Rechnung, aber nur mit den Bausteinen, die sich
+        vergangenheitsfest pruefen lassen. scripts/score_befund.js benutzt
+        diese Gewichte - alles andere liegt nur als heutiger Stand vor. */
+    gewichteMessbar: { momentum: 0.6, ruhe: 0.4 },
+    /** Unter so vielen vorhandenen Bausteinen wird kein Score gezeigt. Aus
+        zwei von fuenf eine Gesamtnote zu bilden hiesse, drei Luecken als
+        Zustimmung zu lesen. */
+    minBausteine: 3,
+    /** Gemessen mit scripts/score_befund.js, Stand 18.11.2026. Steht in der
+        Anzeige neben dem Score - eine Zahl ohne ihren gemessenen Wert ist
+        genau das, was dieses Projekt beim Elliott-Modul schon einmal
+        entfernt hat.
+
+        Das Ergebnis: Ueber 103 monatliche Stichtage brachte das oberste
+        Fuenftel nach Score 1,10 % im Folgemonat, das unterste 1,13 %. Die
+        Spanne liegt damit bei −0,02 % mit einem Band von −1,31 bis +1,31 -
+        also nichts. Ueber drei Monate dasselbe Bild (−0,07 %).
+
+        Das heisst nicht, dass der Score nutzlos ist; es heisst, dass er als
+        RANGFOLGE in diesem Korb nichts vorhersagt. Als Zusammenfassung der
+        Bausteine bleibt er brauchbar - solange niemand ihn fuer eine
+        Prognose haelt. Genau deshalb steht die Zahl in der Anzeige. */
+    befund: {
+      titel: 108, stichtage: 103, tage: 21,
+      spanne: -0.0002, lo: -0.0131, hi: 0.0131,
+      anteilPositiv: 0.573,
+      obenMittel: 0.0110, untenMittel: 0.0113,
+    },
+  },
+
   /* ---------- Darstellung ---------- */
   anzeige: {
     /** Haltbarkeit des Zwischenspeichers fuer Zins und Benchmark. */
