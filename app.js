@@ -211,9 +211,32 @@ const Fundamentals = {
   load() {
     if (!this.prom) {
       this.prom = fetch("data/fundamentals.json?v=" + Date.now())
-        .then(r => r.ok ? r.json() : null)
-        .then(j => { this.data = (j && j.data) || {}; return this.data; })
-        .catch(() => { this.data = null; return null; });
+        /* Eine Fehlerantwort muss in den catch laufen. Zuvor stand hier
+           ": null", und die naechste Stufe machte daraus this.data = {} -
+           ein leeres, aber WAHRES Objekt. Die Seite hielt die Datei dann fuer
+           geladen und fand nur nie einen Titel: keine Kennzahlen, kein
+           Faktorprofil, kein Score, und nirgends ein Hinweis warum. */
+        .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
+        .then(j => {
+          if (!j || !j.data) throw new Error("Datei ohne data-Abschnitt");
+          this.data = j.data;
+          return this.data;
+        })
+        .catch(() => {
+          /* Den Fehlschlag NICHT merken. Das Versprechen wird oben
+             zwischengespeichert, damit gleichzeitige Aufrufe nicht
+             durcheinanderlaufen - gespeichert bleiben soll aber nur der
+             Erfolg. Sonst schaltet ein einziger misslungener Abruf die
+             Fundamentaldaten fuer die ganze Sitzung ab, und seit dem Cockpit
+             haengen daran drei Abschnitte und der Gesamt-Score.
+
+             Genau das ist beim Ausrollen passiert: Die GitHub Action hatte
+             die Datei gerade ersetzt, ein Abruf fiel hinein, und die Seite
+             zeigte bis zum Neuladen weder Faktorprofil noch Bewertung. */
+          this.prom = null;
+          this.data = null;
+          return null;
+        });
     }
     return this.prom;
   },
