@@ -287,6 +287,20 @@ in derselben Datei **dieselben Daten als Jahreswerte**. Wer nur prüft, ob eine
 Zeile mit Ziffern beginnt, liest sie als Monate mit und verschiebt die ganze
 Reihe.
 
+**Zur Versionsnummer hinter jeder Datei.** `index.html` hängt an jede eigene
+Datei ein `?v=…`. Das ist kein Schmuck, sondern der einzige Hebel gegen den
+Cache: Dieselbe Adresse liefert dieselbe Antwort, auch wenn die Datei auf dem
+Server längst eine andere ist. Wer `cockpit.js` ändert und `?v=2` stehen lässt,
+liefert Besuchern die alte Fassung aus — und wenn zwei Dateien
+zusammengehören, auch eine unmögliche Mischung aus alt und neu.
+
+Das ist beim Ausliefern des Cockpits passiert: Fünf Phasen änderten
+`config.js`, die Nummer blieb bei `v=1`. Nach dem Mergen lieferte
+`config.js?v=1` aus dem Cache noch die Fassung der ersten Phase (5819 Bytes,
+ohne den Score-Abschnitt), während auf dem Server 9294 Bytes lagen —
+`AK_CONFIG.score` war undefiniert und der ganze Cockpit-Abschnitt fiel aus.
+**Jede geänderte Datei bekommt eine neue Nummer, im selben Commit.**
+
 **Gesamt-Score — mit seiner eigenen Rückmessung.** Ganz oben im Cockpit steht
 eine Zahl von 0 bis 100 aus fünf Bausteinen: Momentum, Ruhe (wenig Schwankung),
 Bilanzqualität, Bewertung und Profitabilität. Ein Klick klappt die Gewichtung
