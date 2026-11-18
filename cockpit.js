@@ -826,6 +826,82 @@ function cpProfil(symbol, alle) {
 }
 
 /* =====================================================================
+   Gesamt-Score
+   ===================================================================== */
+
+/**
+ * Gewichtetes Mittel vorhandener Bausteine, jeder auf der Skala 0 bis 100.
+ *
+ * Fehlende Bausteine zaehlen NICHT als null, sondern fallen heraus; ueber den
+ * Rest wird neu normiert. Der Unterschied ist nicht akademisch: Ein Titel ohne
+ * Bilanzdaten bekaeme sonst allein dafuer eine schlechte Note.
+ *
+ * @param {Object<string, number|null>} teile
+ * @param {Object<string, number>} gewichte
+ */
+function cpScoreAusTeilen(teile, gewichte) {
+  let summe = 0, gewicht = 0;
+  for (const k of Object.keys(gewichte)) {
+    const v = teile[k];
+    if (v == null || !isFinite(v)) continue;
+    summe += v * gewichte[k];
+    gewicht += gewichte[k];
+  }
+  return gewicht > 0 ? summe / gewicht : null;
+}
+
+/**
+ * Gesamt-Score aus den Ergebnissen der einzelnen Module.
+ *
+ * Was hier passiert, ist eine Gewichtung von Dingen, die sich nicht von
+ * selbst vergleichen lassen: ein Perzentilrang, eine Punktzahl von neun, ein
+ * Bewertungsrang. Dass sie sich zu einer Zahl verrechnen lassen, heisst nicht,
+ * dass die Zahl etwas bedeutet - deshalb steht in der Anzeige neben dem Score,
+ * was eine Rueckmessung dazu ergeben hat, und deshalb sind alle Gewichte
+ * sichtbar und veraenderbar.
+ *
+ * @param {object} erg  Ergebnisse aus cpRechne
+ * @param {object} scores  Dossier-Scores (Piotroski), optional
+ * @param {object} gewichte
+ */
+function cpScore(erg, scores, gewichte) {
+  const g = gewichte || AK_CONFIG.score.gewichte;
+  const rang = (id) => {
+    const w = erg.profil && erg.profil.werte.find(x => x.id === id);
+    return w ? w.rang : null;
+  };
+  const teile = {
+    momentum: erg.quer ? erg.quer.mom12.rang : null,
+    ruhe: (erg.quer && erg.quer.vola.rang != null) ? 100 - erg.quer.vola.rang : null,
+    qualitaet: (scores && scores.piotroski != null && scores.piotroskiMax >= 6)
+      ? Math.round(100 * scores.piotroski / scores.piotroskiMax) : null,
+    bewertung: rang("wert"),
+    profitabilitaet: rang("profit"),
+  };
+  const vorhanden = Object.keys(g).filter(k => teile[k] != null && isFinite(teile[k]));
+  if (vorhanden.length < AK_CONFIG.score.minBausteine) {
+    return { grund: `Nur ${vorhanden.length} von ${Object.keys(g).length} Bausteinen vorhanden,`
+      + ` mindestens ${AK_CONFIG.score.minBausteine} nötig.`, teile };
+  }
+  const wert = cpScoreAusTeilen(teile, g);
+  const gesamtGewicht = vorhanden.reduce((a, k) => a + g[k], 0);
+  return {
+    wert, teile, gewichte: g, vorhanden,
+    /* Was jeder Baustein beitraegt, nach der Neunormierung - das ist die
+       Zahl, die in der aufgeklappten Ansicht stehen muss, nicht das
+       eingestellte Rohgewicht. */
+    beitraege: Object.keys(g).map(k => ({
+      id: k,
+      gewicht: g[k],
+      anteil: teile[k] == null ? null : g[k] / gesamtGewicht,
+      wert: teile[k],
+      beitrag: teile[k] == null ? null : teile[k] * g[k] / gesamtGewicht,
+    })),
+    fehlend: Object.keys(g).filter(k => teile[k] == null),
+  };
+}
+
+/* =====================================================================
    Oberflaeche
    ===================================================================== */
 
@@ -933,6 +1009,18 @@ function cpRechne(chart, bench, rf, roh, fund, faktoren, symbol, quer) {
     profil: cpProfil(symbol, (typeof Fundamentals === "object" && Fundamentals.data) || null),
     quer: cpQuerRang(symbol, quer),
   };
+}
+
+/** Score getrennt, weil er auf den Ergebnissen der anderen Module aufsetzt. */
+function cpScoreDazu(erg, roh, fund, gewichte) {
+  let scores = null;
+  try {
+    if (typeof computeScores === "function" && roh) {
+      scores = computeScores(roh, { marketCap: fund && fund.marketCap, fcf: fund && fund.fcf });
+    }
+  } catch (e) { /* ohne Bilanzdaten eben ohne Qualitaetsbaustein */ }
+  erg.score = cpScore(erg, scores, gewichte);
+  return erg;
 }
 
 function cpAbschnitt() {
@@ -1221,8 +1309,11 @@ function cpZeige(out, erg, bench, rf, chart, item) {
       <p class="cp-leer">${e(rg.grund)}</p></div>`;
   }
 
+  const scoreHtml = erg.score ? cpScoreHtml(erg.score, cpOffen) : "";
+
   out.className = "";
   out.innerHTML = `
+    ${scoreHtml}
     <div class="cp-teil">
       <h4>Risiko <span class="cp-q">Markowitz 1952</span></h4>
       ${risikoHtml}
@@ -1349,10 +1440,142 @@ function cpPortfolioHtml(positionen, charts) {
   </div>`;
 }
 
+/* ---------- Gesamt-Score: Anzeige und Gewichtung ---------- */
+
+const CP_GEW_SPEICHER = "ak.score.gewichte";
+
+/** Eingestellte Gewichte, sonst die aus config.js. */
+function cpGewichte() {
+  try {
+    const roh = JSON.parse(localStorage.getItem(CP_GEW_SPEICHER));
+    if (roh && typeof roh === "object") {
+      const out = {};
+      for (const k of Object.keys(AK_CONFIG.score.gewichte)) {
+        const v = Number(roh[k]);
+        out[k] = (isFinite(v) && v >= 0) ? v : AK_CONFIG.score.gewichte[k];
+      }
+      if (Object.values(out).some(v => v > 0)) return out;
+    }
+  } catch (e) { /* kaputter Eintrag -> Standard */ }
+  return { ...AK_CONFIG.score.gewichte };
+}
+function cpGewichteSetzen(g) {
+  try { localStorage.setItem(CP_GEW_SPEICHER, JSON.stringify(g)); } catch (e) {}
+}
+function cpGewichteZuruecksetzen() {
+  try { localStorage.removeItem(CP_GEW_SPEICHER); } catch (e) {}
+}
+
+const CP_BAUSTEIN_NAMEN = {
+  momentum: "Momentum", ruhe: "Ruhe (wenig Schwankung)", qualitaet: "Bilanzqualität",
+  bewertung: "Bewertung", profitabilitaet: "Profitabilität",
+};
+const CP_BAUSTEIN_HER = {
+  momentum: "Perzentil des 12-1-Momentums im Korb",
+  ruhe: "umgekehrtes Perzentil der Schwankung im Korb",
+  qualitaet: "Piotroski F-Score, auf 100 gerechnet",
+  bewertung: "Perzentil Buchwert zu Marktwert im Korb",
+  profitabilitaet: "Perzentil Bruttogewinn je Bilanzsumme im Korb",
+};
+
+function cpScoreHtml(sc, offen) {
+  const e = typeof esc === "function" ? esc : (x => x);
+  if (sc.grund) {
+    return `<div class="cp-score leer">
+      <div class="cp-scorekopf"><span class="cp-scorelabel">Gesamt-Score</span>
+        <b>–</b></div>
+      <p class="cp-note">${e(sc.grund)} Aus den vorhandenen Bausteinen eine Gesamtnote zu
+      bilden hieße, die fehlenden als Zustimmung zu lesen.</p></div>`;
+  }
+  const B = AK_CONFIG.score.befund;
+  const stufe = sc.wert >= 70 ? "hoch" : sc.wert >= 40 ? "mittel" : "tief";
+  const zeilen = sc.beitraege.map(b => `<div class="cp-sz${b.wert == null ? " leer" : ""}">
+      <span class="cp-n">${e(CP_BAUSTEIN_NAMEN[b.id] || b.id)}</span>
+      <input type="range" min="0" max="50" step="1" value="${Math.round(b.gewicht * 100)}"
+        data-gew="${b.id}" aria-label="Gewicht ${e(CP_BAUSTEIN_NAMEN[b.id] || b.id)}">
+      <span class="cp-gw">${Math.round(b.gewicht * 100)} %</span>
+      <b>${b.wert == null ? "–" : Math.round(b.wert)}</b>
+      <span class="cp-note">${b.wert == null
+        ? "nicht verfügbar – fällt aus der Rechnung"
+        : `${e(CP_BAUSTEIN_HER[b.id] || "")} · trägt ${cpZ(b.beitrag, 1)} von ${cpZ(sc.wert, 1)} bei`}</span>
+    </div>`).join("");
+
+  return `<div class="cp-score ${stufe}">
+    <div class="cp-scorekopf">
+      <span class="cp-scorelabel">Gesamt-Score</span>
+      <b>${Math.round(sc.wert)}</b>
+      <span class="cp-scoreskala"><i style="width:${Math.max(0, Math.min(100, sc.wert))}%"></i></span>
+      <button type="button" class="cp-mini" id="cp-gewtoggle" aria-expanded="${offen ? "true" : "false"}">
+        ${offen ? "Gewichtung einklappen" : "Gewichtung zeigen"}</button>
+    </div>
+    <div class="cp-gewbox" ${offen ? "" : "hidden"}>
+      ${zeilen}
+      <div class="cp-gewfuss">
+        <button type="button" class="cp-mini" id="cp-gewreset">Standardgewichte</button>
+        <span class="cp-note">Die Gewichte sind eine Entscheidung, keine Messung. Niemand hat
+        gemessen, dass Momentum ein Viertel wiegen sollte. Änderungen bleiben in diesem Browser.</span>
+      </div>
+    </div>
+    ${sc.fehlend.length ? `<p class="cp-note">Ohne ${sc.fehlend.map(k =>
+       e(CP_BAUSTEIN_NAMEN[k] || k)).join(", ")} – über die übrigen Bausteine neu normiert,
+       damit eine Lücke nicht als schlechte Note zählt.</p>` : ""}
+    ${B ? `<p class="cp-fuss"><b>Was der Score wert ist – gemessen.</b>
+      ${B.titel} Titel über zehn Jahre, ${B.stichtage} monatliche Stichtage: Das oberste
+      Fünftel nach Score brachte im Folgemonat ${cpP(B.obenMittel, 2)}, das unterste
+      ${cpP(B.untenMittel, 2)} – eine Spanne von ${cpP(B.spanne, 2)}
+      (95 %: ${cpP(B.lo, 2)} bis ${cpP(B.hi, 2)}, in ${cpP(B.anteilPositiv, 0)} der Monate positiv).
+      ${B.lo > 0 ? "" : `<b class="cp-warn">Das Band schließt die Null ein: Als Rangfolge sagt
+        der Score in diesem Korb nichts voraus.</b> Als Zusammenfassung der Bausteine bleibt er
+        brauchbar – solange ihn niemand für eine Prognose hält. `}
+      Geprüft sind nur Momentum und Ruhe – Bilanzqualität, Bewertung und Profitabilität liegen
+      nur als heutiger Stand vor, sie auf die Vergangenheit anzuwenden wäre ein Blick in die
+      eigenen Karten. Dazu: Der Korb ist heute zusammengestellt, verschwundene Titel fehlen
+      darin, und Gebühren sind nicht abgezogen. Nachrechenbar mit
+      <code>scripts/score_befund.js</code>.</p>`
+    : `<p class="cp-fuss">Für diesen Score liegt noch keine Rückmessung vor
+      (<code>scripts/score_befund.js</code>). Bis dahin ist er eine Zusammenfassung der
+      Bausteine – nicht mehr.</p>`}
+  </div>`;
+}
+
+/** Schieberegler und Knöpfe verdrahten; neu zeichnen ohne neu zu rechnen. */
+function cpScoreVerdrahten(wurzel, neuZeichnen) {
+  const toggle = wurzel.querySelector("#cp-gewtoggle");
+  if (toggle) toggle.onclick = () => neuZeichnen(toggle.getAttribute("aria-expanded") !== "true");
+  const reset = wurzel.querySelector("#cp-gewreset");
+  if (reset) reset.onclick = () => { cpGewichteZuruecksetzen(); neuZeichnen(true); };
+  wurzel.querySelectorAll("input[data-gew]").forEach(el => {
+    el.oninput = () => {
+      const g = cpGewichte();
+      g[el.dataset.gew] = Number(el.value) / 100;
+      /* Alles auf null waere kein Score, sondern eine Division durch null -
+         dann bleibt der letzte sinnvolle Stand stehen. */
+      if (Object.values(g).some(v => v > 0)) { cpGewichteSetzen(g); neuZeichnen(true); }
+    };
+  });
+}
+
 /** Vom Detailfenster aufgerufen, nachdem der Abschnitt im Dokument steht. */
+/* Ob die Gewichtung aufgeklappt ist, und woraus zuletzt gezeichnet wurde.
+   Eine Gewichtsaenderung soll NICHT neu rechnen und schon gar nicht neu
+   laden - nur die Gewichte aendern sich, nicht die Daten. */
+let cpOffen = false;
+let cpStand = null;
+
+function cpNeuZeichnen(offen) {
+  if (!cpStand) return;
+  cpOffen = !!offen;
+  const out = document.getElementById("cp-out");
+  if (!out) return;
+  cpScoreDazu(cpStand.erg, cpStand.roh, cpStand.fund, cpGewichte());
+  cpZeige(out, cpStand.erg, cpStand.bench, cpStand.rf, cpStand.lang, cpStand.item);
+  cpScoreVerdrahten(out, cpNeuZeichnen);
+}
+
 async function cpVerdrahte(item, chart, fund) {
   const out = document.getElementById("cp-out");
   if (!out) return;
+  cpOffen = false; cpStand = null;
   try {
     const waehrung = (chart.meta && chart.meta.currency) || "";
     const [bench, rf, faktoren, quer] = await Promise.all([
@@ -1369,7 +1592,10 @@ async function cpVerdrahte(item, chart, fund) {
     try { roh = (typeof Fundamentals === "object") ? Fundamentals.get(item.s) : null; }
     catch (err) { /* ohne Datei einfach kein CAPE */ }
     const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund, faktoren, item.s, quer);
+    cpScoreDazu(erg, roh, fund, cpGewichte());
+    cpStand = { erg, bench, rf, lang, item, roh, fund };
     cpZeige(out, erg, bench, rf, lang, item);
+    cpScoreVerdrahten(out, cpNeuZeichnen);
   } catch (e) {
     out.className = "";
     out.innerHTML = `<p class="cp-leer">Das Cockpit ließ sich nicht rechnen:

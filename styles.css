@@ -850,3 +850,43 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 .cp-matrix td{width:30px;height:24px;text-align:center;color:var(--ink);
   border:1px solid var(--bg);border-radius:3px}
 .cp-matrix td.selbst{background:var(--bg2);color:var(--faint)}
+
+/* =====================================================================
+   Gesamt-Score
+
+   Die Zahl steht gross da, die Gewichtung dahinter. Beides bewusst in einem
+   Kasten: Wer den Score sieht, soll ihn aufklappen koennen, ohne ihn zu
+   suchen - ein Score, dessen Zustandekommen man erst finden muss, ist ein
+   Black-Box-Score mit Fussnote.
+   ===================================================================== */
+.cp-score{border:1px solid var(--line);border-left-width:3px;border-radius:10px;
+  padding:12px 14px;margin:0 0 16px;background:var(--surface)}
+.cp-score.hoch{border-left-color:var(--up)}
+.cp-score.mittel{border-left-color:var(--warn)}
+.cp-score.tief{border-left-color:var(--down)}
+.cp-score.leer{border-left-color:var(--line)}
+.cp-scorekopf{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cp-scorelabel{font:600 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--faint)}
+.cp-scorekopf>b{font:700 26px var(--disp);color:var(--ink);line-height:1}
+.cp-scoreskala{flex:1;min-width:90px;height:6px;border-radius:99px;background:var(--bg2);
+  overflow:hidden}
+.cp-scoreskala i{display:block;height:100%;background:var(--accent)}
+.cp-mini{background:var(--surface2);border:1px solid var(--line);color:var(--muted);
+  border-radius:7px;padding:4px 10px;font:500 11.5px var(--sans);cursor:pointer}
+.cp-mini:hover{color:var(--ink);border-color:var(--muted)}
+
+.cp-gewbox{margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+.cp-sz{display:grid;grid-template-columns:minmax(110px,1.1fr) 92px 44px 34px 2fr;
+  gap:5px 10px;align-items:center;padding:5px 0;font-size:12.5px}
+.cp-sz>b{font:600 14px var(--mono);color:var(--ink);text-align:right}
+.cp-sz.leer>b,.cp-sz.leer .cp-n{color:var(--faint)}
+.cp-gw{font:500 11.5px var(--mono);color:var(--muted);text-align:right}
+.cp-sz input[type=range]{width:100%;accent-color:var(--accent);height:3px}
+.cp-gewfuss{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:9px;
+  padding-top:9px;border-top:1px solid var(--line)}
+
+@media(max-width:620px){
+  .cp-sz{grid-template-columns:1fr 70px 40px 32px;gap:2px 8px}
+  .cp-sz .cp-note{grid-column:1/-1}
+}
