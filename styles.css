@@ -720,3 +720,51 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;font-size:11.5px;color
 .el-fibtab tr.gold td:first-child{color:var(--accent)}
 .el-fibtab tr.gold td:last-child{color:var(--accent)}
 
+
+/* =====================================================================
+   Analyse-Cockpit
+
+   Vier Teile untereinander, jeder mit seiner Quelle in der Ueberschrift.
+   Bewusst keine Kacheln wie bei .kv: Die Werte brauchen eine Einordnung
+   daneben ("defensiv", "nicht von null zu unterscheiden"), und die passt
+   nicht in eine Kachel von 160 Pixeln. Drei Spalten - Name, Wert,
+   Einordnung - lesen sich wie eine Tabelle, ohne eine zu sein.
+   ===================================================================== */
+.cp-laedt{font-size:12.5px;color:var(--faint);padding:6px 0}
+
+.cp-teil{margin-bottom:18px}
+.cp-teil>h4{font:600 12px var(--sans);letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink);margin:0 0 9px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.cp-q{font:400 11px var(--sans);letter-spacing:0;text-transform:none;color:var(--faint)}
+
+.cp-z{display:grid;grid-template-columns:minmax(130px,1.1fr) minmax(74px,auto) 2fr;
+  gap:6px 14px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);
+  font-size:12.5px}
+.cp-z:last-child{border-bottom:none}
+.cp-n{color:var(--muted)}
+.cp-z>b{font:600 14px var(--mono);color:var(--ink);text-align:right}
+.cp-z>b.up{color:var(--up)} .cp-z>b.down{color:var(--down)}
+.cp-note{color:var(--faint);font-size:11.5px;line-height:1.5}
+.cp-note b{color:var(--muted);font-weight:600}
+.cp-warn{color:var(--warn)} .cp-ok{color:var(--up)}
+
+/* Verhaltens-Hinweise: Fliesstext, kein Wert. Sie sagen nichts Messbares
+   aus - eine Zahl daneben wuerde genau das vortaeuschen. */
+.cp-flag{background:var(--surface);border:1px solid var(--line);border-left-width:3px;
+  border-radius:9px;padding:10px 13px;margin-bottom:8px}
+.cp-flag b{font:600 13px var(--sans);color:var(--ink)}
+.cp-flag p{margin:5px 0 0;font-size:12px;line-height:1.6;color:var(--muted)}
+.cp-f-anker{border-left-color:var(--accent)}
+.cp-f-lotterie{border-left-color:var(--warn)}
+.cp-f-sprung{border-left-color:var(--muted)}
+
+.cp-leer{font-size:12.5px;color:var(--faint);line-height:1.6;margin:0}
+.cp-fuss{font-size:11.3px;color:var(--faint);line-height:1.6;margin:14px 0 0;
+  padding-top:10px;border-top:1px solid var(--line)}
+.cp-fuss code{font:11px var(--mono);color:var(--muted)}
+.cp-fuss b{color:var(--muted)}
+
+@media(max-width:620px){
+  .cp-z{grid-template-columns:1fr auto;gap:2px 10px}
+  .cp-note{grid-column:1/-1}
+}

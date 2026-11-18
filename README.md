@@ -131,6 +131,59 @@ sonst das 52-Wochen-Hoch – gibt es keinen, bleibt es leer. Vorher stand dort
 `max(52-Wochen-Hoch, Ziel 1 × 1,06)`: mal das eine, mal das andere, der Abstand
 reichte von 6 bis 120 %.
 
+**Analyse-Cockpit.** Ein Abschnitt in der Detailansicht, der vier Module aus
+vier Arbeiten der Finanzforschung zeigt. Er rechnet beim Öffnen, nicht auf
+Klick – die Rechnung dauert Millisekunden, nur die längere Kursreihe wird
+nachgeladen.
+
+| Modul | Quelle | Was dasteht |
+|---|---|---|
+| Risiko | Markowitz (1952) | Volatilität 1 J. und 3 J., maximaler Rückgang samt Erholungsdauer, Korrelation zur Benchmark |
+| Marktrisiko | Sharpe (1964) | Beta roh und nach Blume bereinigt, R², Eigenkapitalkosten, Jensens Alpha mit t-Statistik, Sharpe-Verhältnis |
+| Momentum | Jegadeesh & Titman (1993) | 12-1, 6-1, 3 Monate, je Einheit Schwankung, relativ zur Benchmark, Umkehrrisiko über 36 Monate |
+| Verhalten | Kahneman & Tversky (1979) | Hinweise statt Zahlen: Anker am 52-Wochen-Hoch, Lotterie-Profil, starke Kursreaktion |
+
+Drei Entscheidungen, die den Unterschied zur üblichen Umsetzung ausmachen:
+
+*Beta aus Monatsrenditen, nicht aus Tagesrenditen.* Und nur über Monate, die
+beide Reihen haben. Zwei Börsen haben verschiedene Feiertage; wer zwei
+Tagesreihen nur auf gleiche **Länge** zuschneidet, legt Dienstag auf Mittwoch
+und misst die Zeitverschiebung als Marktrisiko mit. Über Monatsenden passiert
+das nicht.
+
+*Benchmark nach Heimatbörse.* Ein DAX-Titel wird am DAX gemessen, ein
+Hongkonger am Hang Seng. Beta gegen den falschen Index misst vor allem
+Wechselkurs und Zeitzone. Für 0700.HK steigt das R² gegen den Hang Seng auf
+0,74 – gegen einen US-Index wäre es ein Bruchteil davon.
+
+*Jede Schätzung bekommt ihre Unsicherheit mitgeliefert.* Neben dem Beta steht
+das R² und bei Werten unter 0,20 der Hinweis, dass das Beta dort schlecht
+bestimmt ist. Neben dem Alpha steht die t-Statistik: Erst ab etwa |t| > 2 ist
+es von null zu unterscheiden. Auf 13 Titeln über fünf Jahre erreicht das kein
+einziger – was genau dem Befund von Carhart (1997) entspricht.
+
+Der risikofreie Zins kommt aus `^TNX`, der 10-jährigen US-Staatsanleihe, über
+dieselbe Kursquelle wie alles andere. Für Titel außerhalb des Dollarraums steht
+ein Hinweis, dass Eigenkapitalkosten und Sharpe gegen den falschen Maßstab
+gerechnet sind – Yahoo führt keine Bundesanleihe (geprüft: `DE10Y-DE.BD`,
+`^GDBR10`, `DE10YT=RR` liefern alle leer).
+
+**Alle Einstellungen stehen in `config.js`** – Zeiträume, Benchmarks,
+Marktrisikoprämie, Schwellen. Die Schwellen der Verhaltens-Hinweise sind an
+Messwerten abgelesen, nicht gesetzt: Die ursprünglich eingetragene Schwelle
+„größter Tagesgewinn über 10 Prozent" hat auf keinem einzigen Titel ausgelöst.
+`node scripts/cockpit_pruefung.js` rechnet die Module an 13 Titeln über fünf
+Börsen durch, prüft die Ergebnisse auf Plausibilität und meldet jede Schwelle,
+die nie oder immer auslöst.
+
+Was das Cockpit **nicht** tut: Es vergibt keinen Punktestand und keine
+Rangfolge. Momentum- und Faktoreffekte sind Durchschnitte über viele Aktien;
+auf einen einzelnen Titel angewandt sind sie eine Einordnung, keine Prognose.
+Das steht an jeder Kennzahl.
+
+Faktorprofil (Fama & French), Bilanzqualität (Piotroski) und Bewertung
+(Shiller) folgen in den nächsten Schritten.
+
 **Elliott-Wellen.** Ein eigener Abschnitt in der Detailansicht („Elliot Wellen
 bestimmen"). Die Analyse läuft **ausschließlich auf Klick** – nie beim Laden,
 nie beim Tickerwechsel. Beim Wechsel wird ein vorhandenes Ergebnis verworfen und
