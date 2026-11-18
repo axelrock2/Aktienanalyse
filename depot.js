@@ -541,6 +541,9 @@ async function renderDepot() {
       </div>
     </div>
 
+    ${typeof cpPortfolioHtml === "function" && rows.length > 1
+      ? cpPortfolioHtml(rows.filter(r => r.ok && r.value > 0), charts) : ""}
+
     <div class="dp-tablewrap">
       <table class="dp-table">
         <thead><tr>

@@ -54,7 +54,7 @@ function ladeModul() {
   const schnitt = quelle.indexOf(marke);
   vm.runInContext((schnitt > 0 ? quelle.slice(0, schnitt) : quelle)
     + "\nglobalThis.__ex = { cpRisiko, cpCapm, cpMomentum, cpVerhalten, cpVola,"
-    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, cpOls, cpFaktorRegression, cpProfil, cpRang, cpRegionWahl, AK_CONFIG };", ctx);
+    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, cpOls, cpFaktorRegression, cpProfil, cpRang, cpRegionWahl, cpPortfolio, cpQuerRang, AK_CONFIG };", ctx);
   return ctx.__ex;
 }
 
@@ -291,6 +291,87 @@ const Z = (v, d = 2) => v == null || !isFinite(v) ? "  – " : v.toFixed(d).padS
       sagePruefung("Titel außerhalb des Korbs bekommt kein leeres Profil",
         M.cpProfil("GIBTESNICHT", daten) === null);
     }
+  }
+
+  /* --- Modul 1b: Portfolio ---
+     Geprueft wird gegen Eigenschaften, die mathematisch gelten muessen. Eine
+     Kovarianzrechnung, die sie verletzt, ist falsch - unabhaengig davon, wie
+     plausibel die Zahlen aussehen. */
+  console.log("\nModul 1b – Risikobeitrag im Depot (Markowitz)");
+  {
+    const monat = (renditen, start = 100) => {
+      const t = [], c = []; let p = start;
+      const d = new Date(Date.UTC(2015, 0, 28));
+      for (const r of renditen) {
+        p *= 1 + r; t.push(d.getTime()); c.push(p);
+        d.setUTCMonth(d.getUTCMonth() + 1); d.setUTCDate(28);
+      }
+      return { t, c, h: c.slice(), l: c.slice() };
+    };
+    const wuerfel = saat => { let s = saat >>> 0 || 1;
+      return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296 - 0.5; }; };
+
+    // A) Zwei identische Reihen: kein Diversifikationsgewinn, exakt null
+    const g = wuerfel(7);
+    const basis = Array.from({ length: 80 }, () => g() * 0.1);
+    const pA = M.cpPortfolio([{ sym: "X", value: 50 }, { sym: "Y", value: 50 }],
+      new Map([["X", monat(basis)], ["Y", monat(basis)]]));
+    sagePruefung("perfekt gleichlaufende Positionen ergeben keinen Diversifikationsgewinn",
+      !pA.grund && Math.abs(pA.gewinn) < 1e-9);
+
+    // B) Vier wenig korrelierte, gleich gewichtete: Portfolio deutlich ruhiger
+    const karte = new Map(), pos = [];
+    for (let i = 0; i < 4; i++) {
+      const w = wuerfel(100 + i);
+      karte.set("T" + i, monat(Array.from({ length: 80 }, () => w() * 0.1)));
+      pos.push({ sym: "T" + i, value: 25 });
+    }
+    const pB = M.cpPortfolio(pos, karte);
+    const mittelVola = pB.eintraege.reduce((a, e) => a + e.vola, 0) / 4;
+    sagePruefung("vier wenig korrelierte Positionen schwanken deutlich weniger als einzeln",
+      !pB.grund && pB.volP < mittelVola * 0.75);
+
+    // C) Euler-Zerlegung: die Beitraege summieren sich exakt zur Portfoliovola
+    const summe = pB.eintraege.reduce((a, e) => a + e.beitrag, 0);
+    sagePruefung("Risikobeiträge summieren sich exakt zur Depot-Volatilität",
+      Math.abs(summe - pB.volP) < 1e-12);
+    sagePruefung("Risikoanteile summieren sich auf 100 %",
+      Math.abs(pB.eintraege.reduce((a, e) => a + e.anteil, 0) - 1) < 1e-12);
+
+    // D) Korrelationsmatrix
+    sagePruefung("Korrelationsmatrix hat Einsen auf der Diagonale und ist symmetrisch",
+      pB.korr.every((z, i) => Math.abs(z[i] - 1) < 1e-12
+        && z.every((v, j) => Math.abs(v - pB.korr[j][i]) < 1e-12)));
+    sagePruefung("eine einzelne Position ergibt keine Portfoliosicht",
+      !!M.cpPortfolio([{ sym: "T0", value: 100 }], karte).grund);
+
+    console.log(`  Beispiel: ${pB.eintraege.length} gleich gewichtete Positionen, `
+      + `Einzelvola im Mittel ${(mittelVola * 100).toFixed(1)} %, `
+      + `Depot ${(pB.volP * 100).toFixed(1)} %, Gewinn ${(pB.gewinn * 100).toFixed(1)} %`);
+  }
+
+  /* --- Querschnitt des Korbs --- */
+  const qDatei = path.join(WURZEL, "data", "quer.json");
+  console.log("\nModul 4b – Momentum im Querschnitt");
+  if (!fs.existsSync(qDatei)) {
+    console.log("  data/quer.json fehlt – build_mover.js noch nicht gelaufen.");
+  } else {
+    const q = JSON.parse(fs.readFileSync(qDatei, "utf8"));
+    console.log(`  ${q.titel} Titel, Stand ${q.stand}`);
+    const mit = q.werte.filter(x => x.m12 != null);
+    sagePruefung("mindestens 50 Titel mit Momentum", mit.length >= 50);
+    sagePruefung("alle Momentumwerte zwischen −100 % und +2000 %",
+      mit.every(x => x.m12 > -100 && x.m12 < 2000));
+    sagePruefung("alle Schwankungen zwischen 1 % und 200 %",
+      q.werte.filter(x => x.v != null).every(x => x.v > 1 && x.v < 200));
+    const erster = q.werte[0] && M.cpQuerRang(q.werte[0].s, q);
+    sagePruefung("Perzentil eines vorhandenen Titels liegt zwischen 0 und 100",
+      !!erster && erster.mom12.rang >= 0 && erster.mom12.rang <= 100);
+    sagePruefung("Titel außerhalb des Korbs bekommt kein Perzentil",
+      M.cpQuerRang("GIBTESNICHT", q) === null);
+    const sortiert = mit.slice().sort((a, b) => b.m12 - a.m12);
+    console.log(`  stärkstes ${sortiert[0].s} ${sortiert[0].m12.toFixed(0)} %, `
+      + `schwächstes ${sortiert[sortiert.length - 1].s} ${sortiert[sortiert.length - 1].m12.toFixed(0)} %`);
   }
 
   /* --- Plausibilitaet --- */

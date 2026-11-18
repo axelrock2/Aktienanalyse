@@ -394,6 +394,135 @@ function cpVerhalten(chart) {
 }
 
 /* =====================================================================
+   Modul 1b - Das Portfolio (Markowitz 1952)
+   ===================================================================== */
+
+/**
+ * Risiko eines Portfolios und der Beitrag jeder einzelnen Position.
+ *
+ * Markowitz' eigentlicher Satz ist nicht, dass Schwankung Risiko ist - das
+ * ist nur die Messvorschrift. Sein Satz ist, dass sich das Risiko eines
+ * Portfolios NICHT aus den Einzelrisiken addiert:
+ *
+ *   sigma_p^2 = Summe_i Summe_j  w_i * w_j * sigma_i * sigma_j * rho_ij
+ *
+ * Weil rho meist unter eins liegt, ist das Ganze ruhiger als die Summe seiner
+ * Teile. Wie viel ruhiger, steht unten als Diversifikationsgewinn.
+ *
+ * Der Risikobeitrag einer Position ist nicht ihr Gewicht und auch nicht ihre
+ * Volatilitaet, sondern:
+ *
+ *   MRC_i = w_i * (Sigma w)_i / sigma_p
+ *
+ * Diese Beitraege addieren sich exakt zu sigma_p auf - deshalb lassen sie sich
+ * als Anteile lesen. Eine Position mit zehn Prozent Gewicht und dreissig
+ * Prozent Risikoanteil ist das, was ein Depot kippen laesst.
+ *
+ * @param {{sym:string,value:number}[]} positionen
+ * @param {Map<string,object>} charts  Kursreihen je Symbol
+ */
+function cpPortfolio(positionen, charts) {
+  const K = AK_CONFIG.portfolio;
+  const brauchbar = positionen.filter(p => p.value > 0 && charts.get(p.sym));
+  if (brauchbar.length < 2) {
+    return { grund: "Für eine Portfoliosicht braucht es mindestens zwei Positionen mit Kursen." };
+  }
+
+  /* Monatsreihen, dann auf die GEMEINSAMEN Monate schneiden. Positionen aus
+     verschiedenen Zeitzonen haben verschiedene Handelstage; nur ueber
+     Monatsenden lassen sie sich ohne Verschiebung nebeneinanderlegen. */
+  const reihen = brauchbar.map(p => ({ p, m: cpMonatsende(charts.get(p.sym).t, charts.get(p.sym).c) }));
+  let monate = [...reihen[0].m.keys()];
+  for (const r of reihen.slice(1)) monate = monate.filter(k => r.m.has(k));
+  monate.sort();
+  monate = monate.slice(-K.monate);
+  if (monate.length < K.minMonate) {
+    return { grund: `Nur ${monate.length} gemeinsame Monate über alle Positionen, mindestens ${K.minMonate} nötig.` };
+  }
+
+  const renditen = reihen.map(r => {
+    const out = [];
+    for (let i = 1; i < monate.length; i++) {
+      const a = r.m.get(monate[i - 1]), b = r.m.get(monate[i]);
+      out.push(a > 0 && b > 0 ? b / a - 1 : 0);
+    }
+    return out;
+  });
+
+  const n = brauchbar.length, T = renditen[0].length;
+  const summe = brauchbar.reduce((a, p) => a + p.value, 0);
+  const w = brauchbar.map(p => p.value / summe);
+  const A = AK_CONFIG.risiko.handelstage / 21;        // Monate je Jahr, rund 12
+
+  // Kovarianzmatrix, auf Jahresmass gebracht
+  const mittel = renditen.map(r => cpMittel(r));
+  const S = Array.from({ length: n }, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = i; j < n; j++) {
+      let c = 0;
+      for (let t = 0; t < T; t++) c += (renditen[i][t] - mittel[i]) * (renditen[j][t] - mittel[j]);
+      c = c / (T - 1) * A;
+      S[i][j] = c; S[j][i] = c;
+    }
+  }
+  const sigma = S.map((z, i) => Math.sqrt(Math.max(0, z[i])));
+
+  // Sigma*w, daraus Portfoliovarianz und Risikobeitraege
+  const Sw = S.map(z => z.reduce((a, v, j) => a + v * w[j], 0));
+  const varP = Sw.reduce((a, v, i) => a + w[i] * v, 0);
+  const volP = Math.sqrt(Math.max(0, varP));
+  if (!(volP > 0)) return { grund: "Die Portfoliovarianz ließ sich nicht bestimmen." };
+
+  const gewichtetesMittel = w.reduce((a, v, i) => a + v * sigma[i], 0);
+
+  const eintraege = brauchbar.map((p, i) => {
+    const beitrag = w[i] * Sw[i] / volP;              // addiert sich zu volP
+    return {
+      sym: p.sym, name: p.n || p.sym,
+      gewicht: w[i], vola: sigma[i],
+      beitrag, anteil: beitrag / volP,
+      /* Die Differenz ist die eigentliche Auskunft: Traegt die Position mehr
+         Risiko bei, als ihr Gewicht vermuten laesst? */
+      ueberhang: beitrag / volP - w[i],
+      korrRest: null,
+    };
+  });
+
+  // Korrelationsmatrix
+  const korr = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) =>
+      (sigma[i] > 0 && sigma[j] > 0) ? S[i][j] / (sigma[i] * sigma[j]) : null));
+
+  /* Korrelation jeder Position zum Rest des Depots - das ist die Zahl, die
+     "diversifiziert dieser Titel?" beantwortet, nicht die Korrelation zu
+     einem einzelnen anderen Titel. */
+  for (let i = 0; i < n; i++) {
+    const restGewicht = 1 - w[i];
+    if (restGewicht <= 1e-9) continue;
+    let cov = 0, varRest = 0;
+    for (let j = 0; j < n; j++) {
+      if (j === i) continue;
+      cov += w[j] * S[i][j];
+      for (let k = 0; k < n; k++) if (k !== i) varRest += w[j] * w[k] * S[j][k];
+    }
+    cov /= restGewicht;
+    varRest /= restGewicht * restGewicht;
+    const sdRest = Math.sqrt(Math.max(0, varRest));
+    if (sigma[i] > 0 && sdRest > 0) eintraege[i].korrRest = cov / (sigma[i] * sdRest);
+  }
+
+  eintraege.sort((a, b) => b.anteil - a.anteil);
+  return {
+    volP, gewichtetesMittel,
+    /* Wie viel Schwankung die Streuung spart. 0,25 heisst: ein Viertel
+       weniger als die gewichtete Summe der Einzelrisiken. */
+    gewinn: gewichtetesMittel > 0 ? 1 - volP / gewichtetesMittel : null,
+    eintraege, korr, symbole: brauchbar.map(p => p.sym),
+    monate: T, von: monate[0], bis: monate[monate.length - 1],
+  };
+}
+
+/* =====================================================================
    Modul 7 - Zyklusbereinigtes KGV (Shiller 1981, Campbell/Shiller)
    ===================================================================== */
 
@@ -609,6 +738,21 @@ function cpRang(wert, liste) {
   return Math.round(100 * (kleiner + gleich / 2) / gueltig.length);
 }
 
+/** Momentum- und Schwankungsrang im Korb. */
+function cpQuerRang(symbol, quer) {
+  if (!quer || !Array.isArray(quer.werte)) return null;
+  const eigen = quer.werte.find(x => x.s === symbol);
+  if (!eigen) return null;
+  const rang = (feld) => cpRang(eigen[feld], quer.werte.map(x => x[feld]));
+  const n = (feld) => quer.werte.filter(x => x[feld] != null && isFinite(x[feld])).length;
+  return {
+    stand: quer.stand,
+    mom12: { wert: eigen.m12, rang: rang("m12"), n: n("m12") },
+    mom6: { wert: eigen.m6, rang: rang("m6"), n: n("m6") },
+    vola: { wert: eigen.v, rang: rang("v"), n: n("v") },
+  };
+}
+
 /**
  * Faktorprofil eines Titels gegenueber dem Vergleichskorb.
  *
@@ -696,7 +840,7 @@ function cpBenchmarkWahl(symbol) {
 
 /* Zins und Benchmark aendern sich nicht je Titel - einmal je Sitzung holen.
    Dasselbe Muster wie loadBenchmark() in app.js. */
-const cpVorrat = { rf: null, faktoren: null, benches: new Map() };
+const cpVorrat = { rf: null, faktoren: null, quer: null, benches: new Map() };
 
 /**
  * Risikofreier Zins aus ^TNX ueber dieselbe Kursquelle wie alles andere.
@@ -716,6 +860,24 @@ async function cpRf() {
     return { wert: AK_CONFIG.capm.rfFallback, quelle: "Rückfallwert aus config.js", stand: null };
   })();
   return cpVorrat.rf;
+}
+
+/**
+ * Querschnittswerte des Korbs aus data/quer.json.
+ *
+ * Jegadeesh & Titman (1993) haben den Momentum-Effekt ueber die RANGFOLGE
+ * vieler Aktien gefunden, nicht am einzelnen Titel. "+25 % in zwoelf Monaten"
+ * sagt ohne die Vergleichsmenge nicht, ob das viel ist. Die Datei entsteht im
+ * selben Lauf wie das Laufband der Startseite - die Kurse des Korbs werden
+ * dort ohnehin geholt.
+ */
+async function cpQuer() {
+  if (!cpVorrat.quer) {
+    cpVorrat.quer = fetch(AK_CONFIG.faktoren.quelleQuer + "?v=" + Date.now())
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null);
+  }
+  return cpVorrat.quer;
 }
 
 /** Faktorreihen und Zinsen aus data/faktoren.json. Einmal je Sitzung. */
@@ -759,7 +921,7 @@ async function cpBenchmark(symbol) {
 }
 
 /** Alles rechnen. Die Daten kommen von aussen - die Funktion holt nichts. */
-function cpRechne(chart, bench, rf, roh, fund, faktoren, symbol) {
+function cpRechne(chart, bench, rf, roh, fund, faktoren, symbol, quer) {
   const risiko = cpRisiko(chart, bench);
   return {
     risiko,
@@ -769,6 +931,7 @@ function cpRechne(chart, bench, rf, roh, fund, faktoren, symbol) {
     cape: cpCape(roh && roh.cape, fund && fund.marketCap, fund && fund.trailingPE),
     regression: cpFaktorRegression(chart, faktoren, cpRegionWahl(symbol)),
     profil: cpProfil(symbol, (typeof Fundamentals === "object" && Fundamentals.data) || null),
+    quer: cpQuerRang(symbol, quer),
   };
 }
 
@@ -822,6 +985,10 @@ if (typeof INFO === "object" && typeof INFO_LABELS === "object") {
       "Wie stark der Titel auf einen Faktor reagiert – die Steigung in der Mehrfachregression der monatlichen Überschussrenditen.\n\nEine Ladung von 0,8 auf Wert (HML) heißt: Der Titel bewegt sich wie ein Portfolio mit kräftigem Value-Charakter. Negative Ladungen sind die Gegenseite – minus auf HML heißt Wachstumscharakter.\n\nEntscheidend ist die t-Statistik daneben. Unter |t| = 2 ist die Ladung nicht von null zu unterscheiden; die Zahl steht trotzdem da, aber zurückgenommen."],
     cpR2adj: ["Erklärte Varianz (bereinigtes R²)",
       "Welcher Anteil der monatlichen Kursbewegung sich durch die Faktoren erklären lässt, korrigiert um die Zahl der Regressoren.\n\nDie Korrektur ist nötig, weil jedes zusätzliche Merkmal das rohe R² mechanisch anhebt, auch wenn es nichts erklärt. Das bereinigte R² kann deshalb sinken, wenn man Faktoren hinzunimmt – und tut es hier regelmäßig."],
+    cpRisikoanteil: ["Risikoanteil einer Position",
+      "Wie viel eine Position zur Schwankung des GESAMTEN Depots beiträgt – nicht wie viel sie wiegt und nicht wie stark sie selbst schwankt.\n\nFormel: w·(Σw)/σ, wobei w die Gewichte sind und Σ die Kovarianzmatrix. Diese Beiträge summieren sich exakt zu 100 %, deshalb lassen sie sich als Anteile lesen.\n\nEine Position mit 25 % Gewicht und 52 % Risikoanteil ist das, was ein Depot kippen lässt. Eine mit 12 % Gewicht und 2 % Risikoanteil ist das, was es ruhig hält – sie schwankt wenig UND läuft nicht mit dem Rest."],
+    cpKorrRest: ["Korrelation zum Rest des Depots",
+      "Wie gleichförmig sich diese Position und der gesamte übrige Depotbestand bewegen, auf Monatsbasis.\n\nDas ist die Zahl, die „diversifiziert dieser Titel?“ beantwortet – nicht die Korrelation zu einem einzelnen anderen Titel. Niedrig heißt: Die Position geht ihren eigenen Weg und senkt dadurch das Gesamtrisiko, selbst wenn sie für sich genommen stark schwankt.\n\nMarkowitz (1952): Genau darum geht es. Zwei schwankungsreiche Titel mit niedriger Korrelation ergeben zusammen ein ruhigeres Depot als ein einzelner ruhiger Titel vermuten lässt."],
     cpAlphaReg: ["Alpha der Faktor-Regression",
       "Was nach Abzug der Faktoren übrig bleibt: der Achsenabschnitt der Regression, auf ein Jahr hochgerechnet.\n\nCarhart (1997) untersuchte damit Investmentfonds und fand, dass ihre scheinbare „Hot Hand“ fast vollständig durch Momentum-Exposure und Kosten erklärbar war – nicht durch Können. Dauerhaft war nur die Underperformance der schlechtesten Fonds.\n\nOhne gesicherte t-Statistik ist ein Alpha kein Können, sondern Streuung. Und es ist rückblickend: Dass etwas übrig blieb, sagt nicht, dass es wieder übrig bleibt."],
   });
@@ -832,6 +999,7 @@ if (typeof INFO === "object" && typeof INFO_LABELS === "object") {
     "profitabilität rmw": "cpLadung", "investition cma": "cpLadung",
     "momentum mom": "cpLadung",
     "erklärte varianz": "cpR2adj", "alpha p. a.": "cpAlphaReg",
+    "risikoanteil": "cpRisikoanteil", "zum rest": "cpKorrRest",
     "volatilität 1 jahr": "cpVola", "volatilität 3 jahre": "cpVola",
     "maximaler rückgang": "cpDrawdown", "korrelation": "cpKorr",
     /* NICHT "beta": Dieser Schluessel ist in app.js schon vergeben und zeigt
@@ -927,6 +1095,15 @@ function cpZeige(out, erg, bench, rf, chart, item) {
        "Momentum 12-1 geteilt durch die Volatilität")}
     ${cpZeile("Relativ zur Benchmark", cpP(m.relativ), `gegen ${e(bench.name)}`,
        m.relativ == null ? "" : m.relativ >= 0 ? "up" : "down")}
+    ${erg.quer && erg.quer.mom12.rang != null
+      ? cpZeile("Perzentil im Vergleichskorb", String(erg.quer.mom12.rang),
+          `unter ${erg.quer.mom12.n} Titeln, Stand ${e(erg.quer.stand)} ·
+           ${erg.quer.mom12.rang >= 80 ? "oberes Fünftel"
+             : erg.quer.mom12.rang <= 20 ? "unteres Fünftel" : "Mittelfeld"}
+           · Schwankung Perzentil ${erg.quer.vola.rang ?? "–"}`)
+      : ""}
+    ${!erg.quer ? `<p class="cp-note">Kein Rang: Der Titel steht nicht im Vergleichskorb
+       (<code>scripts/chancen_watchlist.txt</code>). Die absoluten Werte oben gelten trotzdem.</p>` : ""}
     ${m.umkehr ? cpZeile("Umkehrrisiko", cpP(m.umkehr.rendite),
        m.umkehr.warnung
          ? `<b class="cp-warn">über 36 Monate mehr als verdoppelt – in den Jahren zwei und drei drehte Momentum im Durchschnitt</b>`
@@ -1082,14 +1259,104 @@ function cpZeige(out, erg, bench, rf, chart, item) {
     </p>`;
 }
 
+/**
+ * Portfolioabschnitt fuer die Depotansicht.
+ *
+ * Steht hier und nicht in depot.js, damit die Rechnung und ihre Darstellung
+ * beieinander bleiben - dieselbe Trennung wie beim Rest des Cockpits. depot.js
+ * ruft die Funktion nur auf.
+ */
+function cpPortfolioHtml(positionen, charts) {
+  if (typeof cpPortfolio !== "function") return "";
+  const e = typeof esc === "function" ? esc : (x => x);
+  const p = cpPortfolio(positionen, charts);
+  if (p.grund) {
+    return `<div class="dp-panel cp-pf">
+      <div class="dp-panel-h"><h4>Risikobeitrag <span class="cp-q">Markowitz 1952</span></h4></div>
+      <p class="cp-leer">${e(p.grund)}</p></div>`;
+  }
+  const K = AK_CONFIG.portfolio;
+  const pp = v => (v < 0 ? "−" : "+") + (Math.abs(v) * 100).toLocaleString("de-DE",
+    { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " Pp";
+
+  const schwer = p.eintraege.filter(x => x.ueberhang >= K.ueberhangWarnung);
+  const traeger = p.eintraege.filter(x => x.korrRest != null && x.korrRest < 0.3);
+
+  const zeilen = p.eintraege.map(x => `<tr>
+      <td>${e(x.sym)}</td>
+      <td class="r">${cpP(x.gewicht, 1)}</td>
+      <td class="r">${cpP(x.vola, 0)}</td>
+      <td class="r"><span class="cp-pfbalken"><i style="width:${Math.min(100, x.anteil * 100)}%"></i></span>${cpP(x.anteil, 1)}</td>
+      <td class="r ${x.ueberhang >= K.ueberhangWarnung ? "down" : x.ueberhang <= -K.ueberhangWarnung ? "up" : ""}">${pp(x.ueberhang)}</td>
+      <td class="r">${x.korrRest == null ? "–" : cpZ(x.korrRest)}</td>
+    </tr>`).join("");
+
+  /* Die Korrelationsmatrix als Farbfeld. Zahlen daneben waeren bei zehn
+     Positionen hundert Zellen - die Farbe traegt die Uebersicht, der
+     Titelzusatz die genaue Zahl. */
+  const matrix = p.symbole.length <= 14 ? `
+    <div class="cp-matrixwrap">
+      <table class="cp-matrix">
+        <tr><th></th>${p.symbole.map(s => `<th><span>${e(s)}</span></th>`).join("")}</tr>
+        ${p.korr.map((zeile, i) => `<tr><th>${e(p.symbole[i])}</th>${zeile.map((v, j) => {
+          if (i === j) return `<td class="selbst">·</td>`;
+          const stufe = v == null ? 0 : Math.max(-1, Math.min(1, v));
+          const farbe = stufe >= 0
+            ? `rgba(224,106,114,${(stufe * 0.55).toFixed(2)})`
+            : `rgba(79,184,172,${(-stufe * 0.55).toFixed(2)})`;
+          return `<td style="background:${farbe}" title="${e(p.symbole[i])} zu ${e(p.symbole[j])}: ${cpZ(v)}">${
+            Math.abs(stufe) >= 0.5 ? cpZ(v, 1).replace("0,", ",") : ""}</td>`;
+        }).join("")}</tr>`).join("")}
+      </table>
+    </div>` : `<p class="cp-note">Die Matrix wird ab 15 Positionen unleserlich und bleibt
+      deshalb aus; die Spalte „zum Rest“ in der Tabelle sagt dasselbe je Position.</p>`;
+
+  return `<div class="dp-panel cp-pf">
+    <div class="dp-panel-h"><h4>Risikobeitrag <span class="cp-q">Markowitz 1952</span></h4></div>
+
+    <div class="cp-pfkopf">
+      <div><span>Depot-Volatilität</span><b>${cpP(p.volP, 1)}</b></div>
+      <div><span>Summe der Einzelrisiken</span><b>${cpP(p.gewichtetesMittel, 1)}</b></div>
+      <div><span>Diversifikationsgewinn</span><b class="up">${cpP(p.gewinn, 1)}</b></div>
+    </div>
+    <p class="cp-note">Das Depot schwankt ${cpP(p.gewinn, 0)} weniger als die gewichtete Summe
+      seiner Positionen. Das ist Markowitz’ eigentlicher Satz: Risiko addiert sich nicht, weil
+      die Titel nicht im Gleichschritt laufen.</p>
+
+    <div class="cp-pftab">
+      <table>
+        <thead><tr><th>Position</th><th class="r">Gewicht</th><th class="r">Vola</th>
+          <th class="r">Risikoanteil${typeof infoFuer === "function" ? infoFuer("Risikoanteil") : ""}</th>
+          <th class="r">Überhang</th><th class="r">zum Rest${typeof infoFuer === "function" ? infoFuer("zum Rest") : ""}</th></tr></thead>
+        <tbody>${zeilen}</tbody>
+      </table>
+    </div>
+
+    ${schwer.length ? `<p class="cp-note"><b class="cp-warn">Risikoschwerpunkt:</b>
+      ${schwer.map(x => `${e(x.sym)} trägt ${cpP(x.anteil, 0)} des Risikos bei ${cpP(x.gewicht, 0)} Gewicht`).join(" · ")}.
+      Das ist keine Warnung vor dem Titel, sondern eine Auskunft über das Depot: Was dieser
+      Titel tut, bestimmt überdurchschnittlich, was das Depot tut.</p>` : ""}
+    ${traeger.length ? `<p class="cp-note">Am meisten zur Streuung tragen
+      ${traeger.map(x => e(x.sym)).join(", ")} bei – sie laufen am wenigsten mit dem Rest.</p>` : ""}
+
+    ${matrix}
+    <p class="cp-fuss">Kovarianz aus ${p.monate} gemeinsamen Monatsrenditen (${e(p.von)} bis ${e(p.bis)}),
+      auf Jahresmaß gebracht. Nur Monate, die alle Positionen haben – Börsen mit anderen
+      Feiertagen ließen sich sonst nicht ohne Verschiebung nebeneinanderlegen.
+      Der Risikoanteil ist w·(Σw)/σ und summiert sich exakt auf 100 %.
+      <br><b>Korrelationen steigen in Krisen</b> – also genau dann, wenn man die Streuung
+      bräuchte. Die Zahlen hier sind ein Durchschnitt über ruhige und unruhige Monate.</p>
+  </div>`;
+}
+
 /** Vom Detailfenster aufgerufen, nachdem der Abschnitt im Dokument steht. */
 async function cpVerdrahte(item, chart, fund) {
   const out = document.getElementById("cp-out");
   if (!out) return;
   try {
     const waehrung = (chart.meta && chart.meta.currency) || "";
-    const [bench, rf, faktoren] = await Promise.all([
-      cpBenchmark(item.s), cpRfFuer(waehrung), cpFaktoren()]);
+    const [bench, rf, faktoren, quer] = await Promise.all([
+      cpBenchmark(item.s), cpRfFuer(waehrung), cpFaktoren(), cpQuer()]);
     /* Fuenf Jahre statt der zwei des Charts: Beta braucht 36 Monate, die
        Drei-Jahres-Volatilitaet 756 Handelstage. Scheitert der Abruf, wird mit
        der vorhandenen Reihe gerechnet - dann fehlen einzelne Werte, statt
@@ -1101,7 +1368,7 @@ async function cpVerdrahte(item, chart, fund) {
     let roh = null;
     try { roh = (typeof Fundamentals === "object") ? Fundamentals.get(item.s) : null; }
     catch (err) { /* ohne Datei einfach kein CAPE */ }
-    const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund, faktoren, item.s);
+    const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund, faktoren, item.s, quer);
     cpZeige(out, erg, bench, rf, lang, item);
   } catch (e) {
     out.className = "";

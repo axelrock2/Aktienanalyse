@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.name "mover-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/mover.json
+          git add data/mover.json data/quer.json
           git diff --cached --quiet && echo "Keine Aenderungen." && exit 0
           git commit -m "Top Mover aktualisiert ($(date -u +%F))"
           git pull --rebase --autostash || true

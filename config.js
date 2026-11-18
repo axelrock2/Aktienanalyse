@@ -130,6 +130,8 @@ const AK_CONFIG = {
   faktoren: {
     /** Datei aus scripts/build_faktoren.py. */
     quelle: "data/faktoren.json",
+    /** Querschnittswerte des Korbs, aus scripts/build_mover.js. */
+    quelleQuer: "data/quer.json",
     /** Fenster der Regression in Monaten. Fuenf Jahre: lang genug fuer sechs
         Regressoren, kurz genug, um das heutige Unternehmen zu beschreiben.
         Carhart rechnete mit 36 bis 60 Monaten. */
@@ -141,6 +143,20 @@ const AK_CONFIG = {
     /** Ab diesem Zuwachs an bereinigtem R² tragen Profitabilitaet und
         Investition beim einzelnen Titel sichtbar etwas bei. */
     zugewinnSichtbar: 0.02,
+  },
+
+  /* ---------- Modul 1b: Portfolio ---------- */
+  portfolio: {
+    /** Fenster der Kovarianzschaetzung in Monaten. */
+    monate: 60,
+    minMonate: 24,
+    /** Ab diesem Ueberhang zwischen Risikoanteil und Gewicht wird eine
+        Position als Risikoschwerpunkt benannt. Fuenf Prozentpunkte: darunter
+        ist der Unterschied kleiner als die Schaetzunsicherheit. */
+    ueberhangWarnung: 0.05,
+    /** Ab dieser Korrelation zum Rest des Depots gilt eine Position als
+        wenig eigenstaendig. */
+    korrHoch: 0.7,
   },
 
   /* ---------- Darstellung ---------- */
