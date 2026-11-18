@@ -305,28 +305,113 @@ function computeScores(entry, live) {
     }
   }
 
-  /* --- Piotroski F-Score (0–9) --- braucht zwei Jahre ---
-     Nur die Kriterien, die die Datenlage erlaubt; sonst maxPossible < 9. */
-  const yrs = k => {
+  /* --- Piotroski F-Score (0–9) ---
+     Piotroski (2000): Innerhalb guenstig bewerteter Aktien trennt ein
+     Neun-Punkte-Check der Bilanzqualitaet die Gewinner von den Verlierern.
+
+     Zwei Dinge waren hier vorher falsch:
+
+     1. Kriterium 3 verglich den Nettogewinn mit dem Vorjahr, nicht die
+        Gesamtkapitalrendite. Bei einem Unternehmen, das seine Bilanzsumme
+        schneller ausweitet als den Gewinn, steigt der Gewinn und die Rendite
+        faellt - das Kriterium sagte dann das Gegenteil dessen, was Piotroski
+        prueft.
+
+     2. Die Kriterien 6 (Current Ratio) und 7 (Verwaesserung) fehlten ganz,
+        weil die noetigen Reihen nie mitgeschrieben wurden. Der Score konnte
+        ueber sieben von neun Punkten nicht hinaus - und sieben von sieben las
+        sich wie sieben von neun.
+
+     Die Rendite wird wie bei Piotroski auf die Bilanzsumme zu JAHRESBEGINN
+     bezogen, nicht auf die zum Jahresende: Der Gewinn ist ueber das Jahr mit
+     dem Kapital erwirtschaftet worden, das am Anfang da war. */
+  const jahre = (k, n = 3) => {
     const m = ser[k] || {};
-    const keys = Object.keys(m).sort().reverse();
-    return { cur: keys[0] ? m[keys[0]] : null, prev: keys[1] ? m[keys[1]] : null };
+    return Object.keys(m).sort().reverse().slice(0, n).map(j => m[j]);
   };
-  const ni = yrs("netIncome"), cfo = yrs("cashFlowOps"), asset = yrs("totalAssets");
-  const rvn = yrs("revenue"), gp = yrs("grossProfit"), ltd = yrs("longTermDebt");
+  const [ni0, ni1] = jahre("netIncome");
+  const [cfo0] = jahre("cashFlowOps");
+  const [ta0, ta1, ta2] = jahre("totalAssets");
+  const [rev0, rev1] = jahre("revenue");
+  const [gp0, gp1] = jahre("grossProfit");
+  const [ltd0, ltd1] = jahre("longTermDebt");
+  const [ca0, ca1] = jahre("currentAssets");
+  const [cl0, cl1] = jahre("currentLiabilities");
+  const [sh0, sh1] = jahre("sharesOutstanding");
+
+  const teile = (a, b) => (a != null && b > 0) ? a / b : null;
+  const roa0 = teile(ni0, ta1);          // Rendite auf das Kapital zu Jahresbeginn
+  const roa1 = teile(ni1, ta2);
+  const cur0 = teile(ca0, cl0), cur1 = teile(ca1, cl1);
+
+  const liste = [];
   let f = 0, fmax = 0;
-  const crit = (cond) => { if (cond != null) { fmax++; if (cond) f++; } };
-  crit(ni.cur != null ? ni.cur > 0 : null);                                   // Rentabilität
-  crit(cfo.cur != null ? cfo.cur > 0 : null);                                 // operativer CF
-  crit((ni.cur != null && ni.prev != null) ? ni.cur > ni.prev : null);        // steigende Rendite
-  crit((cfo.cur != null && ni.cur != null) ? cfo.cur > ni.cur : null);        // CF > Gewinn (Qualität)
-  crit((ltd.cur != null && ltd.prev != null && asset.cur && asset.prev)
-        ? (ltd.cur / asset.cur) < (ltd.prev / asset.prev) : null);            // sinkende Verschuldung
-  crit((rvn.cur != null && asset.cur && rvn.prev != null && asset.prev)
-        ? (rvn.cur / asset.cur) > (rvn.prev / asset.prev) : null);            // Kapitalumschlag
-  crit((gp.cur != null && rvn.cur && gp.prev != null && rvn.prev)
-        ? (gp.cur / rvn.cur) > (gp.prev / rvn.prev) : null);                  // steigende Marge
-  if (fmax >= 4) { out.piotroski = f; out.piotroskiMax = fmax; }
+  /* Jedes Kriterium mit Namen und beiden Jahreswerten - die Oberflaeche soll
+     die Checkliste zeigen koennen, nicht nur die Summe. */
+  const krit = (nr, name, bedingung, wert) => {
+    if (bedingung == null) { liste.push({ nr, name, erfuellt: null, wert }); return; }
+    fmax++; if (bedingung) f++;
+    liste.push({ nr, name, erfuellt: !!bedingung, wert });
+  };
+  /* Deutsche Schreibweise samt Minuszeichen - toFixed liefert einen
+     Bindestrich, der Rest der Seite zeigt ein echtes Minus. */
+  const fmtK = (v, d = 2) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(d).replace(".", ",");
+  const fmtQ = (a, b, d = 2) => (a == null || b == null) ? null
+    : `${fmtK(a, d)} → ${fmtK(b, d)}`;
+
+  // Rentabilitaet
+  krit(1, "Gesamtkapitalrendite positiv", roa0 == null ? null : roa0 > 0,
+       roa0 == null ? null : fmtK(roa0 * 100, 1) + " %");
+  /* Vorzeichen selbst setzen: fmtBig liefert einen Bindestrich, in derselben
+     Tabelle steht daneben ein echtes Minus. */
+  krit(2, "Operativer Cashflow positiv", cfo0 == null ? null : cfo0 > 0,
+       cfo0 == null ? null : (cfo0 < 0 ? "−" : "")
+         + (typeof fmtBig === "function" ? fmtBig(Math.abs(cfo0)) : String(Math.abs(cfo0))));
+  krit(3, "Gesamtkapitalrendite gestiegen",
+       (roa0 == null || roa1 == null) ? null : roa0 > roa1,
+       fmtQ(roa1 != null ? roa1 * 100 : null, roa0 != null ? roa0 * 100 : null, 1));
+  krit(4, "Cashflow über dem Gewinn", (cfo0 == null || ni0 == null) ? null : cfo0 > ni0,
+       (cfo0 != null && ni0 != null && ta1 > 0)
+         ? fmtQ(ni0 / ta1 * 100, cfo0 / ta1 * 100, 1) : null);
+  // Verschuldung, Liquiditaet, Finanzierung
+  krit(5, "Langfristige Verschuldung gesunken",
+       (teile(ltd0, ta0) == null || teile(ltd1, ta1) == null) ? null
+         : teile(ltd0, ta0) < teile(ltd1, ta1),
+       fmtQ(teile(ltd1, ta1) != null ? teile(ltd1, ta1) * 100 : null,
+            teile(ltd0, ta0) != null ? teile(ltd0, ta0) * 100 : null, 1));
+  krit(6, "Current Ratio gestiegen", (cur0 == null || cur1 == null) ? null : cur0 > cur1,
+       fmtQ(cur1, cur0));
+  /* Die Aktienzahl meldet die SEC so, wie sie im jeweiligen Jahr war - nach
+     einem Split springt sie um den Splitfaktor. Nvidia teilte 2024 im
+     Verhaeltnis 10:1; das als "neue Aktien ausgegeben" zu werten, waere falsch.
+     Aendert sich die Zahl um mehr als die Haelfte nach oben oder ein Drittel
+     nach unten, ist ein Split die weit wahrscheinlichere Erklaerung als eine
+     Emission dieser Groesse - das Kriterium bleibt dann offen statt falsch. */
+  const shVerhaeltnis = (sh0 != null && sh1 > 0) ? sh0 / sh1 : null;
+  const splitVerdacht = shVerhaeltnis != null && (shVerhaeltnis >= 1.5 || shVerhaeltnis <= 0.67);
+  krit(7, "Keine neuen Aktien ausgegeben",
+       (shVerhaeltnis == null || splitVerdacht) ? null : shVerhaeltnis <= 1.001,
+       shVerhaeltnis == null ? null
+         : splitVerdacht ? "Aktienzahl ×" + fmtK(shVerhaeltnis) + " – Split?"
+         : fmtK((shVerhaeltnis - 1) * 100, 1) + " %");
+  // Operative Effizienz
+  krit(8, "Bruttomarge gestiegen",
+       (teile(gp0, rev0) == null || teile(gp1, rev1) == null) ? null
+         : teile(gp0, rev0) > teile(gp1, rev1),
+       fmtQ(teile(gp1, rev1) != null ? teile(gp1, rev1) * 100 : null,
+            teile(gp0, rev0) != null ? teile(gp0, rev0) * 100 : null, 1));
+  krit(9, "Kapitalumschlag gestiegen",
+       (teile(rev0, ta1) == null || teile(rev1, ta2) == null) ? null
+         : teile(rev0, ta1) > teile(rev1, ta2),
+       fmtQ(teile(rev1, ta2), teile(rev0, ta1)));
+
+  /* Eine Verwaesserung von bis zu 0,1 Prozent gilt als keine: Die gemeldete
+     Aktienzahl schwankt durch Rundung und Stichtag auch ohne Ausgabe. */
+  if (fmax >= 4) {
+    out.piotroski = f;
+    out.piotroskiMax = fmax;
+    out.piotroskiListe = liste;
+  }
 
   /* --- DCF-Näherung ---
      Sehr konservativ: FCF (oder operativer CF) als Basis, feste Annahmen,
@@ -2171,7 +2256,7 @@ function renderDetail(item, chart, fund, a) {
   /* Das Cockpit rechnet erst, wenn der Abschnitt im Dokument steht, und
      laedt dafuer eine laengere Kursreihe nach. Bewusst ohne await: Das
      Detailfenster soll stehen, bevor die Zusatzdaten da sind. */
-  if (typeof cpVerdrahte === "function") cpVerdrahte(item, chart);
+  if (typeof cpVerdrahte === "function") cpVerdrahte(item, chart, fund);
   let curDays = 252, curMode = "candle";
   const draw = () => drawChart(chart, a, curDays, curMode);
   panel.querySelectorAll(".rbtn").forEach(b => b.onclick = () => {
@@ -2612,10 +2697,23 @@ function buildDossier(item,chart,fund,a,deep,news,bench,demo,scores){
                   : scores.altmanZone === "grau" ? "Graubereich" : "erhöhtes Risiko")
           : ""}
       </div>
+      ${scores && scores.piotroskiListe
+        ? `<table class="ds-piot">
+             <tr><th></th><th>Kriterium</th><th>Vorjahr → aktuell</th><th></th></tr>
+             ${scores.piotroskiListe.map(k => `<tr class="${k.erfuellt === null ? "offen" : k.erfuellt ? "ja" : "nein"}">
+               <td class="p-nr">${k.nr}</td>
+               <td>${esc(k.name)}</td>
+               <td class="p-wert">${k.wert ? esc(k.wert) : "–"}</td>
+               <td class="p-hak">${k.erfuellt === null ? "?" : k.erfuellt ? "✓" : "✕"}</td>
+             </tr>`).join("")}
+           </table>` : ""}
       ${scores && (scores.piotroski != null || scores.altmanZ != null)
         ? `<p class="dshint">Berechnet aus Bilanzdaten (${esc(scores.source)}) ${dsBadge("calc")}.
            ${scores.altmanCapped ? "Der Marktwert-Term des Altman-Z ist gedeckelt, da die Bewertung sehr hoch ist – bei Wachstumswerten ist der Z-Score nur eingeschränkt aussagekräftig. " : ""}
-           ${scores.piotroskiMax < 9 ? "Piotroski aus " + scores.piotroskiMax + " von 9 Kriterien, soweit die Datenlage reicht. " : ""}
+           ${scores.piotroskiMax < 9 ? "Piotroski aus " + scores.piotroskiMax + " von 9 Kriterien – die übrigen trägt die Datenlage nicht; sie zählen weder als erfüllt noch als verfehlt. " : ""}
+           Die Rendite bezieht sich auf die Bilanzsumme zu Jahresbeginn, wie bei Piotroski (2000).
+           Für Banken und Versicherungen ist der F-Score nicht gedacht – ihre Bilanzstruktur macht
+           Current Ratio und Kapitalumschlag unvergleichbar.
            Beneish M-Score erfordert weitere Detailposten und bleibt offen ${dsBadge("judge")}.</p>`
         : `<p class="dsna">Piotroski F-Score, Altman Z-Score und Beneish M-Score erfordern Mehrjahres-Bilanzen. Für diesen Titel liegen aktuell keine Bilanzdaten vor – Felder bewusst offen statt mit Schätzwerten gefüllt.</p>`}
     </section>

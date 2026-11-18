@@ -3,21 +3,90 @@
 # ein Depot darf es nie sein. Grosse auslaendische Werte werden ueber ihr
 # SEC-Form-20-F erfasst (ADR-Ticker verwenden, z. B. Toyota = TM).
 #
-# --- US-Werte ---
-NVDA
-JNJ
+# Diese Liste ist das Vergleichsuniversum des Faktorprofils. Sie umfasst alle
+# Titel aus scripts/chancen_watchlist.txt, die bei der SEC einreichen - also
+# eine CIK haben -, damit Perzentile gegen dieselbe Menge gerechnet werden,
+# ueber die die Startseite ohnehin spricht. Die 41 nicht-US-Notierungen des
+# Korbs (DE, L, PA, HK, T und andere) koennen hier nicht stehen: Sie reichen
+# nicht bei der SEC ein, und ohne Mehrjahresbilanzen gibt es weder einen
+# Piotroski-Score noch ein zyklusbereinigtes KGV.
+#
+# Laufzeit: rund 0,15 s Pause je Titel fuer die SEC plus rund 2 s fuer die
+# Marktkennzahlen - bei dieser Laenge etwa drei Minuten je Lauf.
+#
+# --- US-Werte (aus dem Chancenkorb, soweit bei der SEC gefuehrt) ---
 AAPL
-MSFT
-GOOGL
+ABBV
+ABT
+ADBE
+ADT
+AMD
 AMZN
-META
+ASX
+ATHM
+AVGO
+AX
+BABA
+BAC
+BIP-PA
+BNTX
+CAMT
+CAT
+CDP
+CDW
+CENX
+CHD
+CM
+COST
+CRM
+CSCO
+CSQ
+CVX
+CW
+DB
+DNTH
+EPAC
+FRT-PC
+FTNT
+GDS
+GE
+GOOGL
+GTES
+HAFN
+HD
+HMC
+HON
+HWM
+INTC
+JNJ
 JPM
+KO
+LLY
+MA
+MCD
+META
+MRK
+MSFT
+NKE
+NVDA
+ORCL
+PEP
+PFE
+PG
+QCOM
+TMO
+TSM
+TXN
+UNH
+UNP
 V
+WMT
+XOM
 # --- Europa/Asien (ueber 20-F bei der SEC) ---
-SAP
 ASML
-TM
 AZN
 NVO
-TSM
+SAP
 SONY
+TM
+TSM

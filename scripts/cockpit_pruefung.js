@@ -54,7 +54,7 @@ function ladeModul() {
   const schnitt = quelle.indexOf(marke);
   vm.runInContext((schnitt > 0 ? quelle.slice(0, schnitt) : quelle)
     + "\nglobalThis.__ex = { cpRisiko, cpCapm, cpMomentum, cpVerhalten, cpVola,"
-    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, AK_CONFIG };", ctx);
+    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, AK_CONFIG };", ctx);
   return ctx.__ex;
 }
 
@@ -106,6 +106,11 @@ const Z = (v, d = 2) => v == null || !isFinite(v) ? "  – " : v.toFixed(d).padS
   const rfReihe = await reihe(AKsym(M));
   const rf = rfReihe.c[rfReihe.c.length - 1] / 100;
   console.error(`Risikofreier Zins aus ${M.AK_CONFIG.capm.rfSymbol}: ${(rf * 100).toFixed(2)} %\n`);
+
+  /* Eine Sammlung fuer alle Pruefungen, damit der Rueckgabewert des Skripts
+     am Ende wirklich "alles bestanden" bedeutet. */
+  const pruef = [];
+  const sagePruefung = (txt, gut) => { pruef.push(gut); console.log(`  ${gut ? "ok  " : "FEHL"}  ${txt}`); };
 
   const zeilen = [];
   for (const [sym, bsym] of PROBEN) {
@@ -172,10 +177,51 @@ const Z = (v, d = 2) => v == null || !isFinite(v) ? "  – " : v.toFixed(d).padS
   ok &= anteil("Beta < 0,8 (defensiv)", zeilen.filter(z => !z.cm.grund && z.cm.stufe === "defensiv").length);
   ok &= anteil("Beta > 1,2 (offensiv)", zeilen.filter(z => !z.cm.grund && z.cm.stufe === "offensiv").length);
 
+  /* --- Modul 7: zyklusbereinigtes KGV ---
+     Gerechnet gegen data/fundamentals.json, also gegen das, was die GitHub
+     Action tatsaechlich schreibt. Fehlt die Datei oder der Block, sagt das
+     Skript das, statt die Pruefung still zu ueberspringen. */
+  const fundDatei = path.join(WURZEL, "data", "fundamentals.json");
+  console.log("\nModul 7 – Zyklusbereinigtes KGV (Shiller)");
+  if (!fs.existsSync(fundDatei)) {
+    console.log("  data/fundamentals.json fehlt – übersprungen.");
+  } else {
+    const daten = (JSON.parse(fs.readFileSync(fundDatei, "utf8")) || {}).data || {};
+    const mitCape = Object.entries(daten).filter(([, e]) => e && e.cape);
+    if (!mitCape.length) {
+      console.log("  Kein Titel hat eine CAPE-Gewinnreihe. Lief build_fundamentals.js"
+        + " seit der Umstellung schon? Sonst fehlt der Block noch.");
+    } else {
+      console.log("Titel      Jahre  vollst.  Verlustj.  Gewinn real Ø    CAPE   laufendes KGV");
+      for (const [sym, e] of mitCape) {
+        const mw = e.markt && e.markt.marketCap;
+        const kgv = e.markt && e.markt.trailingPE;
+        const c = M.cpCape(e.cape, mw, kgv);
+        const mrd = (e.cape.gewinnRealMittel / 1e9).toFixed(2) + " Mrd";
+        console.log(`${sym.padEnd(10)}${String(e.cape.jahre).padStart(4)}`
+          + `${(e.cape.vollstaendig ? "  ja" : " nein").padStart(8)}`
+          + `${String(e.cape.verlustjahre).padStart(9)}  ${mrd.padStart(13)}`
+          + `  ${c ? Z(c.wert, 1) : "  – "}  ${c && c.kgv ? Z(c.kgv, 1) : "  – "}`
+          + (c && c.lage ? "   " + c.lage : "  (ohne Marktwert kein CAPE)"));
+      }
+      sagePruefung("CAPE positiv, wo berechenbar",
+        mitCape.every(([, e]) => {
+          const c = M.cpCape(e.cape, e.markt && e.markt.marketCap, null);
+          return c == null || c.wert > 0;
+        }));
+      sagePruefung("CAPE unter 500 (sonst steckt ein Einheitenfehler darin)",
+        mitCape.every(([, e]) => {
+          const c = M.cpCape(e.cape, e.markt && e.markt.marketCap, null);
+          return c == null || c.wert < 500;
+        }));
+      sagePruefung("inflationsbereinigte Gewinne weichen von den nominalen ab",
+        mitCape.some(([, e]) => e.cape.reihe.some(x => x.gewinn !== x.gewinnReal)));
+    }
+  }
+
   /* --- Plausibilitaet --- */
   console.log("\nPlausibilität");
-  const pruef = [];
-  const sage = (txt, gut) => { pruef.push(gut); console.log(`  ${gut ? "ok  " : "FEHL"}  ${txt}`); };
+  const sage = sagePruefung;
   sage("alle Titel liefern eine Volatilität", zeilen.every(z => z.r.volaKurz > 0));
   sage("alle Volatilitäten zwischen 5 % und 150 %",
        zeilen.every(z => z.r.volaKurz > 0.05 && z.r.volaKurz < 1.5));
