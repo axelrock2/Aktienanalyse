@@ -1586,11 +1586,20 @@ async function cpVerdrahte(item, chart, fund) {
        dass der ganze Abschnitt ausfaellt. */
     let lang = chart;
     try { lang = await loadChart(item.s, AK_CONFIG.benchmark.jahre); } catch (e) {}
-    /* Rohdaten fuer die Gewinnreihe des CAPE. Fundamentals.load() ist bis
-       hierhin laengst gelaufen - das Detailfenster hat sie schon geholt. */
+    /* Die Datei selbst anfordern, statt sich darauf zu verlassen, dass das
+       Detailfenster sie schon geholt hat. Genau das stand hier vorher - und
+       es stimmt nicht: loadFundamentals() kehrt bei einem Treffer im
+       12-Stunden-Zwischenspeicher sofort zurueck und ruft Fundamentals.load()
+       nie auf. Bei jedem zweiten Besuch blieben Faktorprofil, Bewertung und
+       Gesamt-Score deshalb leer, ohne dass irgendwo ein Fehler erschien.
+       Der Aufruf kostet nichts: Das Versprechen ist gemerkt. */
     let roh = null;
-    try { roh = (typeof Fundamentals === "object") ? Fundamentals.get(item.s) : null; }
-    catch (err) { /* ohne Datei einfach kein CAPE */ }
+    try {
+      if (typeof Fundamentals === "object") {
+        await Fundamentals.load();
+        roh = Fundamentals.get(item.s);
+      }
+    } catch (err) { /* ohne Datei einfach kein CAPE und kein Profil */ }
     const erg = cpRechne(lang, bench.reihe, rf.wert, roh, fund, faktoren, item.s, quer);
     cpScoreDazu(erg, roh, fund, cpGewichte());
     cpStand = { erg, bench, rf, lang, item, roh, fund };
