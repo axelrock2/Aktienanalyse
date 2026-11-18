@@ -54,7 +54,7 @@ function ladeModul() {
   const schnitt = quelle.indexOf(marke);
   vm.runInContext((schnitt > 0 ? quelle.slice(0, schnitt) : quelle)
     + "\nglobalThis.__ex = { cpRisiko, cpCapm, cpMomentum, cpVerhalten, cpVola,"
-    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, AK_CONFIG };", ctx);
+    + " cpDrawdown, cpSchiefe, cpRegression, cpPaare, cpMonatsende, cpCape, cpOls, cpFaktorRegression, cpProfil, cpRang, cpRegionWahl, AK_CONFIG };", ctx);
   return ctx.__ex;
 }
 
@@ -216,6 +216,80 @@ const Z = (v, d = 2) => v == null || !isFinite(v) ? "  – " : v.toFixed(d).padS
         }));
       sagePruefung("inflationsbereinigte Gewinne weichen von den nominalen ab",
         mitCape.some(([, e]) => e.cape.reihe.some(x => x.gewinn !== x.gewinnReal)));
+    }
+  }
+
+  /* --- Module 3 und 5: Faktormodelle ---
+     Zuerst die Mehrfachregression selbst, gegen eine Aufgabe mit bekannter
+     Loesung. Eine Regression, die auf exakten Daten nicht exakt rechnet,
+     braucht man auf echten gar nicht erst laufen zu lassen. */
+  console.log("\nModul 3 und 5 – Faktormodelle");
+  {
+    const X = [], y = [];
+    for (let i = 0; i < 40; i++) { const a = i % 7, b = (i * 3) % 5; X.push([a, b]); y.push(2 + 3 * a - b); }
+    const r = M.cpOls(y, X);
+    const genau = r && Math.abs(r.b[0] - 2) < 1e-9 && Math.abs(r.b[1] - 3) < 1e-9
+      && Math.abs(r.b[2] + 1) < 1e-9 && Math.abs(r.r2 - 1) < 1e-9;
+    sagePruefung("Regression löst y = 2 + 3·x₁ − x₂ exakt", !!genau);
+    // Zwei identische Spalten: die Matrix ist singulaer, das muss auffallen
+    sagePruefung("singuläre Matrix wird erkannt, nicht geraten",
+      M.cpOls(y, X.map(z => [z[0], z[0]])) === null);
+  }
+
+  const fDatei = path.join(WURZEL, "data", "faktoren.json");
+  if (!fs.existsSync(fDatei)) {
+    console.log("  data/faktoren.json fehlt – build_faktoren.py noch nicht gelaufen.");
+  } else {
+    const F = JSON.parse(fs.readFileSync(fDatei, "utf8"));
+    console.log(`  Faktordaten Stand ${F.stand}, Regionen ${Object.keys(F.regionen).join(", ")}`);
+    console.log("\nTitel      Reg  Alpha p.a.   t(α)    MKT    SMB    HML    MOM   R²adj    n");
+    const laeufe = [];
+    for (const [sym] of PROBEN) {
+      let ch; try { ch = await reihe(sym); } catch (e) { continue; }
+      const region = M.cpRegionWahl(sym);
+      const r = M.cpFaktorRegression(ch, F, region);
+      if (r.grund) { console.log(`${sym.padEnd(11)}${String(region).padEnd(5)}${r.grund}`); continue; }
+      laeufe.push({ sym, r });
+      const c = r.carhart;
+      console.log(`${sym.padEnd(11)}${r.region.padEnd(4)} ${P(c.alpha)} ${Z(c.tAlpha, 1)}  `
+        + c.ladungen.map(l => Z(l.wert)).join(" ") + `  ${Z(c.r2adj)} ${String(c.n).padStart(4)}`
+        + (Math.abs(c.tAlpha) > 2 ? "   ALPHA GESICHERT" : ""));
+    }
+    if (laeufe.length) {
+      sagePruefung("alle Marktladungen zwischen −1 und 5",
+        laeufe.every(x => { const b = x.r.carhart.ladungen[0].wert; return b > -1 && b < 5; }));
+      sagePruefung("alle bereinigten R² zwischen 0 und 1",
+        laeufe.every(x => x.r.carhart.r2adj >= 0 && x.r.carhart.r2adj <= 1));
+      sagePruefung("jede Regression nutzt mindestens die geforderten Monate",
+        laeufe.every(x => x.r.carhart.n >= M.AK_CONFIG.faktoren.minMonate));
+      /* Das Fuenffaktorenmodell enthaelt das Vierfaktorenmodell. Sein ROHES R²
+         kann deshalb nie kleiner sein - das bereinigte schon, und genau das
+         ist der Grund, warum es bereinigt ausgewiesen wird. */
+      sagePruefung("rohes R² steigt mit zwei weiteren Faktoren nie",
+        laeufe.every(x => !x.r.ff5 || x.r.ff5.r2 >= x.r.carhart.r2 - 1e-9));
+      const gesichert = laeufe.filter(x => Math.abs(x.r.carhart.tAlpha) > 2).length;
+      console.log(`  ${gesichert} von ${laeufe.length} Titeln mit gesichertem Alpha`
+        + " – bei reiner Streuung wären es etwa 5 %.");
+    }
+
+    /* Perzentilraenge: Randfaelle, die in echten Daten vorkommen. */
+    sagePruefung("Perzentil bei zu kleinem Universum bleibt leer",
+      M.cpRang(1, [1, 2, 3]) === null);
+    const skala = Array.from({ length: 40 }, (_, i) => i + 1);
+    sagePruefung("Perzentil des kleinsten Werts unter 10, des größten über 90",
+      M.cpRang(1, skala) < 10 && M.cpRang(40, skala) > 90);
+    sagePruefung("Perzentil eines fehlenden Werts bleibt leer",
+      M.cpRang(null, skala) === null);
+    const fd = path.join(WURZEL, "data", "fundamentals.json");
+    if (fs.existsSync(fd)) {
+      const daten = (JSON.parse(fs.readFileSync(fd, "utf8")) || {}).data || {};
+      const erster = Object.keys(daten)[0];
+      const prof = erster ? M.cpProfil(erster, daten) : null;
+      console.log(`  Faktorprofil für ${erster}: `
+        + (prof ? prof.werte.map(w => `${w.name} ${w.rang ?? "–"} (n=${w.n})`).join(", ")
+                : "kein Profil"));
+      sagePruefung("Titel außerhalb des Korbs bekommt kein leeres Profil",
+        M.cpProfil("GIBTESNICHT", daten) === null);
     }
   }
 

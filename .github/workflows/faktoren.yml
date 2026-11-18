@@ -1,0 +1,43 @@
+name: Faktordaten aktualisieren
+
+# Die Faktorreihen von Kenneth French erscheinen einmal im Monat, rund zwei
+# Monate nach dem Berichtsmonat. Ein taeglicher Lauf waere Verschwendung -
+# woechentlich reicht und faengt die Veroeffentlichung sicher ab.
+on:
+  schedule:
+    - cron: "40 6 * * 1"      # montags 06:40 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: faktoren
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Keine Abhaengigkeiten: zipfile und urllib stehen in der
+      # Standardbibliothek. requirements.txt wird hier bewusst nicht
+      # installiert - scrapling braeuchte dieser Lauf nicht.
+      - name: Faktordaten holen
+        run: python3 scripts/build_faktoren.py
+
+      - name: Aenderungen committen
+        run: |
+          git config user.name "faktoren-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/faktoren.json
+          git diff --cached --quiet && echo "Keine Aenderungen." && exit 0
+          git commit -m "Faktordaten aktualisiert ($(date -u +%F))"
+          git pull --rebase --autostash || true
+          git push

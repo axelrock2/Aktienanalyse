@@ -239,7 +239,59 @@ vier bis acht Fakten je Kennzahl. Solche Einträge sehen aus wie Daten und
 enthalten keine — sie werden jetzt verworfen. Bei 16 Titeln fällt so etwas auf,
 bei 74 nicht mehr.
 
-Das Faktorprofil (Fama & French, Carhart) folgt im nächsten Schritt.
+**Faktorprofil (Fama & French 1993/2015).** Vier Perzentilränge im eigenen
+Vergleichskorb: Größe, Wert, Profitabilität, Investition — gerechnet aus
+`data/fundamentals.json`, also aus der Datei, die die Seite ohnehin lädt. Kein
+zusätzlicher Abruf, und das Universum ist genau die Menge, über die die
+Startseite spricht.
+
+Jeder Faktor hat **seine eigene Vergleichszahl**. Nicht jeder Titel meldet jede
+Größe: Banken weisen keinen Bruttogewinn aus, ohne Marktwert gibt es weder
+Größe noch Wert. Ein gemeinsames „n = 74" wäre für einzelne Zeilen schlicht
+falsch. Unter 20 Vergleichstiteln bleibt ein Rang leer statt eine Zahl ohne
+Trennschärfe zu zeigen.
+
+Bei der Investition ist die Leserichtung umgekehrt: Dort war historisch der
+**niedrige** Rang die ertragreichere Seite (verhalten wachsende Unternehmen,
+CMA). Das steht im Tooltip, weil es sonst garantiert falsch gelesen wird.
+
+**Faktor-Regression (Carhart 1997).** Die monatlichen Überschussrenditen der
+letzten fünf Jahre auf die Faktorrenditen regressiert — Markt, Größe, Wert und
+Momentum. Die Frage ist Carharts eigene: Bleibt nach Abzug bekannter Faktoren
+noch etwas übrig?
+
+Über dreizehn Titel aus fünf Regionen erreichen zwei ein gesichertes Alpha
+(NVDA +36,3 % p. a. bei t = 2,5; PLTR +80,0 % bei t = 2,6). Bei den übrigen elf
+ist das Alpha nicht von null zu unterscheiden — auch dort, wo es groß aussieht:
+MSTR +55,9 % bei t = 1,3. Genau deshalb steht neben jeder Zahl ihre
+t-Statistik, und Ladungen ohne gesicherte Statistik sind zurückgenommen
+dargestellt.
+
+Das Fünffaktorenmodell wird mitgerechnet, aber nur gezeigt, wenn
+Profitabilität und Investition beim jeweiligen Titel wirklich etwas beitragen.
+Bei Toyota hebt es das bereinigte R² von 0,22 auf 0,48, bei Apple senkt es
+dieses von 0,51 auf 0,49 — zusätzliche Regressoren erklären nicht automatisch
+mehr.
+
+**Die Faktordaten kommen aus der Kenneth French Data Library**, über eine eigene
+GitHub Action (`scripts/build_faktoren.py`, wöchentlich). Aus dem Browser sind
+sie nicht erreichbar: Die Dateien liegen als ZIP, und der Server setzt keinen
+CORS-Kopf. Vier Regionen — USA, Europa, Japan, Asien-Pazifik ohne Japan —, je
+240 Monate, zusammen 58 KB roh und rund 13 KB gepackt. Kanadische und
+lateinamerikanische Notierungen bekommen keine Regression, weil es für sie
+keine passende Reihe gibt; das steht dann dort statt einer Regression gegen den
+falschen Markt.
+
+Beim Einlesen der Dateien ist eine Falle eingebaut: Auf die Monatszeilen folgen
+in derselben Datei **dieselben Daten als Jahreswerte**. Wer nur prüft, ob eine
+Zeile mit Ziffern beginnt, liest sie als Monate mit und verschiebt die ganze
+Reihe.
+
+**Der Euro-Zins ist da.** Die EZB liefert die Rendite der Bundesanleihe
+(3,42 % im Oktober 2026); dieselbe Action holt sie mit. Für Euro-Titel rechnet
+das Cockpit jetzt damit statt mit dem US-Zins — der Hinweis aus Phase 1
+erscheint nur noch für Währungen, für die weiterhin keine Reihe vorliegt.
+
 
 **Elliott-Wellen.** Ein eigener Abschnitt in der Detailansicht („Elliot Wellen
 bestimmen"). Die Analyse läuft **ausschließlich auf Klick** – nie beim Laden,
