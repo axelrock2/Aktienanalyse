@@ -1,202 +1,202 @@
 {
-  "stand": "2026-11-19",
-  "erzeugt": "2026-11-19T15:40:15.075Z",
+  "stand": "2026-11-20",
+  "erzeugt": "2026-11-20T15:21:44.223Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 489,
-      "cur": "USD",
-      "wert": -7.76,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.3,
-      "cur": "HKD",
-      "wert": -5.49,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "UNH",
-      "name": "UnitedHealth Group Incorporated",
-      "kurs": 333.19,
-      "cur": "USD",
-      "wert": -4.78,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "NKE",
-      "name": "NIKE, Inc.",
-      "kurs": 34.89,
-      "cur": "USD",
-      "wert": -3.91,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "SAP.DE",
-      "name": "SAP SE",
-      "kurs": 186.36,
-      "cur": "EUR",
-      "wert": -3.9,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "FTNT",
-      "name": "Fortinet, Inc.",
-      "kurs": 136.85,
-      "cur": "USD",
-      "wert": 3.82,
-      "stichtag": "2026-11-19"
-    },
-    {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 31.29,
+      "kurs": 28.09,
       "cur": "USD",
-      "wert": -3.78,
-      "stichtag": "2026-11-19"
+      "wert": -7.87,
+      "stichtag": "2026-11-20"
     },
     {
-      "sym": "UNP",
-      "name": "Union Pacific Corporation",
-      "kurs": 291.7,
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 322.76,
       "cur": "USD",
-      "wert": -3.06,
-      "stichtag": "2026-11-19"
+      "wert": -6.89,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 455.94,
+      "cur": "USD",
+      "wert": -6.8,
+      "stichtag": "2026-11-20"
     },
     {
       "sym": "ASML.AS",
       "name": "ASML Holding N.V.",
-      "kurs": 1298.6,
+      "kurs": 1203.2,
       "cur": "EUR",
-      "wert": 3,
-      "stichtag": "2026-11-19"
+      "wert": -6.6,
+      "stichtag": "2026-11-20"
     },
     {
-      "sym": "FPH.AX",
-      "name": "Fisher & Paykel Healthcare Corporation Limited",
-      "kurs": 40.61,
-      "cur": "AUD",
-      "wert": 2.91,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "BABA",
-      "name": "Alibaba Group Holding Limited",
-      "kurs": 86.64,
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 13.79,
       "cur": "USD",
-      "wert": 2.69,
-      "stichtag": "2026-11-19"
+      "wert": -6.57,
+      "stichtag": "2026-11-20"
     },
     {
-      "sym": "NOVN.SW",
-      "name": "Novartis AG",
-      "kurs": 127.98,
-      "cur": "CHF",
-      "wert": -2.66,
-      "stichtag": "2026-11-19"
+      "sym": "CAMT",
+      "name": "Camtek Ltd.",
+      "kurs": 92.68,
+      "cur": "USD",
+      "wert": -5.22,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "kurs": 334.45,
+      "cur": "USD",
+      "wert": -5.01,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 14.39,
+      "cur": "HKD",
+      "wert": -4.77,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 139.29,
+      "cur": "USD",
+      "wert": -4.58,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "UNH",
+      "name": "UnitedHealth Group Incorporated",
+      "kurs": 345.29,
+      "cur": "USD",
+      "wert": 4.48,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "2005.HK",
+      "name": "SSY Group Limited",
+      "kurs": 2.44,
+      "cur": "HKD",
+      "wert": -3.94,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "0388.HK",
+      "name": "Hong Kong Exchanges and Clearing Limited",
+      "kurs": 357,
+      "cur": "HKD",
+      "wert": -3.72,
+      "stichtag": "2026-11-20"
     }
   ],
   "woche": [
     {
       "sym": "GDS",
       "name": "GDS Holdings Limited",
-      "kurs": 15.27,
+      "kurs": 13.79,
       "cur": "USD",
-      "wert": -23.84,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "UNH",
-      "name": "UnitedHealth Group Incorporated",
-      "kurs": 333.19,
-      "cur": "USD",
-      "wert": -17.76,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 489,
-      "cur": "USD",
-      "wert": -16.45,
-      "stichtag": "2026-11-19"
+      "wert": -30.39,
+      "stichtag": "2026-11-20"
     },
     {
       "sym": "ASX",
       "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 31.29,
+      "kurs": 28.09,
       "cur": "USD",
-      "wert": -13.78,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "CRM",
-      "name": "Salesforce, Inc.",
-      "kurs": 188.66,
-      "cur": "USD",
-      "wert": -13.29,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "CENX",
-      "name": "Century Aluminum Company",
-      "kurs": 30.96,
-      "cur": "USD",
-      "wert": -12.82,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "SAP.DE",
-      "name": "SAP SE",
-      "kurs": 186.36,
-      "cur": "EUR",
-      "wert": -12.32,
-      "stichtag": "2026-11-19"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 113.21,
-      "cur": "USD",
-      "wert": -10.94,
-      "stichtag": "2026-11-19"
+      "wert": -20.98,
+      "stichtag": "2026-11-20"
     },
     {
       "sym": "TSM",
       "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "kurs": 361.44,
+      "kurs": 334.45,
       "cur": "USD",
-      "wert": -10.86,
-      "stichtag": "2026-11-19"
+      "wert": -16.12,
+      "stichtag": "2026-11-20"
     },
     {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.3,
-      "cur": "HKD",
-      "wert": -10.42,
-      "stichtag": "2026-11-19"
+      "sym": "UNH",
+      "name": "UnitedHealth Group Incorporated",
+      "kurs": 345.29,
+      "cur": "USD",
+      "wert": -15.26,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "ORCL",
+      "name": "Oracle Corporation",
+      "kurs": 106.68,
+      "cur": "USD",
+      "wert": -14.9,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 455.94,
+      "cur": "USD",
+      "wert": -14.63,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "NVDA",
+      "name": "NVIDIA Corporation",
+      "kurs": 139.29,
+      "cur": "USD",
+      "wert": -14.47,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 29.43,
+      "cur": "USD",
+      "wert": -13.5,
+      "stichtag": "2026-11-20"
     },
     {
       "sym": "ABX.TO",
       "name": "Barrick Mining Corporation",
-      "kurs": 48.69,
+      "kurs": 46.41,
       "cur": "CAD",
-      "wert": -9.77,
-      "stichtag": "2026-11-19"
+      "wert": -13.49,
+      "stichtag": "2026-11-20"
     },
     {
-      "sym": "CAT",
-      "name": "Caterpillar Inc.",
-      "kurs": 547.72,
+      "sym": "CRM",
+      "name": "Salesforce, Inc.",
+      "kurs": 188.47,
       "cur": "USD",
-      "wert": -9.51,
-      "stichtag": "2026-11-19"
+      "wert": -13.48,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "SAP.DE",
+      "name": "SAP SE",
+      "kurs": 184.68,
+      "cur": "EUR",
+      "wert": -13.48,
+      "stichtag": "2026-11-20"
+    },
+    {
+      "sym": "2196.HK",
+      "name": "Shanghai Fosun Pharmaceutical (Group) Co., Ltd.",
+      "kurs": 14.39,
+      "cur": "HKD",
+      "wert": -13.16,
+      "stichtag": "2026-11-20"
     }
   ]
 }
