@@ -1,202 +1,202 @@
 {
-  "stand": "2026-11-25",
-  "erzeugt": "2026-11-26T16:48:24.589Z",
+  "stand": "2026-11-27",
+  "erzeugt": "2026-11-27T16:33:54.279Z",
   "grundmenge": 108,
   "woche_tage": 5,
   "tag": [
     {
-      "sym": "CDW",
-      "name": "CDW Corporation",
-      "kurs": 174.97,
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 178.42,
       "cur": "USD",
-      "wert": 6.59,
-      "stichtag": "2026-11-25"
+      "wert": 5.79,
+      "stichtag": "2026-11-27"
     },
     {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 103.88,
+      "sym": "ASX",
+      "name": "ASE Technology Holding Co., Ltd.",
+      "kurs": 31.04,
       "cur": "USD",
-      "wert": -5.13,
-      "stichtag": "2026-11-25"
+      "wert": 5.26,
+      "stichtag": "2026-11-27"
     },
     {
-      "sym": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "kurs": 270.19,
+      "sym": "CENX",
+      "name": "Century Aluminum Company",
+      "kurs": 30.93,
       "cur": "USD",
-      "wert": 4.55,
-      "stichtag": "2026-11-25"
+      "wert": 4.74,
+      "stichtag": "2026-11-27"
     },
     {
-      "sym": "6758.T",
-      "name": "Sony Group Corporation",
-      "kurs": 4513,
-      "cur": "JPY",
-      "wert": 4.42,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "BAYN.DE",
-      "name": "Bayer Aktiengesellschaft",
-      "kurs": 52.9,
-      "cur": "EUR",
-      "wert": 4.38,
-      "stichtag": "2026-11-26"
-    },
-    {
-      "sym": "BMW.DE",
-      "name": "Bayerische Motoren Werke Aktiengesellschaft",
-      "kurs": 57.56,
-      "cur": "EUR",
-      "wert": 4.2,
-      "stichtag": "2026-11-26"
-    },
-    {
-      "sym": "NVDA",
-      "name": "NVIDIA Corporation",
-      "kurs": 149.3,
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 90.17,
       "cur": "USD",
-      "wert": -3.91,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1171.8,
-      "cur": "EUR",
-      "wert": 3.55,
-      "stichtag": "2026-11-26"
-    },
-    {
-      "sym": "META",
-      "name": "Meta Platforms, Inc.",
-      "kurs": 609.89,
-      "cur": "USD",
-      "wert": 3.4,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "EGLN.L",
-      "name": "iShares Physical Gold ETC",
-      "kurs": 63.12,
-      "cur": "EUR",
-      "wert": 3.17,
-      "stichtag": "2026-11-26"
+      "wert": 4.53,
+      "stichtag": "2026-11-27"
     },
     {
       "sym": "AMZN",
       "name": "Amazon.com, Inc.",
-      "kurs": 244.43,
+      "kurs": 253.69,
       "cur": "USD",
-      "wert": -3.12,
-      "stichtag": "2026-11-25"
+      "wert": 3.79,
+      "stichtag": "2026-11-27"
     },
     {
-      "sym": "7203.T",
-      "name": "Toyota Motor Corporation",
-      "kurs": 3406,
-      "cur": "JPY",
-      "wert": 2.87,
-      "stichtag": "2026-11-25"
+      "sym": "META",
+      "name": "Meta Platforms, Inc.",
+      "kurs": 632.59,
+      "cur": "USD",
+      "wert": 3.72,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "AVGO",
+      "name": "Broadcom Inc.",
+      "kurs": 311.24,
+      "cur": "USD",
+      "wert": 3.45,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "CAT",
+      "name": "Caterpillar Inc.",
+      "kurs": 561.93,
+      "cur": "USD",
+      "wert": 3.36,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 51.49,
+      "cur": "CAD",
+      "wert": 3.3,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "ATHM",
+      "name": "Autohome Inc.",
+      "kurs": 21.49,
+      "cur": "USD",
+      "wert": 3.22,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "INTC",
+      "name": "Intel Corporation",
+      "kurs": 56.22,
+      "cur": "USD",
+      "wert": 3.21,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "kurs": 278.54,
+      "cur": "USD",
+      "wert": 3.09,
+      "stichtag": "2026-11-27"
     }
   ],
   "woche": [
     {
-      "sym": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "kurs": 406.03,
-      "cur": "USD",
-      "wert": -23.41,
-      "stichtag": "2026-11-25"
-    },
-    {
       "sym": "DNTH",
       "name": "Dianthus Therapeutics, Inc.",
-      "kurs": 99.01,
+      "kurs": 100.82,
       "cur": "USD",
-      "wert": 17.9,
-      "stichtag": "2026-11-25"
+      "wert": 18.85,
+      "stichtag": "2026-11-27"
     },
     {
       "sym": "0151.HK",
       "name": "Want Want China Holdings Limited",
       "kurs": 2.38,
       "cur": "HKD",
-      "wert": -16.32,
-      "stichtag": "2026-11-25"
+      "wert": -16.9,
+      "stichtag": "2026-11-26"
+    },
+    {
+      "sym": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "kurs": 418,
+      "cur": "USD",
+      "wert": -14.55,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "ABX.TO",
+      "name": "Barrick Mining Corporation",
+      "kurs": 51.49,
+      "cur": "CAD",
+      "wert": 13.8,
+      "stichtag": "2026-11-27"
     },
     {
       "sym": "AVGO",
       "name": "Broadcom Inc.",
-      "kurs": 300.86,
+      "kurs": 311.24,
       "cur": "USD",
-      "wert": -15.02,
-      "stichtag": "2026-11-25"
+      "wert": -10.21,
+      "stichtag": "2026-11-27"
     },
     {
-      "sym": "GDS",
-      "name": "GDS Holdings Limited",
-      "kurs": 13.8,
+      "sym": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "kurs": 178.42,
       "cur": "USD",
-      "wert": -11.88,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "1686.HK",
-      "name": "SUNeVision Holdings Ltd.",
-      "kurs": 4.02,
-      "cur": "HKD",
-      "wert": -11.65,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "GTES",
-      "name": "Gates Industrial Corporation Ltd.",
-      "kurs": 22.39,
-      "cur": "USD",
-      "wert": -10.3,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "ASX",
-      "name": "ASE Technology Holding Co., Ltd.",
-      "kurs": 29.49,
-      "cur": "USD",
-      "wert": -9.32,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "ASML.AS",
-      "name": "ASML Holding N.V.",
-      "kurs": 1171.8,
-      "cur": "EUR",
-      "wert": -9.04,
-      "stichtag": "2026-11-26"
-    },
-    {
-      "sym": "ORCL",
-      "name": "Oracle Corporation",
-      "kurs": 103.88,
-      "cur": "USD",
-      "wert": -8.79,
-      "stichtag": "2026-11-25"
-    },
-    {
-      "sym": "AMZN",
-      "name": "Amazon.com, Inc.",
-      "kurs": 244.43,
-      "cur": "USD",
-      "wert": -8.71,
-      "stichtag": "2026-11-25"
+      "wert": 10.13,
+      "stichtag": "2026-11-27"
     },
     {
       "sym": "BNTX",
       "name": "BioNTech SE",
-      "kurs": 90.42,
+      "kurs": 89.39,
       "cur": "USD",
-      "wert": 8.6,
-      "stichtag": "2026-11-25"
+      "wert": 9.84,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "BMW.DE",
+      "name": "Bayerische Motoren Werke Aktiengesellschaft",
+      "kurs": 58.64,
+      "cur": "EUR",
+      "wert": 9.69,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "GDS",
+      "name": "GDS Holdings Limited",
+      "kurs": 13.5,
+      "cur": "USD",
+      "wert": -8.54,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "BABA",
+      "name": "Alibaba Group Holding Limited",
+      "kurs": 90.17,
+      "cur": "USD",
+      "wert": 8.23,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "NKE",
+      "name": "NIKE, Inc.",
+      "kurs": 37.13,
+      "cur": "USD",
+      "wert": 8.17,
+      "stichtag": "2026-11-27"
+    },
+    {
+      "sym": "BALD-B.ST",
+      "name": "Fastighets AB Balder (publ)",
+      "kurs": 54.88,
+      "cur": "SEK",
+      "wert": 8.12,
+      "stichtag": "2026-11-27"
     }
   ]
 }
